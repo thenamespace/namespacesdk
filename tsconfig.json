@@ -1,16 +1,23 @@
 {
-    "compilerOptions": {
-      "module": "commonjs",
-      "target": "es2020",
-      "declaration": true,
-      "outDir": "./dist",
-      "resolveJsonModule": true,
-      "strict": true,          
-      "esModuleInterop": true, 
-      "skipLibCheck": true,  
-      "forceConsistentCasingInFileNames": true 
-    },
-    "include": [
-      "src/**/*"
-    ]
-  }
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "removeComments": true,
+    "noLib": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "useUnknownInCatchVariables": false,
+    "target": "ES2021",
+    "sourceMap": true,
+    "allowJs": false,
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@namespacesdk/offchain-manager": ["./packages/offchain-manager"],
+      "@namespacesdk/offchain-manager/*": ["./packages/offchain-manager/*"],
+    }
+  },
+  "include": ["packages/**/*", "integration/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}

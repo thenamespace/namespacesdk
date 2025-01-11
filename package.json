@@ -1,5 +1,8 @@
 {
   "name": "namespacesdk",
+  "version": "0.0.1",
+  "description": "For interacting with namespace API",
+  "homepage": "https://nestjs.com",
   "private": true,
   "workspaces": [
     "packages/*"
