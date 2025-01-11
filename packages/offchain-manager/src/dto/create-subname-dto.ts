@@ -1,4 +1,4 @@
-export interface CreateSubnameDTO {
+export interface SubnameDTO {
   label: string;
   domain: string;
   address: `0x${string}`;
