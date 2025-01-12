@@ -112,7 +112,7 @@ export const _getFilteredSubnames = async (
 
   return client
     .get<SubnamePagedResponse>(`/v1/subname/search`, {
-      params: query,
+      params: searchQuery,
     })
     .then((res) => res.data);
 };
