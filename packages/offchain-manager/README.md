@@ -1,24 +1,159 @@
-# Offchain Client
+# @namespacesdk/offchain-manager
 
-The Offchain Client is a TypeScript library for managing ENS subnames and related data records via an HTTP-based API. 
-This library provides functions for interacting with subnames, including creation, deletion, text records, data records, and filtering operations.
+This library provides an `OffchainClient` for interacting with subnames, text records, data records, and API key management in an ENS-like system. It is built on top of Axios and provides a convenient API for managing off-chain data.
+
+---
+
+## API Key Management
+
+To interact with the offchain system, an API key is required for each ENS name. Here's how you can generate and manage API keys:
+
+### Generating an API Key
+
+The `generateApiKey` method creates an API key for a given ENS name. It requires the `signerAddress` and a `SignerFunction` to generate a token. Below is the implementation of the key generation process:
+
+```typescript
+interface AuthTokenClaims {
+  address: string;
+  nonce: string;
+  issued: number;
+}
+
+export type SignerFunction = (message: string) => Promise<string>;
+
+export const _generateApiKeyForName = async (
+  client: AxiosInstance,
+  ensName: string,
+  signerAddress: string,
+  signerFunc: SignerFunction
+): Promise<string> => {
+  const token = await generateToken(client, signerAddress, signerFunc);
+  const { data } = await client.post<{ apiKey: string }>(`/auth/name/${ensName}`, {}, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return data.apiKey;
+};
+
+export const _nonce = async (client: AxiosInstance): Promise<string> => {
+  return client.get<string>("/auth/nonce").then((res) => res.data);
+};
+
+const generateToken = async (
+  client: AxiosInstance,
+  signerWallet: string,
+  signerFunc: SignerFunction
+) => {
+  const nonce = await _nonce(client);
+  const claims: AuthTokenClaims = {
+    address: signerWallet,
+    issued: new Date().getTime(),
+    nonce,
+  };
+  const claimsJSON = JSON.stringify(claims);
+  const claimsB64 = btoa(claimsJSON);
+  const signature = await signerFunc(claimsJSON);
+  const signatureB64 = btoa(signature);
+
+  return `${claimsB64}.${signatureB64}`;
+};
+```
+
+### Using the API Key
+
+Once the API key is generated, you can set it for an ENS name using the `setApiKey` method:
+
+```typescript
+client.setApiKey("example.eth", "your-api-key");
+```
+
+This ensures all subsequent requests for the ENS name use the provided API key.
+
+---
+
+## Subname Management
+
+The library allows you to manage subnames, including creating, deleting, and querying their availability.
+
+### Creating a Subname
+
+The `createSubname` method allows you to create a subname with the following request object:
+
+```typescript
+export interface SubnameDTO {
+  label: string;
+  domain: string;
+  address: `0x${string}`;
+  coinType?: number;
+  addresses?: Record<string, string>;
+  textRecords?: Record<string, string>;
+  dataRecords?: Record<string, string>;
+  ttl?: number;
+}
+```
+
+Example:
+
+```typescript
+await client.createSubname({
+  label: "subname",
+  domain: "example.eth",
+  address: "0x1234567890abcdef1234567890abcdef12345678",
+  textRecords: {
+    key1: "value1",
+    key2: "value2",
+  },
+  dataRecords: {
+    dataKey: "dataValue",
+  },
+  ttl: 3600,
+});
+```
+
+---
+
+## Methods
+
+Below is a list of available methods in the `OffchainClient`:
+
+### Subname Management
+- `createSubname(request: SubnameDTO): Promise<void>`
+- `deleteSubname(fullSubname: string): Promise<void>`
+- `isSubnameAvailable(fullSubname: string): Promise<GetAvailableResponse>`
+
+### Record Management
+- `addTextRecord(subname: string, key: string, value: string): Promise<void>`
+- `deleteTextRecord(subname: string, key: string): Promise<void>`
+- `getTextRecords(fullSubname: string): Promise<Record<string, string>>`
+- `getTextRecord(fullSubname: string, key: string): Promise<GetRecordResponse>`
+- `addDataRecord(fullSubname: string, key: string, data: any): Promise<void>`
+- `deleteDataRecord(fullSubname: string, key: string): Promise<void>`
+- `getDataRecords(fullSubname: string): Promise<Record<string, any>>`
+- `getDataRecord(fullSubname: string, key: string): Promise<GetRecordResponse>`
+
+### API Key Management
+- `generateApiKey(ensName: string, signerWallet: string, signerFunc: SignerFunction): Promise<string>`
+- `setApiKey(ensName: string, apiKey: string): void`
+
+---
 
 ## Installation
 
-Install the library using npm:
+Install the library using npm or yarn:
 
 ```bash
-npm install <library-name>
+npm install @namespacesdk/offchain-manager
 ```
 
-## Usage
+---
 
-### Create an Offchain Client
+## Configuration
 
-To create an Offchain Client instance, use the `createOffchainClient` function and pass an Axios configuration:
+The client can be initialized with a configuration object:
 
 ```typescript
-import { createOffchainClient } from "<library-name>";
+import { createOffchainClient } from "@namespacesdk/offchain-manager";
 
 const client = createOffchainClient({
   baseURL: "https://api.example.com",
@@ -26,146 +161,6 @@ const client = createOffchainClient({
 });
 ```
 
-### API Methods
+---
 
-#### Subname Management
-
-- **Create Subname:**
-
-  ```typescript
-  await client.createSubname({
-    domain: "example.eth",
-    label: "subname",
-    resolver: "0xResolverAddress",
-  });
-  ```
-
-- **Delete Subname:**
-
-  ```typescript
-  await client.deleteSubname("subname.example.eth");
-  ```
-
-#### Text Records Management
-
-- **Add Text Record:**
-
-  ```typescript
-  await client.addTextRecord("subname.example.eth", "key", "value");
-  ```
-
-- **Delete Text Record:**
-
-  ```typescript
-  await client.deleteTextRecord("subname.example.eth", "key");
-  ```
-
-- **Get Text Records:**
-
-  ```typescript
-  const records = await client.getTextRecords("subname.example.eth");
-  ```
-
-- **Get Specific Text Record:**
-
-  ```typescript
-  const record = await client.getTextRecord("subname.example.eth", "key");
-  ```
-
-#### Data Records Management
-
-- **Add Data Record:**
-
-  ```typescript
-  await client.addDataRecord("subname.example.eth", "dataKey", { data: "value" });
-  ```
-
-- **Delete Data Record:**
-
-  ```typescript
-  await client.deleteDataRecord("subname.example.eth", "dataKey");
-  ```
-
-- **Get Data Records:**
-
-  ```typescript
-  const dataRecords = await client.getDataRecords("subname.example.eth");
-  ```
-
-- **Get Specific Data Record:**
-
-  ```typescript
-  const dataRecord = await client.getDataRecord("subname.example.eth", "dataKey");
-  ```
-
-#### Subname Filtering
-
-- **Get Filtered Subnames:**
-
-  ```typescript
-  const subnames = await client.getFilteredSubnames({
-    domain: "example.eth",
-    limit: 10,
-    offset: 0,
-  });
-  ```
-
-#### API Key Management
-
-- **Generate API Key:**
-
-  ```typescript
-  const apiKey = await client.generateApiKey(
-    "example.eth",
-    "0xYourWalletAddress",
-    async (message) => {
-      return await signMessage(message);
-    }
-  );
-  ```
-
-- **Set API Key:**
-
-  ```typescript
-  client.setApiKey("example.eth", "your-api-key");
-  ```
-
-#### Check Subname Availability
-
-- **Is Subname Available:**
-
-  ```typescript
-  const availability = await client.isSubnameAvailable("subname.example.eth");
-  ```
-
-## Error Handling
-
-Ensure you handle errors gracefully by wrapping API calls in `try-catch` blocks:
-
-```typescript
-try {
-  const records = await client.getTextRecords("subname.example.eth");
-  console.log(records);
-} catch (error) {
-  console.error("Failed to fetch text records:", error);
-}
-```
-
-## Development
-
-To contribute or develop locally, clone the repository and install dependencies:
-
-```bash
-git clone <repository-url>
-npm install
-```
-
-Run tests to verify functionality:
-
-```bash
-npm test
-```
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
+For more details, refer to the library documentation or the source code.
