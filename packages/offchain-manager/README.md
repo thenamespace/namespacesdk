@@ -12,52 +12,30 @@ To interact with the offchain system, an API key is required for each ENS name. 
 
 The `generateApiKey` method creates an API key for a given ENS name. It requires the `signerAddress` and a `SignerFunction` to generate a token. Below is the implementation of the key generation process:
 
+`generateApiKey` method used signed message under the hood, it constructs a token which is then sent to backend service. The backend will verify that wallet which requests an `api key` is has required permissions for the name it wants to get api key for.
+
+Example of api key generation using viem library
+
 ```typescript
-interface AuthTokenClaims {
-  address: string;
-  nonce: string;
-  issued: number;
+import {privateKeyToAccount} from "viem/accounts";
+import {createOffchainClient} from "@namespacesdk/offchain-manager";
+
+const offchainClient = createOffchainClient({
+  baseURL: "https://api..."
+})
+
+async function generateApiKey() {
+   const PRIVATE_KEY = "0xYourPkHere"
+   const WALLET = privateKeyToAccount(PRIVATE_KEY);
+   const WALLET_ADDRESS = WALLET.address;
+   const ENS_NAME = "myensname.eth";
+
+   const signerFunction = async (message: string) => {
+       return WALLET.signMessage({message});
+  }
+   const apiKeyForName = await client.generateApiKey(ENS_NAME, WALLET_ADDRESS, signerFunction);
 }
 
-export type SignerFunction = (message: string) => Promise<string>;
-
-export const _generateApiKeyForName = async (
-  client: AxiosInstance,
-  ensName: string,
-  signerAddress: string,
-  signerFunc: SignerFunction
-): Promise<string> => {
-  const token = await generateToken(client, signerAddress, signerFunc);
-  const { data } = await client.post<{ apiKey: string }>(`/auth/name/${ensName}`, {}, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return data.apiKey;
-};
-
-export const _nonce = async (client: AxiosInstance): Promise<string> => {
-  return client.get<string>("/auth/nonce").then((res) => res.data);
-};
-
-const generateToken = async (
-  client: AxiosInstance,
-  signerWallet: string,
-  signerFunc: SignerFunction
-) => {
-  const nonce = await _nonce(client);
-  const claims: AuthTokenClaims = {
-    address: signerWallet,
-    issued: new Date().getTime(),
-    nonce,
-  };
-  const claimsJSON = JSON.stringify(claims);
-  const claimsB64 = btoa(claimsJSON);
-  const signature = await signerFunc(claimsJSON);
-  const signatureB64 = btoa(signature);
-
-  return `${claimsB64}.${signatureB64}`;
-};
 ```
 
 ### Using the API Key
