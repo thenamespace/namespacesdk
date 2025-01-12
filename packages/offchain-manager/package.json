@@ -1,6 +1,6 @@
 {
   "name": "@namespacesdk/offchain-manager",
-  "version": "1.0.0",
+  "version": "1.0.3-alpha",
   "description": "Library for interacting with namespace offchain-manager",
   "main": "index.ts",
   "license": "MIT",

@@ -5,12 +5,10 @@ export {
 } from "./offchain-client";
 
 export {
-    FilterSubnamesQuery,
-    GetAvailableResponse,
-    GetRecordResponse,
-    SubnamePagedResponse
-} from "./offchain-client/types"
+  FilterSubnamesQuery,
+  GetAvailableResponse,
+  GetRecordResponse,
+  SubnamePagedResponse,
+} from "./offchain-client/types";
 
-export { 
-    SubnameDTO
-} from "./dto/create-subname-dto"
+export { SubnameDTO } from "./dto/create-subname-dto";

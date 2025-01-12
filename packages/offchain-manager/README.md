@@ -12,9 +12,9 @@ To interact with the offchain system, an API key is required for each ENS name. 
 
 The `generateApiKey` method creates an API key for a given ENS name. It requires the `signerAddress` and a `SignerFunction` to generate a token. Below is the implementation of the key generation process:
 
-`generateApiKey` method used signed message under the hood, it constructs a token which is then sent to backend service. The backend will verify that wallet which requests an `api key` is has required permissions for the name it wants to get api key for.
+`generateApiKey` method uses sign message under the hood, it constructs a token which is then sent to backend service. The backend will verify that wallet which requests an `api key` has required permissions for the name it wants to get api key for.
 
-Example of api key generation using viem library
+Below is the implementation of the key generation process using Viem:
 
 ```typescript
 import {privateKeyToAccount} from "viem/accounts";
@@ -140,5 +140,3 @@ const client = createOffchainClient({
 ```
 
 ---
-
-For more details, refer to the library documentation or the source code.
