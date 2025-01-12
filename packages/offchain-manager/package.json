@@ -1,22 +1,24 @@
 {
   "name": "@namespacesdk/offchain-manager",
-  "version": "1.0.3-alpha",
+  "version": "1.0.6-alpha",
   "description": "Library for interacting with namespace offchain-manager",
-  "main": "index.ts",
   "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "keywords": [
     "sdk",
     "offchain",
     "namespace"
   ],
+  "files": [
+    "/dist"
+  ],
   "author": "Nenad Mitkovic <arti@namespace.ninja>",
   "dependencies": {
     "@types/node": "^22.10.5",
     "axios": "^1.7.9",
-    "siwe": "^2.3.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3",
-    "viem": "^2.22.7"
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "rimraf dist && tsc",
