@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { SubnameDTO } from "../dto/create-subname-dto";
 import {
+  _addDataRecords,
   _addTextRecord,
   _createSubname,
   _deleteDataRecord,
@@ -9,8 +10,20 @@ import {
 } from "./private-actions";
 import { extractParentAndLabel } from "./utils";
 import { _generateApiKeyForName, SignerFunction } from "./auth-actions";
-import { _getTextRecord, _getTextRecords, _isSubnameAvailable } from "./public-actions";
-import { GetAvailableResponse, GetRecordResponse } from "./types";
+import {
+  _getDataRecord,
+  _getDataRecords,
+  _getFilteredSubnames,
+  _getTextRecord,
+  _getTextRecords,
+  _isSubnameAvailable,
+} from "./public-actions";
+import {
+  FilterSubnamesQuery,
+  GetAvailableResponse,
+  GetRecordResponse,
+  SubnamePagedResponse,
+} from "./types";
 
 export interface OffchainClient {
   createSubname(request: SubnameDTO): Promise<void>;
@@ -24,9 +37,15 @@ export interface OffchainClient {
     signerWallet: string,
     signerFunc: SignerFunction
   ): Promise<string>;
-  getTextRecords(fullSubname: string): Promise<Record<string,string>>
-  getTextRecord(fullSubname: string, key: string): Promise<GetRecordResponse>
-  isSubnameAvailable(fullSubname: string): Promise<GetAvailableResponse>
+  getTextRecords(fullSubname: string): Promise<Record<string, string>>;
+  getTextRecord(fullSubname: string, key: string): Promise<GetRecordResponse>;
+  isSubnameAvailable(fullSubname: string): Promise<GetAvailableResponse>;
+  addDataRecord(fullSubname: string, key: string, data: any): Promise<void>
+  getDataRecords(fullSubname: string): Promise<Record<string, any>>;
+  getDataRecord(fullSubname: string, key: string): Promise<GetRecordResponse>;
+  getFilteredSubnames(
+    query: FilterSubnamesQuery
+  ): Promise<SubnamePagedResponse>;
 }
 
 export interface OffchainClientConfig extends AxiosRequestConfig {}
@@ -40,16 +59,23 @@ class HttpOffchainClient implements OffchainClient {
     this.HTTP = axios.create({ ...this.config, baseURL: baseUri });
   }
 
-  public async getTextRecords(fullSubname: string): Promise<Record<string,string>> {
-    return await _getTextRecords(this.HTTP, fullSubname)
+  public async getTextRecords(
+    fullSubname: string
+  ): Promise<Record<string, string>> {
+    return await _getTextRecords(this.HTTP, fullSubname);
   }
-  
-  public async getTextRecord(fullSubname: string, key: string): Promise<GetRecordResponse> {
+
+  public async getTextRecord(
+    fullSubname: string,
+    key: string
+  ): Promise<GetRecordResponse> {
     return await _getTextRecord(this.HTTP, fullSubname, key);
   }
 
-  public async isSubnameAvailable(fullSubname: string): Promise<GetAvailableResponse> {
-    return await _isSubnameAvailable(this.HTTP, fullSubname)
+  public async isSubnameAvailable(
+    fullSubname: string
+  ): Promise<GetAvailableResponse> {
+    return await _isSubnameAvailable(this.HTTP, fullSubname);
   }
 
   public async createSubname(request: SubnameDTO) {
@@ -61,7 +87,19 @@ class HttpOffchainClient implements OffchainClient {
   }
 
   public async deleteSubname(fullSubname: string) {
-    await _deleteSubname(this.HTTP, this.fetchApiKeyForName(fullSubname), fullSubname);
+    await _deleteSubname(
+      this.HTTP,
+      this.fetchApiKeyForName(fullSubname),
+      fullSubname
+    );
+  }
+
+  public async getDataRecord(fullSubname: string, key: string) {
+    return (await _getDataRecord(this.HTTP, fullSubname, key)) as any;
+  }
+
+  public async getDataRecords(fullSubname: string) {
+    return (await _getDataRecords(this.HTTP, fullSubname)) as any;
   }
 
   public async addTextRecord(subname: string, key: string, value: string) {
@@ -74,21 +112,30 @@ class HttpOffchainClient implements OffchainClient {
     );
   }
 
-  public async deleteTextRecord(subname: string, key: string) {
+  public async deleteTextRecord(fullSubname: string, key: string) {
     await _deleteTextRecord(
       this.HTTP,
-      this.fetchApiKeyForName(subname),
-      subname,
+      this.fetchApiKeyForName(fullSubname),
+      fullSubname,
       key
     );
   }
 
-  public async addDataRecord(subname: string) {}
-  public async deleteDataRecord(subname: string, key: string) {
+  public async addDataRecord(fullSubname: string, key: string, data: any) {
+    await _addDataRecords(
+      this.HTTP,
+      this.fetchApiKeyForName(fullSubname),
+      fullSubname,
+      key,
+      data
+    );
+  }
+
+  public async deleteDataRecord(fullSubname: string, key: string) {
     await _deleteDataRecord(
       this.HTTP,
-      this.fetchApiKeyForName(subname),
-      subname,
+      this.fetchApiKeyForName(fullSubname),
+      fullSubname,
       key
     );
   }
@@ -98,7 +145,20 @@ class HttpOffchainClient implements OffchainClient {
     signerWallet: string,
     signerFunc: SignerFunction
   ): Promise<string> {
-    return _generateApiKeyForName(this.HTTP, ensName, signerWallet, signerFunc);
+    const apiKey = await _generateApiKeyForName(
+      this.HTTP,
+      ensName,
+      signerWallet,
+      signerFunc
+    );
+    this.apiKeys[ensName] = apiKey;
+    return apiKey;
+  }
+
+  public async getFilteredSubnames(
+    query: FilterSubnamesQuery
+  ): Promise<SubnamePagedResponse> {
+    return _getFilteredSubnames(this.HTTP, query);
   }
 
   public setApiKey(ensName: string, apiKey: string) {
