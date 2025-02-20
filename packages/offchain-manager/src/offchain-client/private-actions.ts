@@ -31,16 +31,20 @@ export const _addTextRecord = (
   value: string
 ) => {
   const { label, parent } = extractParentAndLabel(fullSubname);
-  return client.put(`/v1/subname/record/${label}/${parent}/${key}/${value}`, {}, {
-    headers: createAuthorizationHeaders(apiKey),
-  });
+  return client.put(
+    `/v1/subname/record/${label}/${parent}/${key}/${value}`,
+    {},
+    {
+      headers: createAuthorizationHeaders(apiKey),
+    }
+  );
 };
 
 export const _deleteTextRecord = (
   client: AxiosInstance,
   apiKey: string,
   fullSubname: string,
-  key: string,
+  key: string
 ) => {
   const { label, parent } = extractParentAndLabel(fullSubname);
   return client.delete(`/v1/subname/record/${label}/${parent}/${key}`, {
@@ -56,11 +60,15 @@ export const _addDataRecords = (
   dataRecords: any
 ) => {
   const { label, parent } = extractParentAndLabel(fullSubname);
-  return client.put(`/v1/subname/data/${label}/${parent}/${key}`, {
-    data: dataRecords
-  }, {
-    headers: createAuthorizationHeaders(apiKey),
-  });
+  return client.put(
+    `/v1/subname/data/${label}/${parent}/${key}`,
+    {
+      data: dataRecords,
+    },
+    {
+      headers: createAuthorizationHeaders(apiKey),
+    }
+  );
 };
 
 export const _deleteDataRecord = (
@@ -74,7 +82,6 @@ export const _deleteDataRecord = (
     headers: createAuthorizationHeaders(apiKey),
   });
 };
-
 
 const createAuthorizationHeaders = (apiKey: string) => {
   return {

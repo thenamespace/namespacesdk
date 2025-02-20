@@ -39,7 +39,6 @@ export const _getTextRecord = async (
     .then((res) => res.data);
 };
 
-
 export const _getDataRecord = async (
   client: AxiosInstance,
   fullSubname: string,
