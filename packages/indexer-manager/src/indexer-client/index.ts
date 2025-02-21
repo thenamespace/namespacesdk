@@ -78,12 +78,3 @@ export const createIndexerClient = (
 ): IndexerClient => {
   return new HttpIndexerClient(config);
 };
-
-export {
-  L1Network,
-  L2Network,
-  GetL2SubnamesQuery,
-  L2SubnameResponse,
-  L2SubnameStats,
-  GetL1SubnamesQuery,
-};
