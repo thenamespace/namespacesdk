@@ -15,11 +15,15 @@ export const _generateApiKeyForName = async (
   signerFunc: SignerFunction
 ): Promise<string> => {
   const token = await generateToken(client, signerAddress, signerFunc);
-  const { data } = await client.post<{apiKey:string}>(`/auth/name/${ensName}`, {}, {
-    headers: {
-        Authorization: `Bearer ${token}`
+  const { data } = await client.post<{ apiKey: string }>(
+    `/auth/name/${ensName}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
-  });
+  );
   return data.apiKey;
 };
 

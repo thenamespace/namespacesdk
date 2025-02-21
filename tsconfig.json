@@ -16,6 +16,8 @@
     "paths": {
       "@namespacesdk/offchain-manager": ["./packages/offchain-manager"],
       "@namespacesdk/offchain-manager/*": ["./packages/offchain-manager/*"],
+      "@namespacesdk/indexer-manager": ["./packages/indexer-manager"],
+      "@namespacesdk/offcindexerhain-manager/*": ["./packages/indexer-manager/*"],
     }
   },
   "include": ["packages/**/*", "integration/**/*"],

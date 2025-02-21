@@ -40,7 +40,7 @@ export interface OffchainClient {
   getTextRecords(fullSubname: string): Promise<Record<string, string>>;
   getTextRecord(fullSubname: string, key: string): Promise<GetRecordResponse>;
   isSubnameAvailable(fullSubname: string): Promise<GetAvailableResponse>;
-  addDataRecord(fullSubname: string, key: string, data: any): Promise<void>
+  addDataRecord(fullSubname: string, key: string, data: any): Promise<void>;
   getDataRecords(fullSubname: string): Promise<Record<string, any>>;
   getDataRecord(fullSubname: string, key: string): Promise<GetRecordResponse>;
   getFilteredSubnames(
