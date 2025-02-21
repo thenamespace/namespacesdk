@@ -38,7 +38,7 @@ class HttpIndexerClient implements IndexerClient {
   private HTTP: AxiosInstance;
 
   constructor(private readonly config: IndexerClientConfig) {
-    const baseUri = "http://localhost:3000";
+    const baseUri = "http://indexer.namespace.tech";
     this.HTTP = axios.create({ ...this.config, baseURL: baseUri });
   }
 

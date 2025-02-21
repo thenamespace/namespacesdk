@@ -1,6 +1,6 @@
 {
   "name": "@namespacesdk/indexer-manager",
-  "version": "1.0.6-alpha",
+  "version": "1.0.0",
   "description": "Library for interacting with namespace indexer-manager",
   "license": "MIT",
   "main": "dist/index.js",
@@ -13,7 +13,7 @@
   "files": [
     "/dist"
   ],
-  "author": "Uros Zigic",
+  "author": "Uros Zigic <uros@namespace.tech>",
   "dependencies": {
     "@types/node": "^22.10.5",
     "axios": "^1.7.9",
