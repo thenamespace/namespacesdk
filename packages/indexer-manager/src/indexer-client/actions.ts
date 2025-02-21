@@ -6,12 +6,14 @@ import {
   L2SubnameResponse,
   L1Network,
   GetL1SubnamesQuery,
+  L2SubnamePagedResponse,
+  L1SubnameResponse,
 } from "./types";
 
 export const _getL2Subnames = async (
   client: AxiosInstance,
   query: GetL2SubnamesQuery
-): Promise<any> => {
+): Promise<L2SubnamePagedResponse> => {
   return client
     .get("/api/v1/subnames", { params: query })
     .then((res: { data: any }) => res.data);
@@ -39,7 +41,7 @@ export const _getL2Stats = async (
 export const _getL1Subnames = async (
   client: AxiosInstance,
   query: GetL1SubnamesQuery
-): Promise<any> => {
+): Promise<L1SubnameResponse[]> => {
   return client
     .get("/api/v1/subnamesMinted", { params: query })
     .then((res: { data: any }) => res.data);
@@ -49,7 +51,7 @@ export const _getL1Subname = async (
   client: AxiosInstance,
   network: L1Network,
   subnameLabel: string
-): Promise<any> => {
+): Promise<L1SubnameResponse> => {
   return client
     .get(
       `/api/v1/subnamesMinted/network/${network}/subnameLabel/${subnameLabel}`

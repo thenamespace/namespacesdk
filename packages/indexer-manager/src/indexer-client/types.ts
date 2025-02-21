@@ -28,6 +28,13 @@ export interface L2SubnameResponse {
   };
 }
 
+export interface L2SubnamePagedResponse {
+  items: L2SubnameResponse[];
+  totalItems: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface L2Stats {
   chainId: number;
   totalSubnames: number;
@@ -46,4 +53,16 @@ export interface GetL1SubnamesQuery {
   owner?: string;
   network: L1Network;
   parentNamehash?: string;
+}
+
+export interface L1SubnameResponse {
+  subnameLabel: string;
+  parentNode: string;
+  paymentReceiver: string;
+  sender: string;
+  subnameOwner: string;
+  tx: string;
+  chainId: number;
+  mintPrice: number;
+  mintFee: number;
 }

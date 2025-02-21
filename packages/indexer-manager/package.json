@@ -1,7 +1,7 @@
 {
   "name": "@namespacesdk/indexer-manager",
   "version": "1.0.6-alpha",
-  "description": "Library for interacting with namespace offchain-manager",
+  "description": "Library for interacting with namespace indexer-manager",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,6 +13,7 @@
   "files": [
     "/dist"
   ],
+  "author": "Uros Zigic",
   "dependencies": {
     "@types/node": "^22.10.5",
     "axios": "^1.7.9",

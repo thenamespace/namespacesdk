@@ -7,6 +7,8 @@ import {
   L2Network,
   L2SubnameStats,
   L2SubnameResponse,
+  L2SubnamePagedResponse,
+  L1SubnameResponse,
 } from "./types";
 import {
   _getL1Subname,
@@ -17,14 +19,17 @@ import {
 } from "./actions";
 
 export interface IndexerClient {
-  getL2Subnames(query: GetL2SubnamesQuery): Promise<any>;
+  getL2Subnames(query: GetL2SubnamesQuery): Promise<L2SubnamePagedResponse>;
   getL2Subname(
     network: L2Network,
     namehash: string
   ): Promise<L2SubnameResponse>;
   getL2Stats(includeTestnet: boolean): Promise<L2SubnameStats>;
-  getL1Subnames(query: GetL1SubnamesQuery): Promise<any>;
-  getL1Subname(network: L1Network, namehash: string): Promise<any>;
+  getL1Subnames(query: GetL1SubnamesQuery): Promise<L1SubnameResponse[]>;
+  getL1Subname(
+    network: L1Network,
+    namehash: string
+  ): Promise<L1SubnameResponse>;
 }
 
 export interface IndexerClientConfig extends AxiosRequestConfig {}
@@ -37,7 +42,9 @@ class HttpIndexerClient implements IndexerClient {
     this.HTTP = axios.create({ ...this.config, baseURL: baseUri });
   }
 
-  public async getL2Subnames(query: GetL2SubnamesQuery): Promise<any> {
+  public async getL2Subnames(
+    query: GetL2SubnamesQuery
+  ): Promise<L2SubnamePagedResponse> {
     return await _getL2Subnames(this.HTTP, query);
   }
 
@@ -52,14 +59,16 @@ class HttpIndexerClient implements IndexerClient {
     return await _getL2Stats(this.HTTP, includeTestnet);
   }
 
-  public async getL1Subnames(query: GetL1SubnamesQuery): Promise<any> {
+  public async getL1Subnames(
+    query: GetL1SubnamesQuery
+  ): Promise<L1SubnameResponse[]> {
     return await _getL1Subnames(this.HTTP, query);
   }
 
   public async getL1Subname(
     network: L1Network,
     subnameLabel: string
-  ): Promise<any> {
+  ): Promise<L1SubnameResponse> {
     return await _getL1Subname(this.HTTP, network, subnameLabel);
   }
 }
@@ -68,4 +77,13 @@ export const createIndexerClient = (
   config: IndexerClientConfig
 ): IndexerClient => {
   return new HttpIndexerClient(config);
+};
+
+export {
+  L1Network,
+  L2Network,
+  GetL2SubnamesQuery,
+  L2SubnameResponse,
+  L2SubnameStats,
+  GetL1SubnamesQuery,
 };
