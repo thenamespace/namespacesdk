@@ -1,6 +1,6 @@
 {
   "name": "@namespacesdk/offchain-manager",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Library for creating and managing offchain subnames",
   "license": "MIT",
   "main": "dist/index.js",
