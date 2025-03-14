@@ -2,6 +2,7 @@ import { AxiosInstance } from "axios";
 import { SubnameDTO } from "../dto/subname.dto";
 import {
   mapAddressesToInternal,
+  mapAddrMapToAddressRecords,
   mapTextMapToTextRecords,
   subnameResponseToRequest,
 } from "./utils";
@@ -51,6 +52,53 @@ export const _updateSubname = async (
   };
 
   return client.post("/api/v1/subnames", request, {
+    headers: createAuthorizationHeaders(apiKey),
+  });
+};
+
+export const _addAddressRecord = async (
+  client: AxiosInstance,
+  apiKey: string,
+  fullSubname: string,
+  coin: number,
+  value: string
+) => {
+  const subname = await _getSingleSubname(client, fullSubname);
+
+  const addresses = subname.addresses || {};
+  addresses[coin] = value;
+
+  const _req = subnameResponseToRequest(subname);
+
+  const request: CreateSubnameRequest_Internal = {
+    ..._req,
+    addresses: mapAddrMapToAddressRecords(addresses),
+  };
+
+  return client.post(`/api/v1/subnames`, request, {
+    headers: createAuthorizationHeaders(apiKey),
+  });
+};
+
+export const _deleteAddressRecord = async (
+  client: AxiosInstance,
+  apiKey: string,
+  fullSubname: string,
+  coin: number,
+) => {
+  const subname = await _getSingleSubname(client, fullSubname);
+
+  const addresses = subname.addresses || {};
+  delete addresses[coin]
+
+  const _req = subnameResponseToRequest(subname);
+
+  const request: CreateSubnameRequest_Internal = {
+    ..._req,
+    addresses: mapAddrMapToAddressRecords(addresses),
+  };
+
+  return client.post(`/api/v1/subnames`, request, {
     headers: createAuthorizationHeaders(apiKey),
   });
 };

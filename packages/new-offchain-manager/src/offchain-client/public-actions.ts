@@ -74,6 +74,7 @@ export const _getFilteredSubnames = async (
   query: QuerySubnamesRequest
 ): Promise<PagedResponse<SubnameDTO[]>> => {
   const searchQuery: Record<string, string | number> = {};
+  
   if (query.parentName) {
     searchQuery.domain = query.parentName;
   }
@@ -95,8 +96,6 @@ export const _getFilteredSubnames = async (
   }
 
   return client
-    .post<PagedResponse<SubnameDTO[]>>(`/api/v1/subnames/search`, {
-      params: searchQuery,
-    })
+    .post<PagedResponse<SubnameDTO[]>>(`/api/v1/subnames/search`, query )
     .then((res) => res.data);
 };
