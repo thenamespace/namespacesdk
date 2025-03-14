@@ -53,7 +53,7 @@ export const _updateSubname = async (
 
   return client.post("/api/v1/subnames", request, {
     headers: createAuthorizationHeaders(apiKey),
-  });
+  }).then(res => res.data);
 };
 
 export const _addAddressRecord = async (

@@ -9,6 +9,7 @@ import {
   _deleteDataRecord,
   _deleteSubname,
   _deleteTextRecord,
+  _updateSubname,
 } from "./private-actions";
 import {
   _getDataRecord,
@@ -26,11 +27,12 @@ import {
   QuerySubnamesRequest,
 } from "./types";
 import { CreateSubnameRequest } from "../dto/create-subname-request.dto";
-import { ChainName, getCoinType } from "../dto";
+import { ChainName, getCoinType, UpdateSubnameRequest } from "../dto";
 
 export interface OffchainClient {
   setApiKey(ensName: string, apiKey: string): void;
   createSubname(request: CreateSubnameRequest): Promise<void>;
+  updateSubname(subname: string, request: UpdateSubnameRequest): Promise<void>;
   deleteSubname(fullSubname: string): Promise<void>;
   isSubnameAvailable(fullSubname: string): Promise<GetAvailableResponse>;
   getSingleSubname(fullName: string): Promise<SubnameDTO | null>;
@@ -73,6 +75,17 @@ class HttpOffchainClient implements OffchainClient {
     const mode = config.mode || "mainnet";
     const uri = config.backendUri || backendUris[mode];
     this.HTTP = axios.create({ ...this.config, baseURL: uri });
+  }
+  public async updateSubname(
+    subname: string,
+    request: UpdateSubnameRequest
+  ): Promise<void> {
+    return _updateSubname(
+      this.HTTP,
+      this.fetchApiKeyForName(subname),
+      subname,
+      request
+    );
   }
 
   public async addAddressRecord(
