@@ -1,3 +1,6 @@
+import { ChainName, CreateSubnameRequest } from "./dto";
+import { createOffchainClient } from "./offchain-client";
+
 export {
   createOffchainClient,
   OffchainClient,
@@ -12,10 +15,10 @@ export {
   QuerySubnamesRequest,
 } from "./offchain-client/types";
 
-export { SubnameDTO } from "./dto/create-subname-dto";
-export { CreateApiKeyRequest } from "./dto/create-api-key.dto";
 export {
+  SubnameDTO,
   CreateSubnameRequest,
-  KeyValueRequest,
-  AddressRecordRequest,
-} from "./dto/create-subname-request.dto";
+  UpdateSubnameRequest,
+  ChainName,
+} from "./dto";
+export { AddressRecord, TextRecord } from "./dto/internal-types";

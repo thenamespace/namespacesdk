@@ -8,4 +8,8 @@ export interface SubnameDTO {
   metadata: Record<string, string>;
   contenthash?: string;
   namehash: string;
+  ownership?: string
+  ttl?: number
+  createdAt?: string
+  updatedAt?: string
 }
