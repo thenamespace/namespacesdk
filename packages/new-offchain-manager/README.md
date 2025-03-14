@@ -10,13 +10,13 @@ The `namespace-sdk` provides an easy-to-use client for managing ENS subnames off
 ## Installation
 
 ```sh
-npm install @namespace-sdk/offchain-manager
+npm install @namespacesdk/offchain-manager
 ```
 
 or using Yarn:
 
 ```sh
-npm install @namespace-sdk/offchain-manager
+npm install @namespacesdk/offchain-manager
 ```
 
 ## Getting Started
@@ -24,7 +24,7 @@ npm install @namespace-sdk/offchain-manager
 ### Import the SDK
 
 ```typescript
-import { OffchainClient } from '@namespace-sdk/offchain-manager';
+import { OffchainClient } from '@namespacesdk/offchain-manager';
 ```
 
 ### Initialize the Client
