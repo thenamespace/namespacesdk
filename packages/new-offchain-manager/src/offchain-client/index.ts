@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
-import { SubnameDTO } from "../dto/create-subname-dto";
+import { SubnameDTO } from "../dto/subname.dto";
 import {
   _addDataRecord,
   _addTextRecord,
@@ -8,8 +8,6 @@ import {
   _deleteSubname,
   _deleteTextRecord,
 } from "./private-actions";
-import { extractParentAndLabel } from "./utils";
-import { _generateApiKeyForName, SignerFunction } from "./auth-actions";
 import {
   _getDataRecord,
   _getDataRecords,
@@ -24,17 +22,10 @@ import {
   PagedResponse,
   QuerySubnamesRequest,
 } from "./types";
-import { CreateApiKeyRequest } from "../dto/create-api-key.dto";
 import { CreateSubnameRequest } from "../dto/create-subname-request.dto";
 
 export interface OffchainClient {
-  generateApiKey(
-    request: CreateApiKeyRequest,
-    signerWallet: string,
-    signerFunc: SignerFunction
-  ): Promise<string>;
   setApiKey(ensName: string, apiKey: string): void;
-
   createSubname(request: CreateSubnameRequest): Promise<void>;
   deleteSubname(fullSubname: string): Promise<void>;
   isSubnameAvailable(fullSubname: string): Promise<GetAvailableResponse>;
@@ -52,15 +43,25 @@ export interface OffchainClient {
   getDataRecord(fullSubname: string, key: string): Promise<GetRecordResponse>;
 }
 
-export interface OffchainClientConfig extends AxiosRequestConfig {}
+type Mode = "mainnet" | "sepolia"
+const backendUris: Record<Mode, string> = {
+  mainnet: "https://offchain-manager.namespace.ninja",
+  sepolia: "https://staging.offchain-manager.namespace.ninja",
+}
+
+export interface OffchainClientConfig extends AxiosRequestConfig {
+  mode?: Mode
+  backendUri?: string
+}
 
 class HttpOffchainClient implements OffchainClient {
   private HTTP: AxiosInstance;
   private apiKeys: Record<string, string> = {};
 
   constructor(private readonly config: OffchainClientConfig) {
-    const baseUri = "http://localhost:3000";
-    this.HTTP = axios.create({ ...this.config, baseURL: baseUri });
+    const mode = config.mode || "mainnet";
+    const uri = config.backendUri || backendUris[mode];
+    this.HTTP = axios.create({ ...this.config, baseURL: uri });
   }
 
   public async getTextRecords(
@@ -149,21 +150,6 @@ class HttpOffchainClient implements OffchainClient {
     );
   }
 
-  public async generateApiKey(
-    request: CreateApiKeyRequest,
-    signerWallet: string,
-    signerFunc: SignerFunction
-  ): Promise<string> {
-    const apiKey = await _generateApiKeyForName(
-      this.HTTP,
-      request,
-      signerWallet,
-      signerFunc
-    );
-    this.apiKeys[request.ensName] = apiKey;
-    return apiKey;
-  }
-
   public async getFilteredSubnames(
     query: QuerySubnamesRequest
   ): Promise<PagedResponse<SubnameDTO[]>> {
@@ -175,7 +161,22 @@ class HttpOffchainClient implements OffchainClient {
   }
 
   private fetchApiKeyForName = (name: string, isSubname: boolean = true) => {
-    let parentName = isSubname ? extractParentAndLabel(name).parent : name;
+
+    const extractParent = () => {
+      const split = name.split(".");
+      const splitLen = split.length;
+      if (splitLen < 2) {
+        throw Error(`Invalid ENS name: ${name}`)
+      }
+
+      if (splitLen === 2) {
+        return name;
+      }
+
+      return split[splitLen - 2] + "." + split[splitLen - 1]
+    }
+
+    let parentName = isSubname ? extractParent() : name;
     if (!this.apiKeys[parentName]) {
       throw new Error(`Api key is not present for name: ${parentName}`);
     }

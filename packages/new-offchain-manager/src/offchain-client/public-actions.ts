@@ -1,12 +1,11 @@
 import { AxiosInstance } from "axios";
-import { extractParentAndLabel } from "./utils";
 import {
   GetAvailableResponse,
   GetRecordResponse,
   PagedResponse,
   QuerySubnamesRequest,
 } from "./types";
-import { SubnameDTO } from "../dto/create-subname-dto";
+import { SubnameDTO } from "../dto/subname.dto";
 
 export const _isSubnameAvailable = async (
   client: AxiosInstance,
@@ -65,19 +64,8 @@ export const _getSingleSubname = (
   client: AxiosInstance,
   fullSubname: string
 ): Promise<SubnameDTO> => {
-  const { label, parent } = extractParentAndLabel(fullSubname);
   return client
-    .get<SubnameDTO>(`/v1/subname/${label}/${parent}`)
-    .then((res) => res.data);
-};
-
-export const _resolveSubnamesByAddress = async (
-  client: AxiosInstance,
-  address: string,
-  coinType: number
-) => {
-  return client
-    .get<SubnameDTO[]>(`/v1/subname/resolution/${address}/${coinType}`)
+    .get<SubnameDTO>(`/api/v1/subnames/${fullSubname}`)
     .then((res) => res.data);
 };
 

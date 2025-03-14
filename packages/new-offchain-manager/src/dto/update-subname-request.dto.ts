@@ -1,8 +1,6 @@
 import { AddressRecord, TextRecord } from "./internal-types";
 
-export interface CreateSubnameRequest {
-  parentName: string;
-  label: string;
+export interface UpdateSubnameRequest {
   texts?: TextRecord[];
   addresses?: AddressRecord[];
   metadata?: TextRecord[];

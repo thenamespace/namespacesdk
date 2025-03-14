@@ -1,18 +1,84 @@
-export const extractParentAndLabel = (fullSubname: string) => {
-  const split = fullSubname.split(".");
-  if (split.length === 3) {
-    return {
-      label: split[0],
-      parent: split[1] + "." + split[2],
+import { getCoinType, SubnameDTO } from "../dto";
+import {
+  AddressRecord,
+  AddressRecord_Internal,
+  CreateSubnameRequest_Internal,
+  TextRecord,
+} from "../dto/internal-types";
+
+
+export const mapAddressesToInternal = (
+  addrs: AddressRecord[]
+): AddressRecord_Internal[] => {
+  const _addr: AddressRecord_Internal[] = addrs.map((addr) => {
+    const _internalAddr: AddressRecord_Internal = {
+      coin: getCoinType(addr.chain),
+      value: addr.value,
     };
-  } else if (split.length === 2) {
+    return _internalAddr;
+  });
+  return _addr;
+};
+
+export const mapTextMapToTextRecords = (
+  txtMap: Record<string, string>
+): TextRecord[] => {
+  return Object.keys(txtMap).map((txtKey) => {
     return {
-      label: split[0],
-      parent: split[1] + ".eth",
+      key: txtKey,
+      value: txtMap[txtKey],
     };
-  } else {
-    throw Error(
-      `Invalid subname ${fullSubname}, expected [label].[parent].[tld]`
-    );
+  });
+};
+
+export const mapAddrMapToAddressRecords = (
+  addrMap: Record<string, string>
+): AddressRecord_Internal[] => {
+  return Object.keys(addrMap).map((addrKey) => {
+    return {
+      coin: parseInt(addrKey),
+      value: addrMap[addrKey],
+    };
+  });
+};
+
+export const subnameResponseToRequest = (
+  response: SubnameDTO
+): CreateSubnameRequest_Internal => {
+  const addrs: AddressRecord_Internal[] = [];
+  const texts: TextRecord[] = [];
+
+  if (response.addresses) {
+    Object.keys(response.addresses).forEach((addrCoin) => {
+      try {
+        const coin = parseInt(addrCoin);
+        const value = response.addresses[addrCoin];
+        addrs.push({ coin: coin, value: value });
+      } catch (err) {}
+    });
   }
+
+  if (response.texts) {
+    Object.keys(response.texts).forEach((txt) => {
+      texts.push({
+        key: txt,
+        value: response.texts[txt],
+      });
+    });
+  }
+
+  return {
+    label: response.label,
+    parentName: response.parentName,
+    addresses: addrs,
+    texts: texts,
+    contenthash: response.contenthash,
+    metadata: Object.keys(response.metadata || {}).map((data) => {
+      return {
+        key: data,
+        value: response.metadata[data],
+      };
+    }),
+    ttl: response.ttl,
+  };
 };
