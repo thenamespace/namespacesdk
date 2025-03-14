@@ -1,6 +1,8 @@
+![Namespace Ninja](https://i.postimg.cc/Nfcbq9jP/namespace.png)
+
 # Namespace SDK - Offchain Client
 
-[![npm version](https://img.shields.io/npm/v/namespace-sdk.svg)](https://www.npmjs.com/package/namespace-sdk)
+[![npm version](https://img.shields.io/npm/v/@namespacesdk/offchain-manager.svg)](https://www.npmjs.com/package/@namespacesdk/offchain-manager)
 
 ## Overview
 The `namespace-sdk` provides an easy-to-use client for managing ENS subnames off-chain. With this SDK, developers can create, update, delete, and query subnames, as well as manage associated records like addresses, text records, and data records.
