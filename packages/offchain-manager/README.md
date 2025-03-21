@@ -221,3 +221,6 @@ For any issues or feature requests, please open an issue on [GitHub](https://git
 ## Contributing
 Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTING.md) before submitting a pull request.
 
+## Questions? Join our Builders Group chat
+Consider joining the [Namespace Builders](https://t.me/+OsziFgfuZz03NjEy) group chat on Telegram if you have any questions, suggestions, feedback, or anything you want to talk about.
+
