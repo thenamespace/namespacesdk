@@ -9,6 +9,7 @@ The `namespace-sdk` provides an easy-to-use client for managing ENS subnames off
 
 ## Namespace Dev Portal
 _If you've already done this, feel free to skip this step._
+
 To issue subnames, make them resolvable, and get an API key, you need to go to our [Dev Portal](https://dev.namespace.ninja).
 1. **Subnames** section allows you to create, edit, or update subnames and all of their records (text, addresses, content hash)
 2. **Resolution** section is there for you to update the Resolver contract to Namespace Hybrid resolver so the subnames issued are resolvable in all ENS-supported apps.
