@@ -1,0 +1,30 @@
+{
+  "name": "@namespacesdk/addresses",
+  "version": "1.0.0",
+  "description": "Library that contains all the Namespace & ENS contract addresses",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [
+    "sdk",
+    "offchain",
+    "namespace"
+  ],
+  "files": [
+    "/dist"
+  ],
+  "author": "Nenad Mitkovic <arti@namespace.ninja>",
+  "dependencies": {
+    "@types/node": "^22.10.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "start": "node dist/index.js",
+    "restart": "rimraf dist && tsc && node dist/index.js"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1"
+  }
+}
