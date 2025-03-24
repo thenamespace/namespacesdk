@@ -30,13 +30,13 @@ export interface EnsContracts {
 
 const l1Contracts: Record<number, L1ContractAddresses> = {
     [mainnetId]: {
-        mintController: "0xCF1cE2d188797E7A50a8eBb017111d2A0464A303",
+        mintController: "0x313442ba3A0b12193787BD162f99Ed3C415F2886",
         nameWrapperProxy: "0x25ADB7e69390FbfeEe26F3C8053955d4D4428Afd",
         hybridResolver: "0x0",
         oldHybridResolver: "0x0dcD506D1Be162E50A2b434028A9a148F2686444"
     },
     [sepoliaId]: {
-        mintController: "0x0D8e2772B4D8d58C8a66EEc5bf77c07934b84942",
+        mintController: "0x1Ded316C799e1445894722F4C0FF2E6175d6AA8e",
         nameWrapperProxy: "0x0Ff41b99D7185B01bA47Ca85e9049166Cb3CD6bd",
         hybridResolver: "0x0",
         oldHybridResolver: "0x2F5E9E8B4495e4CDC5bC6C5FCBa93B8AaBDeF595"
