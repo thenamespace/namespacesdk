@@ -1,6 +1,6 @@
 {
   "name": "@namespacesdk/addresses",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Library that contains all the Namespace & ENS contract addresses",
   "license": "MIT",
   "main": "dist/index.js",
