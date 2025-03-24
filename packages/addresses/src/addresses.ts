@@ -57,10 +57,10 @@ const l2Contracts: Record<number, L2ContractAddresses> = {
         resolver: "0xD8de4F5D7117BA37bA171ec9180Da798056f2CEd"
     },
     [baseSepoliaId]:  {
-        controller: "0xD01626e0872aE04393B69D7Bb34bAea9abC48102",
-        emitter: "0x8764EFC3d0b1172a3B76143b0A0E6757525Afc1f",
-        registryResolver: "0x8810B0A0946E1585Cb4ca0bB07fDC074d7038941",
-        resolver: "0x0a31201dc15E25062E4Be297a86F5AD8DccC8055"
+        controller: "0xd11bB95D28856eb5F21C16919e16C5512572BDD2",
+        emitter: "0xCbf89f3a4e982753AC883F6592b9D3b9E7E1C27a",
+        registryResolver: "0x72d229708C3C1fAa27127Ca7453dF32820a7cf73",
+        resolver: "0xC880B6BAe15f4905c160218f37Da1876E5A6De5B"
     },
 };
 
