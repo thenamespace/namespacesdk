@@ -1,6 +1,9 @@
 ![Namespace Ninja](https://i.postimg.cc/Nfcbq9jP/namespace.png)
 
-# @namespacesdk/mint-manager
+# Namespace SDK - Mint Manager
+
+[![npm version](https://img.shields.io/npm/v/@namespacesdk/mint-manager.svg)](https://www.npmjs.com/package/@namespacesdk/mint-manager)
+
 
 `@namespacesdk/mint-manager` is a TypeScript SDK for minting subnames on the ENS (Ethereum Name Service) platform. It enables seamless interaction with the Namespace ecosystem, allowing users to mint both Mainnet and Layer 2 (L2) subnames on supported networks, including Base and Optimism. The SDK abstracts the complexities of interacting with smart contracts, ensuring a smooth developer experience.
 
