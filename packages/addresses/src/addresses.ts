@@ -32,13 +32,13 @@ const l1Contracts: Record<number, L1ContractAddresses> = {
     [mainnetId]: {
         mintController: "0xCf7625A2fb60B0822444E5964b4Ce80c148e7Fad",
         nameWrapperProxy: "0x25ADB7e69390FbfeEe26F3C8053955d4D4428Afd",
-        hybridResolver: "0x0",
+        hybridResolver: "0xe5A0277018879679d18cCDb66B52BD06f7fE95FD",
         oldHybridResolver: "0x0dcD506D1Be162E50A2b434028A9a148F2686444"
     },
     [sepoliaId]: {
         mintController: "0x313442ba3A0b12193787BD162f99Ed3C415F2886",
         nameWrapperProxy: "0x0Ff41b99D7185B01bA47Ca85e9049166Cb3CD6bd",
-        hybridResolver: "0x0",
+        hybridResolver: "0xd5568c739f3a615c27e8926f1067b9a791893c3e",
         oldHybridResolver: "0x2F5E9E8B4495e4CDC5bC6C5FCBa93B8AaBDeF595"
     }
 }
