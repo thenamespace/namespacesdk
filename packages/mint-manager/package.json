@@ -1,6 +1,6 @@
 {
   "name": "@namespacesdk/mint-manager",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Library for minting l2 subnames",
   "license": "MIT",
   "main": "dist/index.js",
@@ -16,7 +16,7 @@
   "author": "Nenad Mitkovic <arti@namespace.ninja>",
   "dependencies": {
     "@ensdomains/address-encoder": "^1.1.2",
-    "@namespacesdk/addresses": "^1.0.7",
+    "@namespacesdk/addresses": "^1.0.12",
     "@types/node": "^22.10.5",
     "axios": "^1.7.9",
     "ts-node": "^10.9.2",
