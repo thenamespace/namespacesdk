@@ -201,7 +201,7 @@ class MintClientImpl implements MintClient {
         abi: Abis.L2_REGISTRY_RESOLVER,
         functionName: "subnodeOwner",
         address: registryResolver,
-        args: [parentNode, subnameNode],
+        args: [subnameNode, parentNode],
       })) as string;
       return ownerAddress.toLocaleLowerCase() === zeroAddress;
     } catch (err) {
