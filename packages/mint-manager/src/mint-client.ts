@@ -181,38 +181,43 @@ class MintClientImpl implements MintClient {
     subname: string,
     chainId: number
   ): Promise<boolean> {
-
     const subnameNetwork = getChainName(chainId);
     const { registryResolver } = getL2NamespaceContracts(chainId);
 
     const split = subname.split(".");
-    
+
     if (split.length < 2) {
-      throw Error(`Invalid subname provided: ${subname}`)
+      throw Error(`Invalid subname provided: ${subname}`);
     }
 
-    const parentName = `${split[split.length - 2]}.${split[split.length - 1]}`
+    const parentName = `${split[split.length - 2]}.${split[split.length - 1]}`;
     const parentNode = namehash(parentName);
-    const subnameNode = namehash(subname)
+    const subnameNode = namehash(subname);
 
     try {
-      const ownerAddress = await this.getPublicClient(subnameNetwork).readContract({
+      const ownerAddress = (await this.getPublicClient(
+        subnameNetwork
+      ).readContract({
         abi: Abis.L2_REGISTRY_RESOLVER,
         functionName: "subnodeOwner",
         address: registryResolver,
         args: [parentNode, subnameNode],
-      }) as string;
+      })) as string;
       return ownerAddress.toLocaleLowerCase() === zeroAddress;
-    } catch(err) {
-      console.warn("Error while checking l2 subname ownership, is registry present?")
+    } catch (err) {
+      console.warn(
+        "Error while checking l2 subname ownership, is registry present?",
+        registryResolver,
+        parentName,
+        subname
+      );
       return false;
-    }    
+    }
   }
 
   private async getMintParameters(
     request: MintParametersRequest
   ): Promise<MintParametersResponse> {
-    
     return this.mintManagerHttp
       .post<MintParametersResponse>(`/api/v1/minting-parameters`, request)
       .then((res) => res.data);
