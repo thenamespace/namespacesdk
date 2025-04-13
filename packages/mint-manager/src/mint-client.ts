@@ -66,7 +66,7 @@ class MintClientImpl implements MintClient {
 
   constructor(private readonly config: MintClientConfig) {
     const libEnv: NamespaceEnv =
-      this.config.environment || "production" ? "staging" : "production";
+      this.config.environment || "production";
     const listManagerUri = this.config.listManagerUri
       ? this.config.listManagerUri
       : LibEnvironment.listingApi[libEnv];
@@ -74,6 +74,7 @@ class MintClientImpl implements MintClient {
       ? this.config.mintManagerUri
       : LibEnvironment.mintingApi[libEnv];
 
+    console.info(`Initializing mint manager sdk with mint-manager: ${mintManagerUri}, list-manager: ${listManagerUri}`)  
     this.mintManagerHttp = axios.create({
       baseURL: mintManagerUri,
     });
