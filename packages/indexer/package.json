@@ -1,0 +1,31 @@
+{
+  "name": "@namespacesdk/indexer",
+  "version": "1.0.0",
+  "description": "Library for which allows interacting with namespace indexer",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [
+    "sdk",
+    "offchain",
+    "namespace"
+  ],
+  "files": [
+    "/dist"
+  ],
+  "author": "artii.eth",
+  "dependencies": {
+    "@types/node": "^22.10.5",
+    "axios": "^1.7.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "start": "node dist/index.js",
+    "restart": "rimraf dist && tsc && node dist/index.js"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1"
+  }
+}
