@@ -54,6 +54,12 @@ class HttpIndexerClient implements IndexerClient {
   public async getL2Subnames(
     request: L2SubnamesRequest
   ): Promise<L2SubnamesResponse> {
+
+    
+    if (request.parent && !request.parent.startsWith("0x")) {
+
+    }
+
     return this.HTTP.get<L2SubnamesResponse>(`/api/v1/l2-subnames/all`, {
       params: request,
     }).then((res) => res.data);

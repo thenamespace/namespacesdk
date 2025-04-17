@@ -1,3 +1,5 @@
+import { createIndexerClient } from "./indexer-client";
+
 export {
   IndexerClient,
   IndexerClientConfig,
