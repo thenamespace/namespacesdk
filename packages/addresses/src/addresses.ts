@@ -35,7 +35,7 @@ const l1Contracts: Record<number, L1ContractAddresses> = {
         nameWrapperProxy: "0x25ADB7e69390FbfeEe26F3C8053955d4D4428Afd",
         hybridResolver: "0xe5A0277018879679d18cCDb66B52BD06f7fE95FD",
         oldHybridResolver: "0x0dcD506D1Be162E50A2b434028A9a148F2686444",
-        bulkEnsRegistrar: "0x2d3260dc00e84c797885ad6245719bec55c827a7"
+        bulkEnsRegistrar: "0x99393f6ceb39a6fdefdfeed1606669b16c49c453"
     },
     [sepoliaId]: {
         mintController: "0x313442ba3A0b12193787BD162f99Ed3C415F2886",
@@ -71,7 +71,7 @@ const ensContracts: Record<number, EnsContracts> = {
     [mainnetId]: {
         ensRegistry: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
         nameWrapper: "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401",
-        ethRegistrarController: "0x0635513f179D50A207757E05759CbD106d7dFcE8",
+        ethRegistrarController: "0x253553366Da8546fC250F225fe3d25d0C782303b",
         publicResolver: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
         universalResolver: "0xce01f8eee7E479C928F8919abD53E553a36CeF67"
     },
