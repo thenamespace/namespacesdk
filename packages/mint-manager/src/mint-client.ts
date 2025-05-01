@@ -18,6 +18,7 @@ import {
   http,
   createPublicClient,
   namehash,
+  ContractFunctionExecutionError,
 } from "viem";
 import { getChain, getChainId, getChainName, ListingChain } from "./chains";
 import { Abis } from "./abi";
@@ -108,7 +109,6 @@ class MintClientImpl implements MintClient {
     });
 
     let resolverData: Hash[] = [];
-    const mintSource = toHex(DEFAULT_MINT_SOURCE);
     const isL1Listing = listing.type === "L1";
     const isL2Listing = listing.type === "L2";
 
@@ -210,8 +210,16 @@ class MintClientImpl implements MintClient {
         "Error while checking l2 subname ownership, is registry present?",
         registryResolver,
         parentName,
-        subname
+        subname,
+        `Parent Node: ${parentNode}`,
+        `Subname Node: ${subnameNode}`
       );
+
+      if (err instanceof ContractFunctionExecutionError) {
+        const contractErr = err as ContractFunctionExecutionError;
+        console.warn(err.cause)
+      }
+
       return false;
     }
   }
