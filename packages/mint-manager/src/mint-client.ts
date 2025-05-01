@@ -19,6 +19,7 @@ import {
   createPublicClient,
   namehash,
   ContractFunctionExecutionError,
+  PublicClient
 } from "viem";
 import { getChain, getChainId, getChainName, ListingChain } from "./chains";
 import { Abis } from "./abi";
@@ -50,13 +51,14 @@ export interface MintClientConfig {
   mintManagerUri?: string;
   listingCacheMilliseconds?: number;
   mintSource?: string;
-  customTransports?: Record<number, Transport>;
+  cursomRpcUrls?: Record<string, string>
 }
 
 class MintClientImpl implements MintClient {
   private mintManagerHttp: AxiosInstance;
   private listManagerHttp: AxiosInstance;
 
+  private cachedClients: Record<number, PublicClient> = {}
   private cachedListings: Record<
     string,
     {
@@ -196,14 +198,13 @@ class MintClientImpl implements MintClient {
     const subnameNode = namehash(subname);
 
     try {
-      const ownerAddress = (await this.getPublicClient(
-        subnameNetwork
-      ).readContract({
+      const web3Client = this.getPublicClient(subnameNetwork);
+      const ownerAddress = await web3Client.readContract({
         abi: Abis.L2_REGISTRY_RESOLVER,
         functionName: "subnodeOwner",
         address: registryResolver,
         args: [subnameNode, parentNode],
-      })) as string;
+      }) as string;
       return ownerAddress.toLocaleLowerCase() === zeroAddress;
     } catch (err) {
       console.warn(
@@ -217,7 +218,9 @@ class MintClientImpl implements MintClient {
 
       if (err instanceof ContractFunctionExecutionError) {
         const contractErr = err as ContractFunctionExecutionError;
-        console.warn(err.cause)
+        console.error(contractErr.cause)
+      } else {
+        console.error(err)
       }
 
       return false;
@@ -262,15 +265,19 @@ class MintClientImpl implements MintClient {
 
   private getPublicClient(chainName: ListingChain) {
     const chain = getChain(chainName);
-    const chainTransport =
-      this.config.customTransports && this.config.customTransports[chain.id]
-        ? this.config.customTransports[chain.id]
-        : http();
 
-    return createPublicClient({
-      transport: chainTransport,
+    if (this.cachedClients[chain.id]) {
+      return this.cachedClients[chain.id];
+    }
+
+    const customTransports = this.config.cursomRpcUrls || {};
+    const chainClient = createPublicClient({
+      transport: http(customTransports[chain.id]),
       chain: chain,
     });
+
+    this.cachedClients[chain.id] = chainClient;
+    return chainClient;
   }
 }
 
