@@ -1,6 +1,6 @@
 {
   "name": "@namespacesdk/indexer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Library for which allows interacting with namespace indexer",
   "license": "MIT",
   "main": "dist/index.js",

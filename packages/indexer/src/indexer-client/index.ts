@@ -47,19 +47,13 @@ class HttpIndexerClient implements IndexerClient {
     nameOrNamehash,
   }: L2SubnameRequest): Promise<L2RegistryResponse> {
     return this.HTTP.get<L2RegistryResponse>(
-      `/api/v1/l2-subnames/chainId/${chainId}/namehash/${nameOrNamehash}`
+      `/api/v1/l2-subnames/registry/chainId/${chainId}/namehash/${nameOrNamehash}`
     ).then((res) => res.data);
   }
 
   public async getL2Subnames(
     request: L2SubnamesRequest
   ): Promise<L2SubnamesResponse> {
-
-    
-    if (request.parent && !request.parent.startsWith("0x")) {
-
-    }
-
     return this.HTTP.get<L2SubnamesResponse>(`/api/v1/l2-subnames/all`, {
       params: request,
     }).then((res) => res.data);
