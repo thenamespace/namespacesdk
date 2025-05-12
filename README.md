@@ -7,6 +7,8 @@ Namespace SDK is a collection of tools and libraries designed to simplify ENS su
 
 Currently, the SDK includes:
 - [`@namespacesdk/offchain-manager`](https://www.npmjs.com/package/@namespacesdk/offchain-manager): Manage ENS subnames off-chain with ease.
+- [`@namespacesdk/offchain-manager`](https://www.npmjs.com/package/@namespacesdk/indexer): A SDK Wrapper around Namespace Indexer, used to easily query data related to L2 subnames.
+- [`@namespacesdk/offchain-manager`](https://www.npmjs.com/package/@namespacesdk/mint-manager): Client for implementing mint functionality, supports both L1 and L2 Subnames.
 
 ## Installation
 Each package in the Namespace SDK is available individually via npm. To install a specific package, use:
