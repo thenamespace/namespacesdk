@@ -1,0 +1,7 @@
+export enum ContenthashType {
+    Ipfs = "ipfs",
+    Onion = "onion3",
+    Swarm = "swarm",
+    Arweave = "arweave",
+    Skynet = "syknet"
+}

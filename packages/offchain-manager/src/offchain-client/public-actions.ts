@@ -1,4 +1,4 @@
-import { AxiosInstance } from "axios";
+import { AxiosError, AxiosInstance } from "axios";
 import {
   GetAvailableResponse,
   GetRecordResponse,
@@ -11,11 +11,24 @@ export const _isSubnameAvailable = async (
   client: AxiosInstance,
   fullSubname: string
 ): Promise<GetAvailableResponse> => {
-  const subname = await client.get(`/api/v1/subnames/${fullSubname}`);
-  if (subname) {
-    return { isAvailable: false };
+  try {
+    const { data } = await client.get<SubnameDTO>(
+      `/api/v1/subnames/${fullSubname}`
+    );
+    if (data && data) {
+      return { isAvailable: false };
+    }
+    return { isAvailable: true };
+  } catch (err) {
+
+    if (err instanceof AxiosError) {
+      const axiosErr = err as AxiosError;
+      if (axiosErr.status === 404) {
+        return { isAvailable: false }
+      } 
+    } 
+    throw err;
   }
-  return { isAvailable: true };
 };
 
 export const _getTextRecords = async (
@@ -74,7 +87,7 @@ export const _getFilteredSubnames = async (
   query: QuerySubnamesRequest
 ): Promise<PagedResponse<SubnameDTO[]>> => {
   const searchQuery: Record<string, string | number> = {};
-  
+
   if (query.parentName) {
     searchQuery.domain = query.parentName;
   }
@@ -96,6 +109,6 @@ export const _getFilteredSubnames = async (
   }
 
   return client
-    .post<PagedResponse<SubnameDTO[]>>(`/api/v1/subnames/search`, query )
+    .post<PagedResponse<SubnameDTO[]>>(`/api/v1/subnames/search`, query)
     .then((res) => res.data);
 };

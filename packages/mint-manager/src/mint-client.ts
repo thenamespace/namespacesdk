@@ -14,7 +14,6 @@ import {
   Address,
   zeroAddress,
   Hash,
-  Transport,
   http,
   createPublicClient,
   namehash,
