@@ -9,13 +9,14 @@ import {
 import { EnsRecords } from "./types";
 import { getCoderByCoinType } from "@ensdomains/address-encoder";
 import { chainMetadata } from "./constants/address-records";
+import { encode } from "@ensdomains/content-hash/src/index";
 
 const ETH_COIN = 60;
 
 const ResolverAbi = parseAbi([
   "function setText(bytes32 node, string key, string value) public",
   "function setAddr(bytes32 node, uint256 coin, bytes value) public",
-  "function setContenthash(bytes32 node, bytes contenthash)"
+  "function setContenthash(bytes32 node, bytes contenthash)",
 ]);
 
 export const convertEnsRecordsToResolverData = (
@@ -77,13 +78,21 @@ export const convertEnsRecordsToResolverData = (
     }
   }
 
-  if (records.contenthash) {
-    try {
-
-    } catch (err) {
-
-    }
-  }
+  // There is currently an issue with content-hash library
+  // [ERR_PACKAGE_PATH_NOT_EXPORTED]
+  // if (records.contenthash) {
+  //   const encodedValue = encode(
+  //     records.contenthash.type as any,
+  //     records.contenthash.value
+  //   );
+  //   resolverData.push(
+  //     encodeFunctionData({
+  //       abi: ResolverAbi,
+  //       args: [subnameNode, encodedValue as Hash],
+  //       functionName: "setContenthash",
+  //     })
+  //   );
+  // }
 
   return resolverData;
 };
