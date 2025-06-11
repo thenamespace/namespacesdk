@@ -91,7 +91,7 @@ export const convertEnsRecordsToResolverData = (
     resolverData.push(
       encodeFunctionData({
         abi: ResolverAbi,
-        args: [subnameNode, encodedValue as Hash],
+        args: [subnameNode, `0x${encodedValue}` as Hash],
         functionName: "setContenthash",
       })
     );
