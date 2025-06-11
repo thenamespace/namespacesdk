@@ -9,7 +9,10 @@ import {
 import { EnsRecords } from "./types";
 import { getCoderByCoinType } from "@ensdomains/address-encoder";
 import { chainMetadata } from "./constants/address-records";
-import { encode } from "@ensdomains/content-hash/src/index";
+//@ts-ignore
+// The newest version of content-hash
+// throws error Error [ERR_PACKAGE_PATH_NOT_EXPORTED]:
+import { encode } from "@ensdomains/content-hash";
 
 const ETH_COIN = 60;
 
@@ -80,19 +83,19 @@ export const convertEnsRecordsToResolverData = (
 
   // There is currently an issue with content-hash library
   // [ERR_PACKAGE_PATH_NOT_EXPORTED]
-  // if (records.contenthash) {
-  //   const encodedValue = encode(
-  //     records.contenthash.type as any,
-  //     records.contenthash.value
-  //   );
-  //   resolverData.push(
-  //     encodeFunctionData({
-  //       abi: ResolverAbi,
-  //       args: [subnameNode, encodedValue as Hash],
-  //       functionName: "setContenthash",
-  //     })
-  //   );
-  // }
+  if (records.contenthash) {
+    const encodedValue = encode(
+      records.contenthash.type as any,
+      records.contenthash.value
+    );
+    resolverData.push(
+      encodeFunctionData({
+        abi: ResolverAbi,
+        args: [subnameNode, encodedValue as Hash],
+        functionName: "setContenthash",
+      })
+    );
+  }
 
   return resolverData;
 };
