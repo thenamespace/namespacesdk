@@ -1,6 +1,6 @@
 {
   "name": "@namespacesdk/mint-manager",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Library for minting l2 subnames",
   "license": "MIT",
   "main": "dist/index.js",
