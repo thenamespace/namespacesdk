@@ -5,4 +5,9 @@ export {
   MintTransactionResponse,
   MintTransactionRequest,
   EnsRecords,
+  EnsAddressRecord,
+  ContenthashRecord,
+  EnsTextRecord,
 } from "./types";
+export { ChainName } from "./constants/address-records";
+export { ContenthashType } from "./constants/contenthash-record";

@@ -8,12 +8,15 @@ import {
 } from "viem";
 import { EnsRecords } from "./types";
 import { getCoderByCoinType } from "@ensdomains/address-encoder";
+import { chainMetadata } from "./constants/address-records";
+import { encode } from "@ensdomains/content-hash/src/index";
 
 const ETH_COIN = 60;
 
 const ResolverAbi = parseAbi([
   "function setText(bytes32 node, string key, string value) public",
   "function setAddr(bytes32 node, uint256 coin, bytes value) public",
+  "function setContenthash(bytes32 node, bytes contenthash)",
 ]);
 
 export const convertEnsRecordsToResolverData = (
@@ -36,8 +39,21 @@ export const convertEnsRecordsToResolverData = (
   }
 
   if (records.addresses && records.addresses.length > 0) {
-    records.addresses.forEach((addr) => {
-      if (addr.coin === ETH_COIN) {
+    for (const addr of records.addresses) {
+      let addressCoin = 0;
+      if (typeof addr.chain === "number") {
+        addressCoin = addr.chain;
+      } else {
+        const supportedChain = chainMetadata[addr.chain];
+        if (!supportedChain) {
+          console.info(`Cannot find coin for chain: ${addr.chain}`);
+          continue;
+        } else {
+          addressCoin = supportedChain.coin;
+        }
+      }
+
+      if (addressCoin === ETH_COIN) {
         resolverData.push(
           encodeFunctionData({
             abi: ResolverAbi,
@@ -46,21 +62,37 @@ export const convertEnsRecordsToResolverData = (
           })
         );
       } else {
-        const addrEncoder = getCoderByCoinType(addr.coin);
+        const addrEncoder = getCoderByCoinType(addressCoin);
         if (addrEncoder) {
           const decodedAddr = addrEncoder.decode(addr.value);
           const hexAddr = toHex(decodedAddr);
           resolverData.push(
             encodeFunctionData({
               abi: ResolverAbi,
-              args: [subnameNode, BigInt(addr.coin), hexAddr],
+              args: [subnameNode, BigInt(addressCoin), hexAddr],
               functionName: "setAddr",
             })
           );
         }
       }
-    });
+    }
   }
+
+  // There is currently an issue with content-hash library
+  // [ERR_PACKAGE_PATH_NOT_EXPORTED]
+  // if (records.contenthash) {
+  //   const encodedValue = encode(
+  //     records.contenthash.type as any,
+  //     records.contenthash.value
+  //   );
+  //   resolverData.push(
+  //     encodeFunctionData({
+  //       abi: ResolverAbi,
+  //       args: [subnameNode, encodedValue as Hash],
+  //       functionName: "setContenthash",
+  //     })
+  //   );
+  // }
 
   return resolverData;
 };

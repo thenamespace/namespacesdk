@@ -239,9 +239,6 @@ class HttpOffchainClient implements OffchainClient {
       const split = name.split(".");
       const splitLen = split.length;
 
-      console.log("SPLIT", split, "SPLIT");
-      console.log("LEN", splitLen);
-
       if (splitLen < 2) {
         throw Error(`Invalid ENS name: ${name}`);
       }
@@ -253,10 +250,7 @@ class HttpOffchainClient implements OffchainClient {
       return split[splitLen - 2] + "." + split[splitLen - 1];
     };
 
-    console.log(isSubname, "IS SUBNAME");
     let parentName = isSubname ? extractParent() : name;
-    console.log(parentName, "parentName");
-    console.log(this.apiKeys);
     if (!this.apiKeys[parentName]) {
       throw new Error(`Api key is not present for name: ${parentName}`);
     }

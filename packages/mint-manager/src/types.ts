@@ -1,4 +1,6 @@
 import { Address } from "viem";
+import { ChainName } from "./constants/address-records";
+import { ContenthashType } from "./constants/contenthash-record";
 
 export interface MintDetailsRequest {
   parentName: string;
@@ -64,9 +66,25 @@ export interface MintTransactionRequest {
   records?: EnsRecords;
 }
 
+export interface EnsTextRecord {
+  key: string
+  value: string
+}
+
+export interface EnsAddressRecord {
+  chain: ChainName | number
+  value: string
+}
+
+export interface ContenthashRecord {
+  type: ContenthashType
+  value: string
+}
+
 export interface EnsRecords {
-  texts?: { key: string; value: string }[];
-  addresses?: { coin: number; value: string }[];
+  texts?: EnsTextRecord[];
+  addresses?: EnsAddressRecord[]
+  contenthash?: ContenthashRecord
 }
 
 export type ListingType = "L1" | "L2";
