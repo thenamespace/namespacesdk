@@ -50,6 +50,15 @@
   dependencies:
     tslib "^2.4.0"
 
+"@ensdomains/address-encoder@1.0.0-rc.3":
+  version "1.0.0-rc.3"
+  resolved "https://registry.yarnpkg.com/@ensdomains/address-encoder/-/address-encoder-1.0.0-rc.3.tgz#78a8081bed834661e7fd21a9c9f67f927100fce5"
+  integrity sha512-8o6zH69rObIqDY4PusEWuN9jvVOct+9jj9AOPO7ifc3ev8nmsly0e8TE1sHkhk0iKFbd3DlSsUnJ+yuRWmdLCQ==
+  dependencies:
+    "@noble/curves" "^1.2.0"
+    "@noble/hashes" "^1.3.2"
+    "@scure/base" "^1.1.5"
+
 "@ensdomains/address-encoder@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@ensdomains/address-encoder/-/address-encoder-1.1.2.tgz#29bb2346f4da21f8e2f7f05a4755d9ccd3ecab6e"
@@ -59,13 +68,14 @@
     "@noble/hashes" "^1.3.2"
     "@scure/base" "^1.1.5"
 
-"@ensdomains/content-hash@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@ensdomains/content-hash/-/content-hash-3.0.0.tgz#441d7d282f6fe9d65d6690bf8e402cb376780871"
-  integrity sha512-5ongDPX9qDkemcYZ2rPXsRzCRDneoR2xujm2Tq3u0ZefQa49ZAURVKGqbJdjoL0VIZDfceLkBXekYKqkfrR5Ww==
+"@ensdomains/content-hash@3.1.0-rc.1":
+  version "3.1.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@ensdomains/content-hash/-/content-hash-3.1.0-rc.1.tgz#f22220df19be2f60683070a683f5760a9a7134d8"
+  integrity sha512-OzdkXgdFmduzcJKU4KRkkJkQHnm5p7m7FkX8k+bHOEoOIzc0ueGT/Jay4nnb60wNk1wSHRmzY+hHBMpFDiGReg==
   dependencies:
-    "@multiformats/sha3" "^2.0.17"
-    multiformats "^12.0.1"
+    "@ensdomains/address-encoder" "1.0.0-rc.3"
+    "@noble/curves" "^1.2.0"
+    "@scure/base" "^1.1.5"
 
 "@hutson/parse-repository-url@^3.0.0":
   version "3.0.2"
@@ -190,27 +200,6 @@
     write-pkg "4.0.0"
     yargs "17.7.2"
     yargs-parser "21.1.1"
-
-"@multiformats/sha3@^2.0.17":
-  version "2.0.17"
-  resolved "https://registry.yarnpkg.com/@multiformats/sha3/-/sha3-2.0.17.tgz#bcfd2d6d7c44a61ced79a2c4dd45acd9ebbfb8d7"
-  integrity sha512-7ik6pk178qLO2cpNucgf48UnAOBMkq/2H92DP4SprZOJqM9zqbVaKS7XyYW6UvhRsDJ3wi921fYv1ihTtQHLtA==
-  dependencies:
-    js-sha3 "^0.8.0"
-    multiformats "^9.5.4"
-
-"@namespacesdk/mint-manager@1.0.7-alpha-0.2":
-  version "1.0.7-alpha-0.2"
-  resolved "https://registry.yarnpkg.com/@namespacesdk/mint-manager/-/mint-manager-1.0.7-alpha-0.2.tgz#eaf35903513cac48ab2635f62f48dc381b0d8dd4"
-  integrity sha512-F7TDT5g/R6vWz7NfT8qgGq69RxXLB3KDjJnAPppfpaA+TM8/fNtUQJjve4IIf3ohEk+tqJh119jgk0sC/PIUww==
-  dependencies:
-    "@ensdomains/address-encoder" "^1.1.2"
-    "@namespacesdk/addresses" "^1.0.12"
-    "@types/node" "^22.10.5"
-    axios "^1.7.9"
-    ts-node "^10.9.2"
-    typescript "^5.7.3"
-    viem "^2.24.3"
 
 "@napi-rs/wasm-runtime@0.2.4":
   version "0.2.4"
@@ -2197,11 +2186,6 @@ jest-get-type@^29.6.3:
   resolved "https://registry.yarnpkg.com/jest-get-type/-/jest-get-type-29.6.3.tgz#36f499fdcea197c1045a127319c0481723908fd1"
   integrity sha512-zrteXnqYxfQh7l5FHyL38jL39di8H8rHoecLH3JNxH3BwOrBsNeabdap5e0I23lD4HHI8W5VFBZqG4Eaq5LNcw==
 
-js-sha3@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.8.0.tgz#b9b7a5da73afad7dedd0f8c463954cbde6818840"
-  integrity sha512-gF1cRrHhIzNfToc802P800N8PpXS+evLLXfsVpowqmAFR9uwbi89WvXg2QspOmXL8QL86J4T1EpFu+yUkwJY3Q==
-
 js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
@@ -2731,21 +2715,6 @@ ms@^2.1.3:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
-
-multiformats@^12.0.1:
-  version "12.1.3"
-  resolved "https://registry.yarnpkg.com/multiformats/-/multiformats-12.1.3.tgz#cbf7a9861e11e74f8228b21376088cb43ba8754e"
-  integrity sha512-eajQ/ZH7qXZQR2AgtfpmSMizQzmyYVmCql7pdhldPuYQi4atACekbJaQplk6dWyIi10jCaFnd6pqvcEFXjbaJw==
-
-multiformats@^9.5.4:
-  version "9.9.0"
-  resolved "https://registry.yarnpkg.com/multiformats/-/multiformats-9.9.0.tgz#c68354e7d21037a8f1f8833c8ccd68618e8f1d37"
-  integrity sha512-HoMUjhH9T8DDBNT+6xzkrd9ga/XiBI4xLr58LJACwK6G3HTOPeMz4nB4KJs33L2BelrIJa7P0VuNaVF3hMYfjg==
-
-multiformats@^9.8.0:
-  version "9.8.0"
-  resolved "https://registry.yarnpkg.com/multiformats/-/multiformats-9.8.0.tgz#a869f4d200a8b70b32b1af25752759ecbc16b72c"
-  integrity sha512-C9NNb+D3iN5JYPii8o5hFd6hg1HG5c2ir4nMQZhqXmij7cszRzeU2+Boj9gPK/Qdna0secaaSxOdF8ihpiht1A==
 
 multimatch@5.0.0:
   version "5.0.0"

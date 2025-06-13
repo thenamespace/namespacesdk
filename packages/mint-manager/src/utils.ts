@@ -9,9 +9,6 @@ import {
 import { EnsRecords } from "./types";
 import { getCoderByCoinType } from "@ensdomains/address-encoder";
 import { chainMetadata } from "./constants/address-records";
-//@ts-ignore
-// The newest version of content-hash
-// throws error Error [ERR_PACKAGE_PATH_NOT_EXPORTED]:
 import { encode } from "@ensdomains/content-hash";
 
 const ETH_COIN = 60;
