@@ -23,9 +23,11 @@ export interface PagedResponse<T> {
 }
 
 export interface QuerySubnamesRequest {
-  parentName: string;
+  parentName?: string;
   labelSearch?: string;
   page?: number;
   size?: number;
   metadata?: Record<string, string>;
+  parentNames?: string[]
+  owner?: string
 }
