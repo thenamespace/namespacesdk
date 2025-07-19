@@ -1,6 +1,3 @@
-import { ChainName, CreateSubnameRequest } from "./dto";
-import { createOffchainClient } from "./offchain-client";
-
 export {
   createOffchainClient,
   OffchainClient,

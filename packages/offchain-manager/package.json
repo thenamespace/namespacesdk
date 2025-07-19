@@ -1,6 +1,6 @@
 {
   "name": "@namespacesdk/offchain-manager",
-  "version": "3.0.6",
+  "version": "3.0.8",
   "description": "Library for creating and managing offchain subnames",
   "license": "MIT",
   "main": "dist/index.js",
@@ -13,7 +13,7 @@
   "files": [
     "/dist"
   ],
-  "author": "Uros Zigic <uros@namespace.tech>",
+  "author": "artii.eth <arti@namespace.ninja>",
   "dependencies": {
     "@types/node": "^22.10.5",
     "axios": "^1.7.9",
