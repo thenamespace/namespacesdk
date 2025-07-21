@@ -10,6 +10,7 @@ export interface CreateSubnameRequest_Internal {
     metadata?: TextRecord[];
     contenthash?: string;
     ttl?: number;
+    owner?: string
 }
 
 export interface AddressRecord_Internal {
