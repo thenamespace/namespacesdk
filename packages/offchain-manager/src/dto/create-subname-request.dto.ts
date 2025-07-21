@@ -8,4 +8,5 @@ export interface CreateSubnameRequest {
   metadata?: TextRecord[];
   contenthash?: string;
   ttl?: number;
+  owner?: string
 }
