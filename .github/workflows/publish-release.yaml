@@ -48,10 +48,14 @@ jobs:
 
           LATEST_TAG=$(git tag --list "*-${PACKAGE}" --sort=-v:refname | head -n 1)
 
+          
           if [ -z "$LATEST_TAG" ]; then
+            echo "No version found"
             NEW_VERSION="1.0.0-$PACKAGE"
           else
-            BASE_VERSION=${LATEST_TAG%-*}
+            echo "Version found: $LATEST_TAG"
+            BASE_VERSION=${LATEST_TAG%-${PACKAGE}}
+
             IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
             PATCH=$((PATCH + 1))
             NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-$PACKAGE"
@@ -66,12 +70,21 @@ jobs:
         working-directory: packages/${{ inputs.package }}
         env:
           version: ${{ steps.versioning.outputs.version }}
-        run: npm version $version --no-git-tag-version
+        run: |
+          PURE_VERSION=${version%-${package}}
 
+          # Show for debug
+          echo "Original version: $version"
+          echo "Pure version for npm: $PURE_VERSION"
 
-      # - name: Publish package to npm registry
-      #   working-directory: packages/${{ inputs.package }}
-      #   run: npm publish
+          # Run npm version with the pure semver
+          npm version $PURE_VERSION --no-git-tag-version
+
+      - name: Publish package to npm registry
+        working-directory: packages/${{ inputs.package }}
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Commit and push version bump and tag
         env:
