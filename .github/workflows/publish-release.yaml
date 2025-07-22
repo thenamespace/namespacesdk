@@ -37,6 +37,7 @@ jobs:
         working-directory: packages/${{ inputs.package }}
         run: |
           npm install
+          cd packages/${{ inputs.package }}
           npm run build
 
       - name: Determine new version
