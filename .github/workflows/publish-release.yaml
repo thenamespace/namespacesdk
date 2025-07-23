@@ -1,5 +1,5 @@
 ---
-name: Build And Publish Package Update
+name: Publish New Package Version
 
 on:
   workflow_dispatch:
@@ -12,6 +12,21 @@ on:
          - addresses
          - indexer
          - mint-manager
+      version:
+        type: string
+        description: "version"
+      publish:
+        type: boolean
+        description: Publish to npm
+        default: false
+      changelog:
+        type: string
+        description: "Changelog (required if publishing)"
+        default: ""
+      discord_notify:
+        type: boolean
+        description: "If checked, the release will notify on discord"
+        default: false
 
 jobs:
   build-and-publish:
@@ -19,6 +34,7 @@ jobs:
 
     permissions:
       contents: write
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -30,10 +46,44 @@ jobs:
           node-version: 24
           registry-url: 'https://registry.npmjs.org/'
 
-      # - name: Authenticate with NmpJS
-      #   run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+      - name: Read previous version from package.json
+        id: previous-version
+        working-directory: packages/${{ inputs.package }}
+        run: |
+          version=$(jq -r '.version' package.json)
+          echo "Previous version: $version"
+          echo "version=$version" >> $GITHUB_OUTPUT
 
-      - name: Install dependencies (root)
+      - name: Extract new version from input
+        id: current-version
+        env: 
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+
+          # Ensure semver format
+          if [[ ! "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "❌ Invalid version format. Must follow semantic versioning (e.g., 1.2.3 or 1.2.3-suffix)"
+            exit 1
+          fi
+
+          version="${{ inputs.version }}"
+          echo "Current version: $version"
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Check valid version increase
+        uses: aleoyakas/check-semver-increased-action@v1
+        id: check-version
+        with:
+          current-version: ${{ steps.current-version.outputs.version }}
+          previous-version: ${{ steps.previous-version.outputs.version }}
+
+      - name: Fail if version not increased
+        if: steps.check-version.outputs.is-version-increased != 'true'
+        run: |
+          echo "❌ Version has not increased. Please bump the version above ${{ steps.previous-version.outputs.version }}"
+          exit 1
+
+      - name: Install dependencies
         run: npm install
 
       - name: Build selected package
@@ -41,67 +91,74 @@ jobs:
         run: npm run build
 
 
-      - name: Determine new version
-        id: versioning
-        run: |
-          PACKAGE="${{ inputs.package }}"
-
-          LATEST_TAG=$(git tag --list "*-${PACKAGE}" --sort=-v:refname | head -n 1)
-
-          
-          if [ -z "$LATEST_TAG" ]; then
-            echo "No version found"
-            NEW_VERSION="1.0.0-$PACKAGE"
-          else
-            echo "Version found: $LATEST_TAG"
-            BASE_VERSION=${LATEST_TAG%-${PACKAGE}}
-
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
-            PATCH=$((PATCH + 1))
-            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-$PACKAGE"
-          fi
-
-          echo "New version: $NEW_VERSION"
-
-          # Set the version as output
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-
       - name: Update package version in package.json
         working-directory: packages/${{ inputs.package }}
-        env:
-          version: ${{ steps.versioning.outputs.version }}
         run: |
-          PURE_VERSION=${version%-${package}}
+          npm version ${{ inputs.version }} --no-git-tag-version
 
-          # Show for debug
-          echo "Original version: $version"
-          echo "Pure version for npm: $PURE_VERSION"
-
-          # Run npm version with the pure semver
-          npm version $PURE_VERSION --no-git-tag-version
+      - name: Validate changelog if publishing
+        if: ${{ inputs.publish == true }}
+        run: |
+          if [ -z "${{ inputs.changelog }}" ]; then
+            echo "❌ Changelog is required when publishing."
+            exit 1
+          fi
 
       - name: Publish package to npm registry
+        if: ${{ inputs.publish == true }}
         working-directory: packages/${{ inputs.package }}
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Commit and push version bump and tag
+        if: ${{ inputs.publish == true }}
         env:
-          version: ${{ steps.versioning.outputs.version }}
-          package: ${{ inputs.package }}
+          VERSION: ${{ inputs.version }}
+          CHANGELOG: ${{ inputs.changelog }}
+          PACKAGE: ${{ inputs.package }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          echo "📝 Prepending changelog for $VERSION"
+   
+          FILE="changelog/${PACKAGE}-changelog.md"
+          TEMP_FILE="${FILE}.tmp"
+
+          echo -e "${VERSION} - ${CHANGELOG}\n" > "$TEMP_FILE"
+
+          if [ -f "$FILE" ]; then
+            cat "$FILE" >> "$TEMP_FILE"
+          fi
+
+          mv "$TEMP_FILE" "$FILE"
+
           # Commit the updated package.json with new version
-          git add packages/$package/package.json
-          git commit -m "chore($package): bump version to $version"
+          git add packages/$PACKAGE/package.json
+          git add changelog/*
+          git commit -m "chore($PACKAGE): bump version to $version"
 
           # Create a tag with the version
-          git tag -a "$version" -m "Release $version"
+          TAG="${PACKAGE}-${VERSION}"
+
+          git tag -a "$TAG" -m "Release $TAG"
 
           # Push commit and tag
           git push origin HEAD
-          git push origin "$version"
+          git push origin "$TAG"
+
+      - name: Post update to Discord
+        if: ${{ inputs.discord_notify == true }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+          VERSION: ${{ inputs.version }}
+          CHANGELOG: ${{ inputs.changelog }}
+          PACKAGE: ${{ inputs.package }}
+        run: |
+          MESSAGE="Published a new version of *@thenamespace/${PACKAGE}*, version: \`${VERSION}\`!\n\n📝 ${CHANGELOG}"
+
+          curl -X POST -H "Content-Type: application/json" \
+            -d "{\"content\": \"$MESSAGE\"}" \
+            "$DISCORD_WEBHOOK_URL"
