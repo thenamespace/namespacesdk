@@ -1,9 +1,12 @@
 ---
-name: Build And Publish Package Update
+name: Publish New Package Version
 
 on:
   workflow_dispatch:
     inputs:
+      version:
+        type: string
+        description: "version"
       package:
         type: choice
         description: Package name
@@ -30,10 +33,38 @@ jobs:
           node-version: 24
           registry-url: 'https://registry.npmjs.org/'
 
-      # - name: Authenticate with NmpJS
-      #   run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+      - name: Validate version format and uniqueness
+        working-directory: packages/${{ inputs.package }}
+        id: validate-version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          echo "Validating version: $INPUT_VERSION"
 
-      - name: Install dependencies (root)
+          # Ensure semver format
+          if [[ ! "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "❌ Invalid version format. Must follow semantic versioning (e.g., 1.2.3 or 1.2.3-suffix)"
+            exit 1
+          fi
+
+          # Extract base semver (strip suffix if present)
+          BASE_VERSION=$(echo "$INPUT_VERSION" | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+')
+
+          # Read current version from package.json
+          CURRENT_VERSION=$(grep '"version":' package.json | head -1 | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+).*"/\1/')
+
+          echo "📦 Current: $CURRENT_VERSION"
+          echo "🚀 New:     $BASE_VERSION"
+
+          # Compare using npx (auto-installs semver if needed)
+          if ! npx --yes semver -c "$BASE_VERSION > $CURRENT_VERSION"; then
+            echo "❌ Provided version must be greater than current version"
+            exit 1
+          fi
+
+          echo "✅ Version is valid and properly incremented."
+
+      - name: Install dependencies
         run: npm install
 
       - name: Build selected package
@@ -41,67 +72,33 @@ jobs:
         run: npm run build
 
 
-      - name: Determine new version
-        id: versioning
-        run: |
-          PACKAGE="${{ inputs.package }}"
-
-          LATEST_TAG=$(git tag --list "*-${PACKAGE}" --sort=-v:refname | head -n 1)
-
-          
-          if [ -z "$LATEST_TAG" ]; then
-            echo "No version found"
-            NEW_VERSION="1.0.0-$PACKAGE"
-          else
-            echo "Version found: $LATEST_TAG"
-            BASE_VERSION=${LATEST_TAG%-${PACKAGE}}
-
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
-            PATCH=$((PATCH + 1))
-            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-$PACKAGE"
-          fi
-
-          echo "New version: $NEW_VERSION"
-
-          # Set the version as output
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-
       - name: Update package version in package.json
         working-directory: packages/${{ inputs.package }}
-        env:
-          version: ${{ steps.versioning.outputs.version }}
         run: |
-          PURE_VERSION=${version%-${package}}
+          npm version ${{ inputs.version }} --no-git-tag-version
 
-          # Show for debug
-          echo "Original version: $version"
-          echo "Pure version for npm: $PURE_VERSION"
+      # - name: Publish package to npm registry
+      #   working-directory: packages/${{ inputs.package }}
+      #   run: npm publish --provenance --access public
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-          # Run npm version with the pure semver
-          npm version $PURE_VERSION --no-git-tag-version
+      # - name: Commit and push version bump and tag
+      #   env:
+      #     version: ${{ steps.versioning.outputs.version }}
+      #     package: ${{ inputs.package }}
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #   run: |
+      #     git config user.name "github-actions[bot]"
+      #     git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Publish package to npm registry
-        working-directory: packages/${{ inputs.package }}
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #     # Commit the updated package.json with new version
+      #     git add packages/$package/package.json
+      #     git commit -m "chore($package): bump version to $version"
 
-      - name: Commit and push version bump and tag
-        env:
-          version: ${{ steps.versioning.outputs.version }}
-          package: ${{ inputs.package }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+      #     # Create a tag with the version
+      #     git tag -a "$version" -m "Release $version"
 
-          # Commit the updated package.json with new version
-          git add packages/$package/package.json
-          git commit -m "chore($package): bump version to $version"
-
-          # Create a tag with the version
-          git tag -a "$version" -m "Release $version"
-
-          # Push commit and tag
-          git push origin HEAD
-          git push origin "$version"
+      #     # Push commit and tag
+      #     git push origin HEAD
+      #     git push origin "$version"
