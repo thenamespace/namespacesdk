@@ -5,15 +5,18 @@
 [![npm version](https://img.shields.io/npm/v/@namespacesdk/offchain-manager.svg)](https://www.npmjs.com/package/@namespacesdk/offchain-manager)
 
 ## Overview
+
 The `namespace-sdk` provides an easy-to-use client for managing ENS subnames off-chain. With this SDK, developers can create, update, delete, and query subnames, as well as manage associated records like addresses, text records, and data records.
 
 ## Namespace Dev Portal
+
 _If you've already done this, feel free to skip this step._
 
 To issue subnames, make them resolvable, and get an API key, you need to go to our [Dev Portal](https://dev.namespace.ninja).
+
 1. **Subnames** section allows you to create, edit, or update subnames and all of their records (text, addresses, content hash)
 2. **Resolution** section is there for you to update the Resolver contract to Namespace Hybrid resolver so the subnames issued are resolvable in all ENS-supported apps.
-3. **API Keys** section allows you to create and manage API keys for ENS names  you're issuing subnames from.
+3. **API Keys** section allows you to create and manage API keys for ENS names you're issuing subnames from.
 
 ## Installation
 
@@ -29,10 +32,38 @@ npm install @namespacesdk/offchain-manager
 
 ## Getting Started
 
+### Environment Setup
+
+For security, the SDK uses environment variables for configuration. Create a `.env` file in your project root:
+
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit the .env file with your actual values
+```
+
+**Required Environment Variables:**
+
+- `NAMESPACE_API_KEY` - Your Namespace API key (obtained from [dev.namespace.ninja](https://dev.namespace.ninja))
+
+**Optional Environment Variables:**
+
+- `TEST_DOMAIN` - Domain for testing (defaults to `happ1.eth`)
+- `TEST_MODE` - Test environment (`mainnet` or `sepolia`, defaults to `sepolia`)
+
+**Example .env file:**
+
+```env
+NAMESPACE_API_KEY=ns-your-api-key-here
+TEST_DOMAIN=happ1.eth
+TEST_MODE=sepolia
+```
+
 ### Import the SDK
 
 ```typescript
-import { OffchainClient } from '@namespacesdk/offchain-manager';
+import { OffchainClient } from "@namespacesdk/offchain-manager";
 ```
 
 ### Initialize the Client
@@ -41,194 +72,234 @@ To use the SDK, create an instance of the `OffchainClient` and set your API key,
 
 ```typescript
 const client = new OffchainClient();
-client.setApiKey('your-ens-name.eth', 'your-api-key');
+client.setApiKey("your-ens-name.eth", "your-api-key");
 ```
 
 ### Subname Management
 
 #### Create a Subname
+
 ```typescript
-import { ChainName } from "@namespacesdk/offchain-manageR"
+import { ChainName } from "@namespacesdk/offchain-manager";
 
 await client.createSubname({
-  parent: 'example.eth',
-  label: 'sub',
+  parent: "example.eth",
+  label: "sub",
   addresses: [
     {
-      chain: ChainName.Ethereum
-      value: "0x123..."
-    }
+      chain: ChainName.Ethereum,
+      value: "0x123...",
+    },
   ],
   texts: [
     {
       key: "avatar",
-      value: "https://my_avatar_url"
-    }
-  ]
+      value: "https://my_avatar_url",
+    },
+  ],
 });
 ```
 
 #### Update a Subname
+
 ```typescript
-await client.updateSubname('sub.example.eth', {
-   addresses: [
+await client.updateSubname("sub.example.eth", {
+  addresses: [
     {
-      chain: ChainName.Ethereum
-      value: "0x123..."
-    }
+      chain: ChainName.Ethereum,
+      value: "0x123...",
+    },
   ],
   texts: [
     {
       key: "avatar",
-      value: "https://my_avatar_url"
-    }
-  ]
+      value: "https://my_avatar_url",
+    },
+  ],
 });
 ```
 
 #### Delete a Subname
+
 ```typescript
-await client.deleteSubname('sub.example.eth');
+await client.deleteSubname("sub.example.eth");
 ```
 
 #### Check if a Subname is Available
+
 ```typescript
-const response = await client.isSubnameAvailable('sub.example.eth');
+const response = await client.isSubnameAvailable("sub.example.eth");
 console.log(response.available);
 ```
 
 #### Get a Subname
+
 ```typescript
-const subname = await client.getSingleSubname('sub.example.eth');
+const subname = await client.getSingleSubname("sub.example.eth");
 console.log(subname);
 ```
 
 #### Query Subnames
+
 ```typescript
-const subnames = await client.getFilteredSubnames({ parent: 'example.eth' });
+const subnames = await client.getFilteredSubnames({ parent: "example.eth" });
 console.log(subnames);
 ```
 
 ### Record Management
 
 #### Add an Address Record
-```typescript
-import { ChainName } from "@namespacesdk/offchain-manager"
 
-await client.addAddressRecord('sub.example.eth',  ChainName.Ethereum, '0xYourEthereumAddress');
+```typescript
+import { ChainName } from "@namespacesdk/offchain-manager";
+
+await client.addAddressRecord(
+  "sub.example.eth",
+  ChainName.Ethereum,
+  "0xYourEthereumAddress"
+);
 ```
 
 #### Delete an Address Record
+
 ```typescript
-await client.deleteAddressRecord('sub.example.eth',  ChainName.Base);
+await client.deleteAddressRecord("sub.example.eth", ChainName.Base);
 ```
 
 #### Add a Text Record
+
 ```typescript
-await client.addTextRecord('sub.example.eth', 'twitter', '@yourhandle');
+await client.addTextRecord("sub.example.eth", "twitter", "@yourhandle");
 ```
 
 #### Delete a Text Record
+
 ```typescript
-await client.deleteTextRecord('sub.example.eth', 'twitter');
+await client.deleteTextRecord("sub.example.eth", "twitter");
 ```
 
 #### Retrieve All Text Records
+
 ```typescript
-const records = await client.getTextRecords('sub.example.eth');
+const records = await client.getTextRecords("sub.example.eth");
 console.log(records);
 ```
 
 #### Retrieve a Specific Text Record
+
 ```typescript
-const record = await client.getTextRecord('sub.example.eth', 'twitter');
+const record = await client.getTextRecord("sub.example.eth", "twitter");
 console.log(record);
 ```
 
 #### Add a Data Record
+
 ```typescript
-await client.addDataRecord('sub.example.eth', 'customData', { key: 'value' });
+await client.addDataRecord("sub.example.eth", "customData", { key: "value" });
 ```
 
 #### Delete a Data Record
+
 ```typescript
-await client.deleteDataRecord('sub.example.eth', 'customData');
+await client.deleteDataRecord("sub.example.eth", "customData");
 ```
 
 #### Retrieve All Data Records
+
 ```typescript
-const dataRecords = await client.getDataRecords('sub.example.eth');
+const dataRecords = await client.getDataRecords("sub.example.eth");
 console.log(dataRecords);
 ```
 
 #### Retrieve a Specific Data Record
+
 ```typescript
-const dataRecord = await client.getDataRecord('sub.example.eth', 'customData');
+const dataRecord = await client.getDataRecord("sub.example.eth", "customData");
 console.log(dataRecord);
 ```
 
 ## API Reference
 
 ### `setApiKey(ensName: string, apiKey: string): void`
+
 Sets the API key for authentication.
 
 ### `createSubname(request: CreateSubnameRequest): Promise<void>`
+
 Creates a new subname under a parent domain.
 
 ### `updateSubname(subname: string, request: UpdateSubnameRequest): Promise<void>`
+
 Updates an existing subname.
 
 ### `deleteSubname(fullSubname: string): Promise<void>`
+
 Deletes a subname.
 
 ### `isSubnameAvailable(fullSubname: string): Promise<GetAvailableResponse>`
+
 Checks if a subname is available.
 
 ### `getSingleSubname(fullName: string): Promise<SubnameDTO | null>`
+
 Retrieves details of a subname.
 
 ### `getFilteredSubnames(query: QuerySubnamesRequest): Promise<PagedResponse<SubnameDTO[]>>`
+
 Fetches subnames based on query parameters.
 
 ### `addAddressRecord(subname: string, chain: ChainName, value: string): Promise<void>`
+
 Adds an address record to a subname.
 
 ### `deleteAddressRecord(subname: string, chain: ChainName): Promise<void>`
+
 Deletes an address record.
 
 ### `addTextRecord(subname: string, key: string, value: string): Promise<void>`
+
 Adds a text record to a subname.
 
 ### `deleteTextRecord(subname: string, key: string): Promise<void>`
+
 Deletes a text record.
 
 ### `getTextRecords(fullSubname: string): Promise<Record<string, string>>`
+
 Retrieves all text records for a subname.
 
 ### `getTextRecord(fullSubname: string, key: string): Promise<GetRecordResponse>`
+
 Retrieves a specific text record.
 
 ### `addDataRecord(fullSubname: string, key: string, data: any): Promise<void>`
+
 Adds a data record to a subname.
 
 ### `deleteDataRecord(subname: string, key: string): Promise<void>`
+
 Deletes a data record.
 
 ### `getDataRecords(fullSubname: string): Promise<Record<string, any>>`
+
 Retrieves all data records for a subname.
 
 ### `getDataRecord(fullSubname: string, key: string): Promise<GetRecordResponse>`
+
 Retrieves a specific data record.
 
 ## License
+
 This project is licensed under the [MIT License](LICENSE).
 
 ## Support
+
 For any issues or feature requests, please open an issue on [GitHub](https://github.com/your-repo/namespace-sdk/issues).
 
 ## Contributing
+
 Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTING.md) before submitting a pull request.
 
 ## Questions? Join our Builders Group chat
-Consider joining the [Namespace Builders](https://t.me/+OsziFgfuZz03NjEy) group chat on Telegram if you have any questions, suggestions, feedback, or anything you want to talk about.
 
+Consider joining the [Namespace Builders](https://t.me/+OsziFgfuZz03NjEy) group chat on Telegram if you have any questions, suggestions, feedback, or anything you want to talk about.
