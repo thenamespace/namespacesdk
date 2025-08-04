@@ -5,7 +5,7 @@ import { AddressRecord, TextRecord } from "./internal-types";
  * 
  * @example
  * ```typescript
- * import { CreateSubnameRequest, ChainName } from '@namespacesdk/offchain-manager';
+ * import { CreateSubnameRequest, ChainName } from '@thenamespace/offchain-manager';
  * 
  * const request: CreateSubnameRequest = {
  *   parentName: 'example.eth',

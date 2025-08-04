@@ -12,7 +12,7 @@
  * 
  * @example
  * ```typescript
- * import { createOffchainClient, ChainName } from '@namespacesdk/offchain-manager';
+ * import { createOffchainClient, ChainName } from '@thenamespace/offchain-manager';
  * 
  * // Initialize client
  * const client = createOffchainClient({ mode: 'sepolia' });

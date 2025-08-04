@@ -4,7 +4,7 @@
  * 
  * @example
  * ```typescript
- * import { ChainName } from '@namespacesdk/offchain-manager';
+ * import { ChainName } from '@thenamespace/offchain-manager';
  * 
  * // Use in address records
  * const addressRecord = {
@@ -144,7 +144,7 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
  * 
  * @example
  * ```typescript
- * import { getCoinType, ChainName } from '@namespacesdk/offchain-manager';
+ * import { getCoinType, ChainName } from '@thenamespace/offchain-manager';
  * 
  * const ethCoinType = getCoinType(ChainName.Ethereum); // Returns 60
  * const baseCoinType = getCoinType(ChainName.Base); // Returns 8453

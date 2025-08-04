@@ -6,7 +6,7 @@ import { AddressRecord, TextRecord } from "./internal-types";
  * 
  * @example
  * ```typescript
- * import { UpdateSubnameRequest, ChainName } from '@namespacesdk/offchain-manager';
+ * import { UpdateSubnameRequest, ChainName } from '@thenamespace/offchain-manager';
  * 
  * const updateRequest: UpdateSubnameRequest = {
  *   texts: [{

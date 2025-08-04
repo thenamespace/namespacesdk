@@ -35,7 +35,7 @@ import { ChainName, getCoinType, UpdateSubnameRequest } from "../dto";
  * 
  * @example
  * ```typescript
- * import { createOffchainClient } from '@namespacesdk/offchain-manager';
+ * import { createOffchainClient } from '@thenamespace/offchain-manager';
  * 
  * const client = createOffchainClient({ mode: 'sepolia' });
  * client.setDefaultApiKey('your-api-key'); // Works with your address based ENS domain
@@ -515,7 +515,7 @@ class HttpOffchainClient implements OffchainClient {
  * 
  * @example
  * ```typescript
- * import { createOffchainClient } from '@namespacesdk/offchain-manager';
+ * import { createOffchainClient } from '@thenamespace/offchain-manager';
  * 
  * // Create client for testnet
  * const client = createOffchainClient({ mode: 'sepolia' });

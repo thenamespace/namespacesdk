@@ -16,7 +16,7 @@ import { ChainName } from '../dto';
  * 
  * @example
  * ```typescript
- * import { validateEnsName } from '@namespacesdk/offchain-manager';
+ * import { validateEnsName } from '@thenamespace/offchain-manager';
  * 
  * validateEnsName('example.eth'); // ✅ Valid
  * validateEnsName('mysite.com'); // ✅ Valid (ENS supports imported domains)
@@ -91,7 +91,7 @@ export const validateEnsName = (name: string): void => {
  * 
  * @example
  * ```typescript
- * import { validateSubname } from '@namespacesdk/offchain-manager';
+ * import { validateSubname } from '@thenamespace/offchain-manager';
  * 
  * validateSubname('alice.example.eth'); // ✅ Valid
  * validateSubname('app.mysite.com'); // ✅ Valid
@@ -135,7 +135,7 @@ export const validateSubname = (subname: string): void => {
  * 
  * @example
  * ```typescript
- * import { validateAddress, ChainName } from '@namespacesdk/offchain-manager';
+ * import { validateAddress, ChainName } from '@thenamespace/offchain-manager';
  * 
  * // Ethereum-style addresses (40 hex characters)
  * validateAddress('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', ChainName.Ethereum); // ✅
@@ -220,7 +220,7 @@ export const validateAddress = (address: string, chain: ChainName): void => {
  * 
  * @example
  * ```typescript
- * import { validateApiKey } from '@namespacesdk/offchain-manager';
+ * import { validateApiKey } from '@thenamespace/offchain-manager';
  * 
  * validateApiKey('ns-123fcc-1126-1234-1234-c63047985fe2'); // ✅ Valid format
  * validateApiKey('short'); // ❌ Throws ValidationError (too short)

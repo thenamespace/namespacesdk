@@ -2,7 +2,7 @@
 
 # Namespace SDK - Offchain Client
 
-[![npm version](https://img.shields.io/npm/v/@namespacesdk/offchain-manager.svg)](https://www.npmjs.com/package/@namespacesdk/offchain-manager)
+[![npm version](https://img.shields.io/npm/v/@thenamespace/offchain-manager.svg)](https://www.npmjs.com/package/@thenamespace/offchain-manager)
 
 ## Overview
 
@@ -23,13 +23,13 @@ To issue subnames, make them resolvable, and get an API key, you need to go to o
 ## Installation
 
 ```sh
-npm install @namespacesdk/offchain-manager
+npm install @thenamespace/offchain-manager
 ```
 
 or using Yarn:
 
 ```sh
-npm install @namespacesdk/offchain-manager
+npm install @thenamespace/offchain-manager
 ```
 
 ## Getting Started
@@ -71,7 +71,7 @@ Then load it in your application:
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { createOffchainClient } from "@namespacesdk/offchain-manager";
+import { createOffchainClient } from "@thenamespace/offchain-manager";
 
 const client = createOffchainClient({ mode: "sepolia" });
 
@@ -85,7 +85,7 @@ client.setApiKey("your-ens-name.eth", process.env.NAMESPACE_API_KEY!);
 ### Import the SDK
 
 ```typescript
-import { createOffchainClient } from "@namespacesdk/offchain-manager";
+import { createOffchainClient } from "@thenamespace/offchain-manager";
 ```
 
 ### Initialize the Client
@@ -147,7 +147,7 @@ client.setApiKey("special-domain.eth", "special-domain-key");
 #### Create a Subname
 
 ```typescript
-import { ChainName } from "@namespacesdk/offchain-manager";
+import { ChainName } from "@thenamespace/offchain-manager";
 
 await client.createSubname({
   parentName: "example.eth",
@@ -220,7 +220,7 @@ console.log(subnames);
 #### Add an Address Record
 
 ```typescript
-import { ChainName } from "@namespacesdk/offchain-manager";
+import { ChainName } from "@thenamespace/offchain-manager";
 
 await client.addAddressRecord(
   "sub.example.eth",

@@ -1,6 +1,6 @@
-# Testing Guide for Namespace SDK
+# Testing Guide for @thenamespace/offchain-manager
 
-This document outlines how to test the Namespace SDK before publishing.
+This document outlines how to test the Namespace SDK offchain-manager package before publishing.
 
 ## 🧪 **Testing Strategy**
 
@@ -111,18 +111,16 @@ npm run test:watch
 
 ## 🔧 **Test Configuration**
 
-### **Test Configuration**
-
-All tests now use environment variables from the `.env` file:
+All tests use environment variables loaded via dotenv:
 
 ```typescript
 // Tests automatically load from .env file
-import { getEnvConfig } from "../src/env";
+import * as dotenv from "dotenv";
+dotenv.config();
 
-const config = getEnvConfig();
-const TEST_DOMAIN = config.TEST_DOMAIN;
-const TEST_API_KEY = config.NAMESPACE_API_KEY;
-const TEST_MODE = config.TEST_MODE;
+const TEST_API_KEY = process.env.NAMESPACE_API_KEY!;
+const TEST_DOMAIN = process.env.TEST_DOMAIN!;
+const TEST_MODE = (process.env.TEST_MODE as "mainnet" | "sepolia") || "sepolia";
 ```
 
 **No manual configuration needed!** Just set up your `.env` file once.
@@ -131,7 +129,7 @@ const TEST_MODE = config.TEST_MODE;
 
 ### **Manual Test Output**
 
-```
+```console
 🧪 Starting Manual SDK Tests...
 
 1️⃣ Testing subname availability...
@@ -149,7 +147,7 @@ const TEST_MODE = config.TEST_MODE;
 
 ### **E2E Test Output**
 
-```
+```console
 🚀 Starting E2E Tests...
 
 Domain: your-domain.eth
@@ -186,7 +184,7 @@ Average Duration: 471ms
 
 1. **API Key Issues**
 
-   ```
+   ```console
    ❌ Please set NAMESPACE_API_KEY environment variable
    ```
 
@@ -194,7 +192,7 @@ Average Duration: 471ms
 
 2. **Domain Issues**
 
-   ```
+   ```console
    ❌ Please update TEST_DOMAIN in the script to use your actual domain
    ```
 
@@ -202,16 +200,18 @@ Average Duration: 471ms
 
 3. **Network Issues**
 
-   ```
+   ```console
    ❌ Test failed: Network Error
    ```
 
    **Solution:** Check your internet connection and API endpoint availability
 
 4. **Rate Limiting**
-   ```
+
+   ```console
    ❌ Test failed: Rate limit exceeded
    ```
+
    **Solution:** Wait a few minutes and try again, or use a different API key
 
 ## 📋 **Pre-Publish Checklist**
@@ -231,7 +231,7 @@ Before publishing a new version:
 For CI/CD pipelines, add these steps:
 
 ```yaml
-# Example GitHub Actions workflow
+# Example GitHub Actions workflow for @thenamespace/offchain-manager
 - name: Run Tests
   run: |
     npm install
