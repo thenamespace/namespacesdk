@@ -1,6 +1,6 @@
 {
   "name": "@thenamespace/offchain-manager",
-  "version": "1.0.2",
+  "version": "1.0.1",
   "description": "TypeScript SDK for creating and managing ENS subnames off-chain with the Namespace API.",
   "license": "MIT",
   "main": "dist/index.js",
