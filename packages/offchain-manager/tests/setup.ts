@@ -1,3 +1,7 @@
+// Load environment variables for testing
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { setupServer } from 'msw/node';
 
 // Create MSW server instance

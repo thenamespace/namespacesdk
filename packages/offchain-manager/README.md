@@ -16,7 +16,9 @@ To issue subnames, make them resolvable, and get an API key, you need to go to o
 
 1. **Subnames** section allows you to create, edit, or update subnames and all of their records (text, addresses, content hash)
 2. **Resolution** section is there for you to update the Resolver contract to Namespace Hybrid resolver so the subnames issued are resolvable in all ENS-supported apps.
-3. **API Keys** section allows you to create and manage API keys for ENS names you're issuing subnames from.
+3. **API Keys** section allows you to create and manage API keys:
+   - **Address-Based API Keys**: Work with all ENS domains registered to your address
+   - **Domain-Based API Keys**: Work with specific ENS domains only
 
 ## Installation
 
@@ -34,30 +36,50 @@ npm install @namespacesdk/offchain-manager
 
 ### Environment Setup
 
-For security, the SDK uses environment variables for configuration. Create a `.env` file in your project root:
+The SDK reads configuration from environment variables. You can set these directly or use a `.env` file with a library like `dotenv`.
+
+**API Key Types:**
+
+The Namespace SDK supports two types of API keys:
+
+1. **Address-Based API Keys** - Work with all ENS domains registered to your address
+2. **Domain-Based API Keys** - Work with a specific ENS domain only
+
+Both can be obtained from [dev.namespace.ninja](https://dev.namespace.ninja).
+
+**Environment Variables:**
+
+- `NAMESPACE_API_KEY` - Your Namespace API key (address-based or domain-based)
+
+**Setting Environment Variables:**
+
+#### Using dotenv (recommended for development)
 
 ```bash
-# Copy the example file
-cp .env.example .env
-
-# Edit the .env file with your actual values
+npm install dotenv
 ```
 
-**Required Environment Variables:**
-
-- `NAMESPACE_API_KEY` - Your Namespace API key (obtained from [dev.namespace.ninja](https://dev.namespace.ninja))
-
-**Optional Environment Variables:**
-
-- `TEST_DOMAIN` - Domain for testing (defaults to `happ1.eth`)
-- `TEST_MODE` - Test environment (`mainnet` or `sepolia`, defaults to `sepolia`)
-
-**Example .env file:**
+Create a `.env` file in your project root:
 
 ```env
 NAMESPACE_API_KEY=ns-your-api-key-here
-TEST_DOMAIN=happ1.eth
-TEST_MODE=sepolia
+```
+
+Then load it in your application:
+
+```typescript
+import * as dotenv from "dotenv";
+dotenv.config();
+
+import { createOffchainClient } from "@namespacesdk/offchain-manager";
+
+const client = createOffchainClient({ mode: "sepolia" });
+
+// Option 1: Use address-based API key (works with all your domains)
+client.setDefaultApiKey(process.env.NAMESPACE_API_KEY!);
+
+// Option 2: Use domain-based API key (works with specific domain)
+client.setApiKey("your-ens-name.eth", process.env.NAMESPACE_API_KEY!);
 ```
 
 ### Import the SDK
@@ -72,7 +94,52 @@ To use the SDK, create an instance using the `createOffchainClient` factory func
 
 ```typescript
 const client = createOffchainClient({ mode: "sepolia" });
-client.setApiKey("your-ens-name.eth", "your-api-key");
+
+// Choose one of the following approaches:
+
+// Approach 1: Address-based API key (recommended for most use cases)
+// Works with all ENS domains registered to your address
+client.setDefaultApiKey("your-address-based-api-key");
+
+// Approach 2: Domain-based API key
+// Works with a specific ENS domain only
+client.setApiKey("your-ens-name.eth", "your-domain-based-api-key");
+```
+
+### API Key Types Explained
+
+#### Address-Based API Keys
+
+- **Use case**: You want to manage subnames for multiple ENS domains that you own
+- **Setup**: Use `client.setDefaultApiKey("your-address-based-key")`
+- **Benefits**:
+  - One key works for all domains registered to your address
+  - Simplified key management
+  - Recommended for most applications
+
+#### Domain-Based API Keys
+
+- **Use case**: You want to manage subnames for one specific ENS domain
+- **Setup**: Use `client.setApiKey("your-domain.eth", "your-domain-based-key")`
+- **Benefits**:
+  - More granular access control
+  - Useful for multi-tenant applications
+  - Can mix different keys for different domains
+
+#### Mixed Usage
+
+You can combine both approaches. Domain-specific keys take precedence over the default key:
+
+```typescript
+// Set a default key for most domains
+client.setDefaultApiKey("your-address-based-key");
+
+// Override with specific key for one domain
+client.setApiKey("special-domain.eth", "special-domain-key");
+
+// Now:
+// - Operations on "special-domain.eth" will use "special-domain-key"
+// - Operations on other domains will use "your-address-based-key"
 ```
 
 ### Subname Management

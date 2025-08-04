@@ -1,21 +1,29 @@
 #!/usr/bin/env ts-node
 
+// Load environment variables for testing
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { createOffchainClient, ChainName } from '../src';
-import { getEnvConfig } from '../src/env';
 
 // Load environment configuration
-const config = getEnvConfig();
-const TEST_DOMAIN = config.TEST_DOMAIN;
-const TEST_API_KEY = config.NAMESPACE_API_KEY;
+const TEST_API_KEY = process.env.NAMESPACE_API_KEY!;
+const TEST_DOMAIN = process.env.TEST_DOMAIN!;
+const TEST_MODE = (process.env.TEST_MODE as 'mainnet' | 'sepolia') || 'sepolia';
+
+if (!TEST_API_KEY) {
+    console.error('❌ NAMESPACE_API_KEY environment variable is required');
+    process.exit(1);
+}
 
 async function runManualTests() {
     console.log('🧪 Starting Manual SDK Tests...\n');
     console.log('TEST_DOMAIN', TEST_DOMAIN);
     console.log('TEST_API_KEY', TEST_API_KEY);
-    console.log('config', config.TEST_MODE);
+    console.log('TEST_MODE', TEST_MODE);
     // Initialize client
     const client = createOffchainClient({
-        mode: config.TEST_MODE,
+        mode: TEST_MODE,
     });
 
     client.setDefaultApiKey(TEST_API_KEY);

@@ -1,16 +1,26 @@
+// Load environment variables for this example
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { createOffchainClient, ChainName } from '../src';
-import { getEnvConfig } from '../src/env';
 
 // Load environment configuration
-const config = getEnvConfig();
+const API_KEY = process.env.NAMESPACE_API_KEY;
+const TEST_MODE = (process.env.TEST_MODE as 'mainnet' | 'sepolia') || 'sepolia';
+
+if (!API_KEY) {
+    console.error('❌ NAMESPACE_API_KEY environment variable is required');
+    console.log('💡 Set it in your .env file or as an environment variable');
+    process.exit(1);
+}
 
 // Initialize the client
 const client = createOffchainClient({
-    mode: config.TEST_MODE, // Using environment-configured mode
+    mode: TEST_MODE, // Using environment-configured mode
 });
 
 // Set your API key from environment
-client.setDefaultApiKey(config.NAMESPACE_API_KEY);
+client.setDefaultApiKey(API_KEY);
 
 async function basicExample() {
     try {
