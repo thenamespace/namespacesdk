@@ -1,4 +1,53 @@
-1.0.15 - Demo testlog change
+# Changelog
 
-1.0.14 - Changelog here
+All notable changes to the `@thenamespace/offchain-manager` package will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.2] - 2025-08-05
+
+### Documentation
+
+- **Enhanced README.md**:
+  - Added Supported Chains section with quick reference to available blockchain networks
+  - Added Error Handling section with try-catch examples and specific error classes
+
+## [1.0.0] - 2025-08-05
+
+### Changed
+
+- **BREAKING**: Package name changed from `@namespacesdk/offchain-manager` to `@thenamespace/offchain-manager`
+- Enhanced package description for better discoverability
+- Updated repository information and added homepage
+- Added comprehensive keywords (ens, ethereum, subnames, domains, web3, sdk, etc.)
+- Added engines specification requiring Node.js >=16.0.0
+- Added publishConfig for public access
+
+### Documentation
+
+- **Enhanced README.md**:
+  - Added comprehensive API key types documentation (Address-based vs Domain-based)
+  - Updated all code examples with new package name
+  - Improved environment setup instructions
+  - Added mixed usage examples for API keys
+  - Updated Namespace Dev Portal section with API key type explanations
+- **Improved TESTING.md**:
+  - Updated title and package references
+  - Fixed environment configuration examples
+  - Updated CI/CD workflow examples
+  - Improved code formatting and consistency
+
+### Package Improvements
+
+- Repository field with proper GitHub organization link
+- Homepage field pointing to namespace.ninja
+- Bugs field for issue tracking
+- PublishConfig for NPM organization publishing
+- Enhanced metadata for better package discovery
+
+### Fixed
+
+- All import statements updated to use new package name
+- Documentation consistency across all files
+- Package.json validation and best practices compliance
