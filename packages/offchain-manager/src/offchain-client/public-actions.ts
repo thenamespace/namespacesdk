@@ -15,18 +15,14 @@ export const _isSubnameAvailable = async (
     const { data } = await client.get<SubnameDTO>(
       `/api/v1/subnames/${fullSubname}`
     );
-    if (data && data) {
-      return { isAvailable: false };
-    }
-    return { isAvailable: true };
+    return { isAvailable: !data };
   } catch (err) {
-
     if (err instanceof AxiosError) {
       const axiosErr = err as AxiosError;
-      if (axiosErr.status === 404) {
-        return { isAvailable: false }
-      } 
-    } 
+      if (axiosErr.response?.status === 404) {
+        return { isAvailable: true };
+      }
+    }
     throw err;
   }
 };

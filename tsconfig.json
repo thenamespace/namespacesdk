@@ -14,8 +14,8 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@namespacesdk/offchain-manager": ["./packages/offchain-manager"],
-      "@namespacesdk/offchain-manager/*": ["./packages/offchain-manager/*"],
+      "@thenamespace/offchain-manager": ["./packages/offchain-manager"],
+      "@thenamespace/offchain-manager/*": ["./packages/offchain-manager/*"]
     }
   },
   "include": ["packages/**/*", "integration/**/*"],
