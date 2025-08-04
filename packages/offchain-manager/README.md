@@ -1,85 +1,19 @@
 ![Namespace Ninja](https://i.postimg.cc/Nfcbq9jP/namespace.png)
 
-# Namespace SDK - Offchain Client
+# Namespace SDK - Offchain Manager
 
 [![npm version](https://img.shields.io/npm/v/@thenamespace/offchain-manager.svg)](https://www.npmjs.com/package/@thenamespace/offchain-manager)
 
 ## Overview
 
-The `namespace-sdk` provides an easy-to-use client for managing ENS subnames off-chain. With this SDK, developers can create, update, delete, and query subnames, as well as manage associated records like addresses, text records, and data records.
-
-## Namespace Dev Portal
-
-_If you've already done this, feel free to skip this step._
-
-To issue subnames, make them resolvable, and get an API key, you need to go to our [Dev Portal](https://dev.namespace.ninja).
-
-1. **Subnames** section allows you to create, edit, or update subnames and all of their records (text, addresses, content hash)
-2. **Resolution** section is there for you to update the Resolver contract to Namespace Hybrid resolver so the subnames issued are resolvable in all ENS-supported apps.
-3. **API Keys** section allows you to create and manage API keys:
-   - **Address-Based API Keys**: Work with all ENS domains registered to your address
-   - **Domain-Based API Keys**: Work with specific ENS domains only
-
-## Installation
-
-```sh
-npm install @thenamespace/offchain-manager
-```
-
-or using Yarn:
-
-```sh
-npm install @thenamespace/offchain-manager
-```
+The `@thenamespace/offchain-manager` provides an easy-to-use client for managing ENS subnames off-chain. With this SDK, developers can create, update, delete, and query subnames, as well as manage associated records like addresses, text records, and data records.
 
 ## Getting Started
 
-### Environment Setup
+### Installation
 
-The SDK reads configuration from environment variables. You can set these directly or use a `.env` file with a library like `dotenv`.
-
-**API Key Types:**
-
-The Namespace SDK supports two types of API keys:
-
-1. **Address-Based API Keys** - Work with all ENS domains registered to your address
-2. **Domain-Based API Keys** - Work with a specific ENS domain only
-
-Both can be obtained from [dev.namespace.ninja](https://dev.namespace.ninja).
-
-**Environment Variables:**
-
-- `NAMESPACE_API_KEY` - Your Namespace API key (address-based or domain-based)
-
-**Setting Environment Variables:**
-
-#### Using dotenv (recommended for development)
-
-```bash
-npm install dotenv
-```
-
-Create a `.env` file in your project root:
-
-```env
-NAMESPACE_API_KEY=ns-your-api-key-here
-```
-
-Then load it in your application:
-
-```typescript
-import * as dotenv from "dotenv";
-dotenv.config();
-
-import { createOffchainClient } from "@thenamespace/offchain-manager";
-
-const client = createOffchainClient({ mode: "sepolia" });
-
-// Option 1: Use address-based API key (works with all your domains)
-client.setDefaultApiKey(process.env.NAMESPACE_API_KEY!);
-
-// Option 2: Use domain-based API key (works with specific domain)
-client.setApiKey("your-ens-name.eth", process.env.NAMESPACE_API_KEY!);
+```sh
+npm install @thenamespace/offchain-manager
 ```
 
 ### Import the SDK
@@ -106,40 +40,16 @@ client.setDefaultApiKey("your-address-based-api-key");
 client.setApiKey("your-ens-name.eth", "your-domain-based-api-key");
 ```
 
-### API Key Types Explained
+### Supported Chains
 
-#### Address-Based API Keys
-
-- **Use case**: You want to manage subnames for multiple ENS domains that you own
-- **Setup**: Use `client.setDefaultApiKey("your-address-based-key")`
-- **Benefits**:
-  - One key works for all domains registered to your address
-  - Simplified key management
-  - Recommended for most applications
-
-#### Domain-Based API Keys
-
-- **Use case**: You want to manage subnames for one specific ENS domain
-- **Setup**: Use `client.setApiKey("your-domain.eth", "your-domain-based-key")`
-- **Benefits**:
-  - More granular access control
-  - Useful for multi-tenant applications
-  - Can mix different keys for different domains
-
-#### Mixed Usage
-
-You can combine both approaches. Domain-specific keys take precedence over the default key:
+The SDK supports multiple blockchain networks for address records:
 
 ```typescript
-// Set a default key for most domains
-client.setDefaultApiKey("your-address-based-key");
+import { ChainName } from "@thenamespace/offchain-manager";
 
-// Override with specific key for one domain
-client.setApiKey("special-domain.eth", "special-domain-key");
-
-// Now:
-// - Operations on "special-domain.eth" will use "special-domain-key"
-// - Operations on other domains will use "your-address-based-key"
+// Available chains: Ethereum, Solana, Arbitrum, Optimism, Base, Polygon,
+// BSC, Avalanche, Gnosis, zkSync, Cosmos, NEAR, Linea, Scroll, Bitcoin,
+// Starknet, Sui
 ```
 
 ### Subname Management
@@ -149,6 +59,7 @@ client.setApiKey("special-domain.eth", "special-domain-key");
 ```typescript
 import { ChainName } from "@thenamespace/offchain-manager";
 
+// Creates a subname named sub.example.eth resolvable to "0x123.."
 await client.createSubname({
   parentName: "example.eth",
   label: "sub",
@@ -287,75 +198,42 @@ const dataRecord = await client.getDataRecord("sub.example.eth", "customData");
 console.log(dataRecord);
 ```
 
-## API Reference
+### Error Handling
 
-### `setApiKey(ensName: string, apiKey: string): void`
+The SDK provides specific error classes for different scenarios:
 
-Sets the API key for authentication.
+```typescript
+import {
+  SubnameAlreadyExistsError,
+  AuthenticationError,
+  SubnameNotFoundError
+} from "@thenamespace/offchain-manager";
 
-### `createSubname(request: CreateSubnameRequest): Promise<void>`
+try {
+  await client.createSubname({...});
+} catch (error) {
+  if (error instanceof SubnameAlreadyExistsError) {
+    console.log("Subname already exists");
+  } else if (error instanceof AuthenticationError) {
+    console.log("Invalid API key");
+  } else if (error instanceof SubnameNotFoundError) {
+    console.log("Subname not found");
+  }
+}
+```
 
-Creates a new subname under a parent domain.
+### Advanced Configuration
 
-### `updateSubname(subname: string, request: UpdateSubnameRequest): Promise<void>`
+```typescript
+const client = createOffchainClient({
+  mode: "sepolia", // or "mainnet"
+  backendUri: "https://custom-backend.com", // Optional custom backend
+});
+```
 
-Updates an existing subname.
+## Documentation
 
-### `deleteSubname(fullSubname: string): Promise<void>`
-
-Deletes a subname.
-
-### `isSubnameAvailable(fullSubname: string): Promise<GetAvailableResponse>`
-
-Checks if a subname is available.
-
-### `getSingleSubname(fullName: string): Promise<SubnameDTO | null>`
-
-Retrieves details of a subname.
-
-### `getFilteredSubnames(query: QuerySubnamesRequest): Promise<PagedResponse<SubnameDTO[]>>`
-
-Fetches subnames based on query parameters.
-
-### `addAddressRecord(subname: string, chain: ChainName, value: string): Promise<void>`
-
-Adds an address record to a subname.
-
-### `deleteAddressRecord(subname: string, chain: ChainName): Promise<void>`
-
-Deletes an address record.
-
-### `addTextRecord(subname: string, key: string, value: string): Promise<void>`
-
-Adds a text record to a subname.
-
-### `deleteTextRecord(subname: string, key: string): Promise<void>`
-
-Deletes a text record.
-
-### `getTextRecords(fullSubname: string): Promise<Record<string, string>>`
-
-Retrieves all text records for a subname.
-
-### `getTextRecord(fullSubname: string, key: string): Promise<GetRecordResponse>`
-
-Retrieves a specific text record.
-
-### `addDataRecord(fullSubname: string, key: string, data: any): Promise<void>`
-
-Adds a data record to a subname.
-
-### `deleteDataRecord(subname: string, key: string): Promise<void>`
-
-Deletes a data record.
-
-### `getDataRecords(fullSubname: string): Promise<Record<string, any>>`
-
-Retrieves all data records for a subname.
-
-### `getDataRecord(fullSubname: string, key: string): Promise<GetRecordResponse>`
-
-Retrieves a specific data record.
+For detailed documentation, API reference, and advanced usage examples, visit our [documentation site](https://docs.namespace.ninja/dev-docs/sdk/offchain-manager).
 
 ## License
 
@@ -371,4 +249,6 @@ Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTIN
 
 ## Questions? Join our Builders Group chat
 
-Consider joining the [Namespace Builders](https://t.me/+OsziFgfuZz03NjEy) group chat on Telegram if you have any questions, suggestions, feedback, or anything you want to talk about.
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/+OsziFgfuZz03NjEy)
+
+Consider joining the [**Namespace Builders**](https://t.me/+OsziFgfuZz03NjEy) group chat on Telegram if you have any questions, suggestions, feedback, or anything you want to talk about.
