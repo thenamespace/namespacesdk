@@ -26,6 +26,7 @@ export const _createSubname = (
     metadata: createRequest.metadata,
     texts: createRequest.texts,
     ttl: createRequest.ttl,
+    owner: createRequest.owner
   };
 
   return client.post("/api/v1/subnames", request, {

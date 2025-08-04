@@ -3,13 +3,14 @@
 import { ChainName } from "./chains";
 
 export interface CreateSubnameRequest_Internal {
-  parentName: string;
-  label: string;
-  texts?: TextRecord[];
-  addresses?: AddressRecord_Internal[];
-  metadata?: TextRecord[];
-  contenthash?: string;
-  ttl?: number;
+    parentName: string;
+    label: string;
+    texts?: TextRecord[];
+    addresses?: AddressRecord_Internal[];
+    metadata?: TextRecord[];
+    contenthash?: string;
+    ttl?: number;
+    owner?: string
 }
 
 export interface AddressRecord_Internal {

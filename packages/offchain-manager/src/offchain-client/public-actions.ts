@@ -82,7 +82,7 @@ export const _getFilteredSubnames = async (
   client: AxiosInstance,
   query: QuerySubnamesRequest
 ): Promise<PagedResponse<SubnameDTO[]>> => {
-  const searchQuery: Record<string, string | number> = {};
+  const searchQuery: Record<string, string | number | string[]> = {};
 
   if (query.parentName) {
     searchQuery.domain = query.parentName;
@@ -94,6 +94,10 @@ export const _getFilteredSubnames = async (
 
   if (query.size) {
     searchQuery.pageSize = query.size;
+  }
+
+  if (query.parentNames && query.parentNames.length > 0) {
+    searchQuery.parentNames = query.parentNames;
   }
 
   if (query.labelSearch) {

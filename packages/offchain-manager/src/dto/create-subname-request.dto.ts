@@ -36,4 +36,5 @@ export interface CreateSubnameRequest {
   contenthash?: string;
   /** Optional time-to-live in seconds for DNS records */
   ttl?: number;
+  owner?: string
 }

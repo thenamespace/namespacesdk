@@ -1,5 +1,5 @@
 {
-  "name": "@namespacesdk/addresses",
+  "name": "@thenamespace/addresses",
   "version": "1.0.15",
   "description": "Library that contains all the Namespace & ENS contract addresses",
   "license": "MIT",
@@ -13,6 +13,10 @@
   "files": [
     "/dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thenamespace/namespacesdk"
+  },
   "author": "Nenad Mitkovic <arti@namespace.ninja>",
   "dependencies": {
     "@types/node": "^22.10.5",
@@ -20,7 +24,7 @@
     "typescript": "^5.7.3"
   },
   "scripts": {
-    "build": "rimraf dist && tsc",
+    "build": "tsc",
     "start": "node dist/index.js",
     "restart": "rimraf dist && tsc && node dist/index.js"
   },
