@@ -63,15 +63,15 @@ TEST_MODE=sepolia
 ### Import the SDK
 
 ```typescript
-import { OffchainClient } from "@namespacesdk/offchain-manager";
+import { createOffchainClient } from "@namespacesdk/offchain-manager";
 ```
 
 ### Initialize the Client
 
-To use the SDK, create an instance of the `OffchainClient` and set your API key, which you can obtain from [https://dev.namespace.ninja](https://dev.namespace.ninja).
+To use the SDK, create an instance using the `createOffchainClient` factory function and set your API key, which you can obtain from [https://dev.namespace.ninja](https://dev.namespace.ninja).
 
 ```typescript
-const client = new OffchainClient();
+const client = createOffchainClient({ mode: "sepolia" });
 client.setApiKey("your-ens-name.eth", "your-api-key");
 ```
 
@@ -83,7 +83,7 @@ client.setApiKey("your-ens-name.eth", "your-api-key");
 import { ChainName } from "@namespacesdk/offchain-manager";
 
 await client.createSubname({
-  parent: "example.eth",
+  parentName: "example.eth",
   label: "sub",
   addresses: [
     {
@@ -142,7 +142,9 @@ console.log(subname);
 #### Query Subnames
 
 ```typescript
-const subnames = await client.getFilteredSubnames({ parent: "example.eth" });
+const subnames = await client.getFilteredSubnames({
+  parentName: "example.eth",
+});
 console.log(subnames);
 ```
 
