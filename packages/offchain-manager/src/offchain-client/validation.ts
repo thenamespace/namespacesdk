@@ -170,47 +170,80 @@ export const validateAddress = (address: string, chain: ChainName): void => {
         case ChainName.Zksync:
         case ChainName.Linea:
         case ChainName.Scroll:
-        case ChainName.Starknet:
-            // Ethereum-style addresses
+        case ChainName.Unichain:
+        case ChainName.Berachain:
+        case ChainName.WorldChain:
+        case ChainName.Zora:
+        case ChainName.Celo:
+            // Ethereum-style addresses (EVM chains)
             if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
                 throw new ValidationError(`Invalid Ethereum-style address: ${address}`);
             }
             break;
+        
+        case ChainName.Starknet:
+            // Starknet addresses are up to 64 hex characters (leading zeros can be omitted)
+            if (!/^0x[a-fA-F0-9]{1,64}$/.test(address)) {
+                throw new ValidationError(`Invalid Starknet address: ${address}`);
+            }
+            break;
+        
         case ChainName.Solana:
             // Solana addresses are base58 encoded, typically 32-44 characters
             if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
                 throw new ValidationError(`Invalid Solana address: ${address}`);
             }
             break;
+        
         case ChainName.Bitcoin:
-            // Bitcoin addresses (simplified validation)
-            if (!/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address)) {
+            // Bitcoin addresses - supports Legacy (P2PKH), Script (P2SH), Bech32 (P2WPKH/P2WSH), and Taproot (P2TR)
+            const bitcoinRegex = /^([13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[a-z0-9]{39,59})$/;
+            if (!bitcoinRegex.test(address)) {
                 throw new ValidationError(`Invalid Bitcoin address: ${address}`);
             }
             break;
+        
         case ChainName.Cosmos:
-            // Cosmos addresses start with 'cosmos'
-            if (!/^cosmos[a-zA-Z0-9]{38}$/.test(address)) {
+            // Cosmos addresses use bech32 format with 'cosmos' prefix
+            if (!/^cosmos1[a-z0-9]{38}$/.test(address)) {
                 throw new ValidationError(`Invalid Cosmos address: ${address}`);
             }
             break;
+        
         case ChainName.Near:
-            // NEAR addresses end with .near
-            if (!/^[a-z0-9._-]+\.near$/.test(address)) {
+            // NEAR addresses: either implicit (64 hex chars) or named accounts ending with .near
+            const nearImplicit = /^[a-f0-9]{64}$/;
+            const nearNamed = /^[a-z0-9._-]+\.near$/;
+            if (!nearImplicit.test(address) && !nearNamed.test(address)) {
                 throw new ValidationError(`Invalid NEAR address: ${address}`);
             }
             break;
+        
         case ChainName.Sui:
-            // Sui addresses are 64 character hex strings
-            if (!/^0x[a-fA-F0-9]{64}$/.test(address)) {
+            // Sui addresses are up to 64 hex characters (leading zeros can be omitted)
+            if (!/^0x[a-fA-F0-9]{1,64}$/.test(address)) {
                 throw new ValidationError(`Invalid Sui address: ${address}`);
             }
             break;
+        
+        case ChainName.Aptos:
+            // Aptos addresses are up to 64 hex characters (leading zeros can be omitted)
+            if (!/^0x[a-fA-F0-9]{1,64}$/.test(address)) {
+                throw new ValidationError(`Invalid Aptos address: ${address}`);
+            }
+            break;
+        
+        case ChainName.Algorand:
+            // Algorand addresses are 58-character Base32 strings (A-Z, 2-7)
+            if (!/^[A-Z2-7]{58}$/.test(address)) {
+                throw new ValidationError(`Invalid Algorand address: ${address}`);
+            }
+            break;
+        
         default:
             throw new ValidationError(`Unsupported chain: ${chain}`);
     }
 };
-
 /**
  * Validates that an API key appears to be in the correct format.
  * This performs basic sanity checks but doesn't verify the key with the server.
