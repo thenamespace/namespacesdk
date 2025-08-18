@@ -48,6 +48,20 @@ export enum ChainName {
   Starknet = "starknet",
   /** Sui Network */
   Sui = "sui",
+  /** Unichain */
+  Unichain = "unichain",
+  /** Berachain */
+  Berachain = "berachain",
+  /** WorldChain */
+  WorldChain = "world_chain",
+  /** Zora */
+  Zora = "zora",
+  /** Celo */
+  Celo = "celo",
+  /** Aptos */
+  Aptos = "aptos",
+  /** Algorand */
+  Algorand = "algorand",
 }
 
 /**
@@ -131,7 +145,35 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
   },
   sui: {
     label: "Sui",
-    coin: 784,
+    coin: 101,
+  },
+  unichain: {
+    label: "Unichain",
+    coin: 130,
+  },
+  berachain: {
+    label: "Berachain",
+    coin: 80094,
+  },
+  world_chain: {
+    label: "WorldChain",
+    coin: 480,
+  },
+  zora: {
+    label: "Zora",
+    coin: 7777777,
+  },
+  celo: {
+    label: "Celo",
+    coin: 42220,
+  },
+  aptos: {
+    label: "Aptos",
+    coin: 22,
+  },
+  algorand: {
+    label: "Algorand",
+    coin: 8,
   },
 };
 

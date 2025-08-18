@@ -1,4 +1,86 @@
-1.0.2 - Enhanced README.md:   - Added Supported Chains section with quick reference to available blockchain networks   - Added Error Handling section with try-catch examples and specific error classes
+# Changelog
 
-1.0.1 - # Changelog  All notable changes to the `@thenamespace/offchain-manager` package will be documented in this file.  The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).  ## [1.0.0] - 2025-08-05  ### Changed  - **BREAKING**: Package name changed from `@namespacesdk/offchain-manager` to `@thenamespace/offchain-manager` - Enhanced package description for better discoverability - Updated repository information and added homepage - Added comprehensive keywords (ens, ethereum, subnames, domains, web3, sdk, etc.) - Added engines specification requiring Node.js >=16.0.0 - Added publishConfig for public access  ### Documentation  - **Enhanced README.md**:   - Added comprehensive API key types documentation (Address-based vs Domain-based)   - Updated all code examples with new package name   - Improved environment setup instructions   - Added mixed usage examples for API keys   - Updated Namespace Dev Portal section with API key type explanations - **Improved TESTING.md**:   - Updated title and package references   - Fixed environment configuration examples   - Updated CI/CD workflow examples   - Improved code formatting and consistency  ### Package Improvements  - Repository field with proper GitHub organization link - Homepage field pointing to namespace.ninja - Bugs field for issue tracking - PublishConfig for NPM organization publishing - Enhanced metadata for better package discovery  ### Fixed  - All import statements updated to use new package name - Documentation consistency across all files - Package.json validation and best practices compliance
+All notable changes to the `@thenamespace/offchain-manager` package will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.3] - 2025-08-19
+
+### Added
+
+- **New Blockchain Support**: Added support for 7 new blockchain networks:
+  - Unichain
+  - Berachain
+  - WorldChain
+  - Zora
+  - Celo
+  - Aptos
+  - Algorand
+
+### Enhanced
+
+- **Improved Address Validation**:
+  - Enhanced Starknet address validation to support variable-length hex addresses (1-64 characters)
+  - Improved Bitcoin address validation to support Legacy (P2PKH), Script (P2SH), Bech32 (P2WPKH/P2WSH), and Taproot (P2TR) formats
+  - Updated Cosmos address validation to use proper bech32 format with 'cosmos1' prefix
+  - Enhanced NEAR address validation to support both implicit accounts (64 hex chars) and named accounts (.near)
+  - Improved Sui address validation to support variable-length hex addresses (1-64 characters)
+  - Added Aptos address validation with variable-length hex support
+  - Added Algorand address validation using Base32 format (58 characters)
+
+### Testing
+
+- **Comprehensive Test Coverage**:
+  - Added validation tests for all new blockchain chains
+  - Enhanced Bitcoin address validation tests with multiple format support
+  - Added Starknet address validation tests for both full and shortened addresses
+  - Added Cosmos, NEAR, Sui, Aptos, and Algorand address validation tests
+  - Added EVM-compatible chain address validation tests
+
+## [1.0.2] - 2025-08-05
+
+### Documentation
+
+- **Enhanced README.md**:
+  - Added Supported Chains section with quick reference to available blockchain networks
+  - Added Error Handling section with try-catch examples and specific error classes
+
+## [1.0.0] - 2025-08-05
+
+### Changed
+
+- **BREAKING**: Package name changed from `@namespacesdk/offchain-manager` to `@thenamespace/offchain-manager`
+- Enhanced package description for better discoverability
+- Updated repository information and added homepage
+- Added comprehensive keywords (ens, ethereum, subnames, domains, web3, sdk, etc.)
+- Added engines specification requiring Node.js >=16.0.0
+- Added publishConfig for public access
+
+### Documentation
+
+- **Enhanced README.md**:
+  - Added comprehensive API key types documentation (Address-based vs Domain-based)
+  - Updated all code examples with new package name
+  - Improved environment setup instructions
+  - Added mixed usage examples for API keys
+  - Updated Namespace Dev Portal section with API key type explanations
+- **Improved TESTING.md**:
+  - Updated title and package references
+  - Fixed environment configuration examples
+  - Updated CI/CD workflow examples
+  - Improved code formatting and consistency
+
+### Package Improvements
+
+- Repository field with proper GitHub organization link
+- Homepage field pointing to namespace.ninja
+- Bugs field for issue tracking
+- PublishConfig for NPM organization publishing
+- Enhanced metadata for better package discovery
+
+### Fixed
+
+- All import statements updated to use new package name
+- Documentation consistency across all files
+- Package.json validation and best practices compliance
