@@ -1,6 +1,6 @@
 {
   "name": "@thenamespace/indexer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "TypeScript SDK for interacting with the Namespace Indexer API - query L2 subnames, registries, and metadata",
   "license": "MIT",
   "main": "dist/index.js",

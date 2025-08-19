@@ -1,3 +1,5 @@
+1.0.2 - ### Changed  - **BREAKING**: SDK renamed to `@thenamespace/indexer` from `@namespacesdk/indexer` - Enhanced error handling with detailed error context and logging - Improved TypeScript types with comprehensive JSDoc documentation - Added response interceptors for better error reporting - Updated default timeout to 30 seconds - Enhanced HTTP client configuration with better defaults  ### Added  - Comprehensive JSDoc documentation for all interfaces and methods - Better error handling with enhanced error messages - Support for custom HTTP client configuration - Improved type safety with detailed interface documentation - Enhanced developer experience with better examples and documentation - Repository metadata and support links  ### Fixed  - Improved error handling for network failures and API errors - Better type definitions with proper semicolons and formatting - Enhanced request/response handling with proper async/await patterns
+
 # Changelog
 
 All notable changes to the `@thenamespace/indexer` package will be documented in this file.
