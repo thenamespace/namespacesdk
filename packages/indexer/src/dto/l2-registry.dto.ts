@@ -1,10 +1,21 @@
+/**
+ * Response interface for L2 registry data from the Namespace Indexer
+ */
 export interface L2RegistryResponse {
-    name: string
-    owner: string
-    tokenSymbol: string
-    tokenName: string
-    tokenAddress: string
-    is_expirable: boolean
-    is_burnable: boolean
-    chain_id: number
+  /** The human-readable name of the registry */
+  name: string;
+  /** The owner address of the registry */
+  owner: string;
+  /** The token symbol for the registry's governance token */
+  tokenSymbol: string;
+  /** The token name for the registry's governance token */
+  tokenName: string;
+  /** The contract address of the registry's governance token */
+  tokenAddress: string;
+  /** Whether subnames in this registry can expire */
+  is_expirable: boolean;
+  /** Whether subnames in this registry can be burned */
+  is_burnable: boolean;
+  /** The chain ID where the registry is deployed */
+  chain_id: number;
 }

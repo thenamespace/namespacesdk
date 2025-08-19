@@ -5,12 +5,26 @@
     "declaration": true,
     "outDir": "dist",
     "resolveJsonModule": true,
-    "strict": true,          
-    "esModuleInterop": true, 
-    "skipLibCheck": true,  
-    "forceConsistentCasingInFileNames": true 
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "declarationMap": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "lib": ["es2020", "dom"],
+    "types": ["node"]
   },
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "examples"
   ]
 }

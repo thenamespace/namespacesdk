@@ -1,50 +1,70 @@
 ![Namespace Ninja](https://i.postimg.cc/Nfcbq9jP/namespace.png)
+# Namespace SDK Monorepo
 
-# Namespace SDK
+This monorepo contains TypeScript SDK packages for interacting with the Namespace ecosystem. It's built using [Lerna](https://lerna.js.org/) for managing multiple packages.
 
-## Overview
+## 📦 Packages
 
-Namespace SDK is a collection of tools and libraries designed to simplify ENS subname management and other namespace-related operations. This monorepo houses multiple sub-packages that provide off-chain and on-chain management capabilities.
+This monorepo contains the following SDK packages:
 
-Currently, the SDK includes:
+### [@thenamespace/addresses](./packages/addresses)
+Library containing all Namespace & ENS contract addresses.
 
-- [`@thenamespace/offchain-manager`](https://www.npmjs.com/package/@thenamespace/offchain-manager): Manage ENS subnames off-chain with ease.
-- [`@namespacesdk/indexer`](https://www.npmjs.com/package/@namespacesdk/indexer): A SDK Wrapper around Namespace Indexer, used to easily query data related to L2 subnames.
-- [`@namespacesdk/mint-manager`](https://www.npmjs.com/package/@namespacesdk/mint-manager): Client for implementing mint functionality, supports both L1 and L2 Subnames.
+### [@thenamespace/indexer](./packages/indexer)
+TypeScript SDK for interacting with the Namespace Indexer API - query L2 subnames, registries, and metadata.
 
-## Installation
+### [@namespacesdk/mint-manager](./packages/mint-manager)
+Library for minting L2 subnames with comprehensive validation and error handling.
 
-Each package in the Namespace SDK is available individually via npm. To install a specific package, use:
+### [@thenamespace/offchain-manager](./packages/offchain-manager)
+TypeScript SDK for creating and managing ENS subnames off-chain with the Namespace API.
 
-```sh
-npm install @thenamespace/offchain-manager
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js >= 16.0.0
+- npm
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/thenamespace/namespacesdk.git
+cd namespacesdk
+
+# Install dependencies for all packages
+npm install
+
 ```
 
-## Packages
+## 📁 Project Structure
 
-### [`@thenamespace/offchain-manager`](https://www.npmjs.com/package/@thenamespace/offchain-manager)
+```
+namespacesdk/
+├── packages/
+│   ├── addresses/          # Contract addresses library
+│   ├── indexer/           # Indexer API SDK
+│   ├── mint-manager/      # L2 subname minting library
+│   └── offchain-manager/  # Off-chain subname management SDK
+├── lerna.json            # Lerna configuration
+└── package.json          # Root package.json (monorepo config)
+```
 
-This package provides an interface for managing ENS subnames off-chain. It allows you to create, update, delete, and query subnames, as well as manage associated records like addresses and text records.
+## 🤝 Contributing
 
-For detailed usage, refer to the [`README.md`](./packages/offchain-manager/README.md) inside the package directory.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Run `npm run test` to ensure all tests pass
+6. Submit a pull request
 
-## Contributing
+## 📄 License
 
-We welcome contributions! If you'd like to contribute, please follow these steps:
+This project is licensed under the MIT License.
 
-1. Fork the repository.
-2. Create a new branch.
-3. Commit your changes.
-4. Open a pull request.
+## 🔗 Links
 
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
-## Support
-
-For any issues or feature requests, please open an issue on [GitHub](https://github.com/your-repo/namespace-sdk/issues).
-
-## Contributors
-
-[![artii.eth](https://github.com/nenadmitt.png?size=50)](https://github.com/nenadmitt)
+- [Namespace Website](https://namespace.ninja)
+- [Documentation](https://docs.namespace.ninja)
+- [GitHub Issues](https://github.com/thenamespace/namespacesdk/issues)

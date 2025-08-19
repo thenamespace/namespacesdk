@@ -1,12 +1,42 @@
 {
   "name": "namespacesdk",
   "version": "0.0.1",
-  "description": "For interacting with namespace API",
-  "homepage": "https://nestjs.com",
+  "description": "Monorepo containing TypeScript SDK packages for Namespace - includes tools for ENS subnames, indexing, off-chain management, and contract addresses",
+  "homepage": "https://namespace.ninja",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
+  "keywords": [
+    "monorepo",
+    "sdk",
+    "namespace",
+    "ens",
+    "ethereum",
+    "subnames",
+    "domains",
+    "web3",
+    "typescript",
+    "offchain",
+    "indexer",
+    "mint-manager",
+    "lerna"
+  ],
+  "author": "Arti <arti@namespace.ninja>",
+  "contributors": [
+    "Harpreet Singh <harpreet@namespace.ninja>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thenamespace/namespacesdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thenamespace/namespacesdk/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "devDependencies": {
     "lerna": "^8.1.9",
     "semver": "^7.7.2"
