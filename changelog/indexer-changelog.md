@@ -5,7 +5,7 @@ All notable changes to the `@thenamespace/indexer` package will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.1] - 2025-01-27
+## [1.0.2] - 2025-08-19
 
 ### Changed
 
@@ -23,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for custom HTTP client configuration
 - Improved type safety with detailed interface documentation
 - Enhanced developer experience with better examples and documentation
-- Added development scripts (`dev`, `clean`)
 - Repository metadata and support links
 
 ### Fixed
@@ -32,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Better type definitions with proper semicolons and formatting
 - Enhanced request/response handling with proper async/await patterns
 
-## [1.0.0] - 2024-12-01
+## [1.0.0] - 2025-04-18
 
 ### Added
 
