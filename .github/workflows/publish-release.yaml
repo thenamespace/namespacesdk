@@ -140,15 +140,29 @@ jobs:
             HEADER_LINE=0
           fi
 
-          # Write up to and including the header
-          if [ "$HEADER_LINE" -gt 0 ]; then
-            head -n "$HEADER_LINE" "$FILE" > "$TEMP_FILE"
+          # Find the line number after the intro section (after the first blank line following '# Changelog')
+          INTRO_END_LINE=$(awk '/^# Changelog/{flag=1; next} flag && /^$/{print NR; exit}' "$FILE")
+          if [ -z "$INTRO_END_LINE" ]; then
+            # Fallback: if not found, use header line
+            HEADER_LINE=$(grep -n "^# Changelog" "$FILE" | cut -d: -f1)
+            if [ -z "$HEADER_LINE" ]; then
+              HEADER_LINE=0
+            fi
+            INTRO_END_LINE=$((HEADER_LINE + 1))
+          fi
+
+          # Pretty print the changelog input (handles single-line input from GitHub UI)
+          PRETTY_CHANGELOG=$(echo "$CHANGELOG" | sed -E 's/(### [A-Za-z]+)/\\n\\1/g' | sed -E 's/ - /\\n- /g' | sed -E '/^[[:space:]]*$/d')
+
+          # Write up to and including the intro
+          if [ "$INTRO_END_LINE" -gt 0 ]; then
+            head -n "$INTRO_END_LINE" "$FILE" > "$TEMP_FILE"
           fi
           # Add the new entry
-          echo -e "\n${HEADER}\n\n${CHANGELOG}\n" >> "$TEMP_FILE"
+          echo -e "\n${HEADER}\n\n${PRETTY_CHANGELOG}\n" >> "$TEMP_FILE"
           # Add the rest of the file
-          if [ "$HEADER_LINE" -gt 0 ]; then
-            tail -n "+$((HEADER_LINE + 1))" "$FILE" >> "$TEMP_FILE"
+          if [ "$INTRO_END_LINE" -gt 0 ]; then
+            tail -n "+$((INTRO_END_LINE + 1))" "$FILE" >> "$TEMP_FILE"
           fi
           mv "$TEMP_FILE" "$FILE"
 
