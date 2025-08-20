@@ -86,6 +86,11 @@ async function runManualTests() {
         await client.addAddressRecord(`${label}.${TEST_DOMAIN}`, ChainName.Base, '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045');
         console.log(`   ✅ Added Base chain address\n`);
 
+        // Test 8.5: Add Sui address record
+        console.log('8️⃣5️⃣ Testing Sui address addition...');
+        await client.addAddressRecord(`${label}.${TEST_DOMAIN}`, ChainName.Sui, '0x556a3c6c150709c0a8486e3eb002ea8118ba79bdf349e710dc3bb85901f797c3');
+        console.log(`   ✅ Added Sui chain address\n`);
+
         // Test 9: Get subnames for domain
         console.log('9️⃣ Testing subname listing...');
         const subnames = await client.getFilteredSubnames({
