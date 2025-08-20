@@ -117,7 +117,7 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
   },
   starknet: {
     label: "Starknet",
-    coin: 234567891,
+    coin: 9004,
   },
   sol: {
     label: "Solana",
@@ -145,7 +145,7 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
   },
   sui: {
     label: "Sui",
-    coin: 101,
+    coin: 784,
   },
   unichain: {
     label: "Unichain",
