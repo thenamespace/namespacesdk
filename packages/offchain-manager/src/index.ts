@@ -14,9 +14,11 @@
  * ```typescript
  * import { createOffchainClient, ChainName } from '@thenamespace/offchain-manager';
  * 
- * // Initialize client
- * const client = createOffchainClient({ mode: 'sepolia' });
- * client.setApiKey('example.eth', 'your-api-key');
+ * // Initialize client with API key inline
+ * const client = createOffchainClient({
+ *   mode: 'sepolia',
+ *   defaultApiKey: 'your-address-based-api-key'
+ * });
  * 
  * // Create a subname
  * await client.createSubname({

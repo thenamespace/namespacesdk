@@ -29,8 +29,7 @@ class E2ETestRunner {
     private testSubnames: string[] = [];
 
     constructor() {
-        this.client = createOffchainClient({ mode: TEST_MODE as 'mainnet' | 'sepolia' });
-        this.client.setDefaultApiKey(TEST_API_KEY);
+        this.client = createOffchainClient({ mode: TEST_MODE as 'mainnet' | 'sepolia', defaultApiKey: TEST_API_KEY });
     }
 
     private async runTest(name: string, testFn: () => Promise<void>): Promise<void> {

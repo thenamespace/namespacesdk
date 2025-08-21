@@ -14,13 +14,11 @@ if (!API_KEY) {
     process.exit(1);
 }
 
-// Initialize the client
+// Initialize the client (API key provided via config)
 const client = createOffchainClient({
     mode: TEST_MODE, // Using environment-configured mode
+    defaultApiKey: API_KEY,
 });
-
-// Set your API key from environment
-client.setDefaultApiKey(API_KEY);
 
 async function basicExample() {
     try {

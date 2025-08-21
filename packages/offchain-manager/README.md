@@ -27,10 +27,22 @@ import { createOffchainClient } from "@thenamespace/offchain-manager";
 To use the SDK, create an instance using the `createOffchainClient` factory function and set your API key, which you can obtain from [https://dev.namespace.ninja](https://dev.namespace.ninja).
 
 ```typescript
-const client = createOffchainClient({ mode: "sepolia" });
+// 1) No-arg initialization (defaults to mainnet)
+const client = createOffchainClient();
 
-// Choose one of the following approaches:
+// 2) Configure network and API keys inline
+const client = createOffchainClient({
+  mode: "sepolia", // or "mainnet"
+  // Address-based API key (works with all ENS domains registered to your address)
+  defaultApiKey: "your-address-based-api-key",
+  // Domain-based API keys for specific ENS parent names
+  domainApiKeys: {
+    "your-ens-name.eth": "your-domain-based-api-key",
+    // add more domains if needed
+  },
+});
 
+// You can also set API Keys after initialization as well
 // Approach 1: Address-based API key (recommended for most use cases)
 // Works with all ENS domains registered to your address
 client.setDefaultApiKey("your-address-based-api-key");
@@ -228,6 +240,8 @@ try {
 const client = createOffchainClient({
   mode: "sepolia", // or "mainnet"
   backendUri: "https://custom-backend.com", // Optional custom backend
+  defaultApiKey: "your-address-based-api-key", // Optional inline key
+  domainApiKeys: { "example.eth": "your-domain-based-api-key" },
 });
 ```
 
