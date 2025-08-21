@@ -1,5 +1,16 @@
 # Changelog
 
+
+## [1.0.5] - 2025-08-21
+
+ 
+\1 
+- Optional API key configuration during client initialization (`defaultApiKey`, `domainApiKeys`)
+- Support for no-parameter client creation (defaults to mainnet)  
+\1 
+- Improved developer experience with inline API key setup
+- Updated documentation and examples
+
 All notable changes to the `@thenamespace/offchain-manager` package will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
