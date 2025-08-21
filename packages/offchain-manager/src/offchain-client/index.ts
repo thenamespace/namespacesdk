@@ -37,7 +37,7 @@ import { ChainName, getCoinType, UpdateSubnameRequest } from "../dto";
  * ```typescript
  * import { createOffchainClient } from '@thenamespace/offchain-manager';
  * 
- * const client = createOffchainClient({ mode: 'sepolia' });
+ * const client = createOffchainClient();
  * client.setDefaultApiKey('your-api-key'); // Works with your address based ENS domain
  * 
  * // Create a subname
@@ -82,8 +82,11 @@ export interface OffchainClient {
    * await client.createSubname({
    *   parentName: 'example.eth',
    *   label: 'alice',
-   *   addresses: [{ chain: ChainName.Ethereum, value: '0x...' }],
-   *   texts: [{ key: 'com.twitter', value: 'alice' }]
+   *   owner: "0x123...",
+   *   addresses: [{ chain: ChainName.Ethereum, value: '0x123...' }],
+   *   texts: [{ key: 'com.twitter', value: 'alice' }],
+   *   contenthash: "ipfs://baf....",
+   *   metadata: [{ key: "sender", value: '0x123...' }],
    * });
    */
   createSubname(request: CreateSubnameRequest): Promise<void>;
@@ -293,6 +296,10 @@ const backendUris: Record<Mode, string> = {
  * const config: OffchainClientConfig = {
  *   mode: 'sepolia', // Use testnet
  *   timeout: 5000,  // 5 second timeout
+ *   defaultApiKey: 'your-address-based-api-key', // Optional: works with all your ENS domains
+ *   domainApiKeys: { // Optional: domain-specific API keys
+ *     'example.eth': 'your-domain-based-api-key'
+ *   }
  * };
  * ```
  */
@@ -306,6 +313,16 @@ export interface OffchainClientConfig extends AxiosRequestConfig {
    * Custom backend URI. If not provided, uses the default URI for the selected mode.
    */
   backendUri?: string;
+  /**
+   * Address-based API key to use by default for all domains registered to your address.
+   * Equivalent to calling client.setDefaultApiKey() after initialization.
+   */
+  defaultApiKey?: string;
+  /**
+   * Domain-based API keys keyed by ENS parent name (e.g., "example.eth").
+   * Equivalent to calling client.setApiKey(name, key) for each entry after initialization.
+   */
+  domainApiKeys?: Record<string, string>;
 }
 
 class HttpOffchainClient implements OffchainClient {
@@ -313,10 +330,20 @@ class HttpOffchainClient implements OffchainClient {
   private apiKeys: Record<string, string> = {};
   private defaultApiKey?: string;
 
-  constructor(private readonly config: OffchainClientConfig) {
+  constructor(private readonly config: OffchainClientConfig = {}) {
     const mode = config.mode || "mainnet";
     const uri = config.backendUri || backendUris[mode];
     this.HTTP = axios.create({ ...this.config, baseURL: uri });
+
+    // Initialize authentication from config if provided
+    if (config.defaultApiKey) {
+      this.setDefaultApiKey(config.defaultApiKey);
+    }
+    if (config.domainApiKeys) {
+      for (const [ensName, apiKey] of Object.entries(config.domainApiKeys)) {
+        this.setApiKey(ensName, apiKey);
+      }
+    }
   }
   public async updateSubname(
     subname: string,
@@ -510,27 +537,50 @@ class HttpOffchainClient implements OffchainClient {
 /**
  * Create a new OffchainClient instance for managing ENS subnames.
  * 
- * @param config - Configuration options including network mode and HTTP settings
+ * @param config - Optional configuration options including network mode, HTTP settings, and API keys
  * @returns A configured OffchainClient instance
  * 
  * @example
  * ```typescript
  * import { createOffchainClient } from '@thenamespace/offchain-manager';
  * 
- * // Create client for testnet
+ * // 1. No-arg initialization (defaults to mainnet)
+ * const client = createOffchainClient();
+ * 
+ * // 2. Configure network mode
  * const client = createOffchainClient({ mode: 'sepolia' });
  * 
- * // Set API key (get from https://dev.namespace.ninja)
- * client.setDefaultApiKey('your-api-key'); // Works with any ENS domain
+ * // 3. Initialize with address-based API key (works with all your ENS domains)
+ * const client = createOffchainClient({
+ *   mode: 'sepolia',
+ *   defaultApiKey: 'your-address-based-api-key'
+ * });
  * 
- * // Now you can use the client with any ENS-compatible domain
- * const availability1 = await client.isSubnameAvailable('alice.example.eth');
- * const availability2 = await client.isSubnameAvailable('app.mysite.com');
- * const availability3 = await client.isSubnameAvailable('user.gallery.art');
+ * // 4. Initialize with domain-based API keys (for specific ENS domains)
+ * const client = createOffchainClient({
+ *   mode: 'sepolia',
+ *   domainApiKeys: {
+ *     'example.eth': 'your-domain-based-api-key',
+ *     'test.eth': 'another-domain-key'
+ *   }
+ * });
+ * 
+ * // 5. Initialize with both default and domain API keys
+ * const client = createOffchainClient({
+ *   mode: 'sepolia',
+ *   defaultApiKey: 'your-address-based-api-key',
+ *   domainApiKeys: {
+ *     'example.eth': 'your-domain-based-api-key'
+ *   }
+ * });
+ * 
+ * // You can also set/update keys after initialization
+ * client.setDefaultApiKey('your-api-key');
+ * client.setApiKey('example.eth', 'your-domain-key');
  * ```
  */
 export const createOffchainClient = (
-  config: OffchainClientConfig
+  config: OffchainClientConfig = {}
 ): OffchainClient => {
   return new HttpOffchainClient(config);
 };
