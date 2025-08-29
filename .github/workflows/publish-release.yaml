@@ -151,8 +151,9 @@ jobs:
             INTRO_END_LINE=$((HEADER_LINE + 1))
           fi
 
-          # Pretty print the changelog input (handles single-line input from GitHub UI)
-          PRETTY_CHANGELOG=$(echo "$CHANGELOG" | sed -E 's/(### [A-Za-z]+)/\\n\\1/g' | sed -E 's/ - /\\n- /g' | sed -E '/^[[:space:]]*$/d')
+          # Process the changelog input to ensure proper formatting
+          # Handle both multi-line and single-line input from GitHub UI
+          PRETTY_CHANGELOG=$(echo "$CHANGELOG" | sed -E 's/\\n/\n/g' | sed -E 's/\\1/\n/g' | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
 
           # Write up to and including the intro
           if [ "$INTRO_END_LINE" -gt 0 ]; then
