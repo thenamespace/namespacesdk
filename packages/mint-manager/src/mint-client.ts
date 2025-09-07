@@ -107,6 +107,7 @@ class MintClientImpl implements MintClient {
       parentName: request.parentName,
       expiryInYears: request.expiryInYears,
       isTestnet: this.config.isTestnet,
+      owner: request.owner
     });
 
     let resolverData: Hash[] = [];
