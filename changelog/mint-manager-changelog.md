@@ -1,7 +1,20 @@
 # Changelog
 
+## [1.1.0] - 2025-10-06
+
+### Changed
+
+- Renamed package scope in docs from `@namespacesdk/mint-manager` to `@thenamespace/mint-manager`.
+- Updated client creation: `createMintClient()` now derives environment internally. Use `{ isTestnet: true }` to target testnet; no explicit environment needed.
+
+### Fixed
+
+- Testnet behavior: When `isTestnet: true`, SDK now consistently uses Sepolia listings and staging API endpoints.
+
+### Misc
+
+- Minor documentation cleanups and examples clarified.
 
 ## [1.0.1] - 2025-09-07
 
 Initial Release
-

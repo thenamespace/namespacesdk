@@ -16,7 +16,7 @@
   "dependencies": {
     "@ensdomains/address-encoder": "^1.1.2",
     "@ensdomains/content-hash": "2.5.7",
-    "@namespacesdk/addresses": "^1.0.12",
+    "@thenamespace/addresses": "^1.0.15",
     "@types/node": "^22.10.5",
     "axios": "^1.7.9",
     "ts-node": "^10.9.2",
@@ -36,7 +36,9 @@
   "scripts": {
     "build": "rimraf dist && tsc",
     "start": "node dist/index.js",
-    "restart": "rimraf dist && tsc && node dist/index.js"
+    "restart": "rimraf dist && tsc && node dist/index.js",
+    "example:testnet": "ts-node ./examples/testnet-usage.ts",
+    "example:availability": "ts-node ./examples/availability-checks.ts"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"

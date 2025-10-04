@@ -2,6 +2,7 @@ import { Address } from "viem";
 import { ChainName } from "./constants/address-records";
 import { ContenthashType } from "./constants/contenthash-record";
 
+/** Parameters for estimating mint details and price. */
 export interface MintDetailsRequest {
   parentName: string;
   label: string;
@@ -10,6 +11,7 @@ export interface MintDetailsRequest {
   isTestnet?: boolean;
 }
 
+/** Estimated details and validations for a mint request. */
 export interface MintDetailsResponse {
   /**
    * Flag indicating if subname can be minted based on passed parameters.
@@ -40,6 +42,7 @@ export interface MintDetailsResponse {
 /**
  * Describes all possible error codes that could be thrown while attempting to mint the subname.
  */
+/** Error codes describing why a mint cannot proceed. */
 export type MintingValidationErrorType =
   | "SUBNAME_TAKEN"
   | "MINTER_NOT_TOKEN_OWNER"
@@ -48,6 +51,7 @@ export type MintingValidationErrorType =
   | "SUBNAME_RESERVED"
   | "VERIFIED_MINTER_ADDRESS_REQUIRED";
 
+/** Prepared transaction data for calling the mint function on-chain. */
 export interface MintTransactionResponse {
   contractAddress: Address;
   args: any[];
@@ -57,6 +61,7 @@ export interface MintTransactionResponse {
   value: bigint;
 }
 
+/** Parameters for preparing a mint transaction. */
 export interface MintTransactionRequest {
   parentName: string;
   label: string;
@@ -66,29 +71,35 @@ export interface MintTransactionRequest {
   records?: EnsRecords;
 }
 
+/** Single ENS text record to set for the subname. */
 export interface EnsTextRecord {
   key: string
   value: string
 }
 
+/** Address record for a specific chain (by coin type or ChainName). */
 export interface EnsAddressRecord {
   chain: ChainName | number
   value: string
 }
 
+/** Contenthash record (ipfs, ipns, swarm, etc.). */
 export interface ContenthashRecord {
   type: ContenthashType
   value: string
 }
 
+/** Optional records to be applied at mint time. */
 export interface EnsRecords {
   texts?: EnsTextRecord[];
   addresses?: EnsAddressRecord[]
   contenthash?: ContenthashRecord
 }
 
+/** Listing type indicating L1 or L2 mint path. */
 export type ListingType = "L1" | "L2";
 
+/** Listing metadata returned by the listing service. */
 export interface NameListing {
   name: string;
   nameNetwork: string;
@@ -98,6 +109,7 @@ export interface NameListing {
   };
 }
 
+/** Request body for fetching mint parameters from the mint service. */
 export interface MintParametersRequest {
   label: string;
   parentName: string;
@@ -107,6 +119,7 @@ export interface MintParametersRequest {
   isTestnet?: boolean;
 }
 
+/** Response body with signed content and parameters for minting. */
 export interface MintParametersResponse {
   content: {
     label: string;

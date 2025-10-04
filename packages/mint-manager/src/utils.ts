@@ -22,6 +22,10 @@ const ResolverAbi = parseAbi([
   "function setContenthash(bytes32 node, bytes contenthash)",
 ]);
 
+/**
+ * Converts ENS records to encoded resolver calldata suitable for batched mint.
+ * Applies texts, addresses (multi-coin), and optional contenthash.
+ */
 export const convertEnsRecordsToResolverData = (
   fullName: string,
   records: EnsRecords

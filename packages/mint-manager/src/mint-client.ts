@@ -26,15 +26,40 @@ import {
   getEnsContracts,
   getL1NamespaceContracts,
   getL2NamespaceContracts,
-} from "@namespacesdk/addresses";
+} from "@thenamespace/addresses";
 import { convertEnsRecordsToResolverData } from "./utils";
 
+/**
+ * Main client interface for preparing mint transactions and checking
+ * subname availability across L1 and supported L2 networks.
+ *
+ * @example
+ * ```typescript
+ * import { createMintClient } from '@thenamespace/mint-manager';
+ *
+ * // Zero-config (mainnet)
+ * const client = createMintClient();
+ *
+ * // Testnet
+ * const testnet = createMintClient({
+ *   isTestnet: true,
+ *   customRpcUrls: { [baseSepolia.id]: ALCHEMY_BASE_SEPOLIA_RPC }
+ * });
+ * ```
+ */
 export interface MintClient {
+  /** Fetches estimated minting parameters and price quote. */
   getMintDetails(request: MintDetailsRequest): Promise<MintDetailsResponse>;
+  /**
+   * Returns ABI, args and value for submitting the mint transaction.
+   * Includes resolver data if records are provided.
+   */
   getMintTransactionParameters(
     request: MintTransactionRequest
   ): Promise<MintTransactionResponse>;
+  /** Checks availability of an L1 subname using ENS Registry. */
   isL1SubnameAvailable(subname: string): Promise<boolean>;
+  /** Checks availability of an L2 subname on a specific chain. */
   isL2SubnameAvailable(subname: string, chainId: number): Promise<boolean>;
 }
 
@@ -43,14 +68,24 @@ export interface MintClient {
 const DEFAULT_LISTING_CACHE = 15 * 60 * 1000;
 const DEFAULT_MINT_SOURCE = "namespace-sdk";
 
+/**
+ * Configuration options for {@link createMintClient}.
+ */
 export interface MintClientConfig {
+  /** When true, uses testnet chains. */
   isTestnet?: boolean;
+  /** @deprecated Environment is not required by consumers. */
   environment?: NamespaceEnv;
+  /** Advanced override for List Manager API base URL. */
   listManagerUri?: string;
+  /** Advanced override for Mint Manager API base URL. */
   mintManagerUri?: string;
+  /** Cache TTL for listing metadata (ms). Default: 15 minutes. */
   listingCacheMilliseconds?: number;
+  /** Source tag sent with minting requests. */
   mintSource?: string;
-  cursomRpcUrls?: Record<string, string>
+  /** Custom RPC URLs. */
+  cursomRpcUrls?: Record<string, string>;
 }
 
 class MintClientImpl implements MintClient {
@@ -66,17 +101,18 @@ class MintClientImpl implements MintClient {
     }
   > = {};
 
-  constructor(private readonly config: MintClientConfig) {
-    const libEnv: NamespaceEnv =
-      this.config.environment || "production";
+  constructor(private readonly config: MintClientConfig = {}) {
+    // Derive environment internally from isTestnet.
+    const derivedEnv: NamespaceEnv = this.config.isTestnet ? "staging" : "production";
+
     const listManagerUri = this.config.listManagerUri
       ? this.config.listManagerUri
-      : LibEnvironment.listingApi[libEnv];
+      : LibEnvironment.listingApi[derivedEnv];
     const mintManagerUri = this.config.mintManagerUri
       ? this.config.mintManagerUri
-      : LibEnvironment.mintingApi[libEnv];
+      : LibEnvironment.mintingApi[derivedEnv];
 
-    console.info(`Initializing mint manager sdk with mint-manager: ${mintManagerUri}, list-manager: ${listManagerUri}`)  
+    console.info(`Initializing mint manager sdk with mint-manager: ${mintManagerUri}, list-manager: ${listManagerUri}`)
     this.mintManagerHttp = axios.create({
       baseURL: mintManagerUri,
     });
@@ -281,6 +317,23 @@ class MintClientImpl implements MintClient {
   }
 }
 
+/**
+ * Create a new MintClient instance.
+ *
+ * @example
+ * ```typescript
+ * import { createMintClient } from '@thenamespace/mint-manager';
+ *
+ * // Mainnet (default)
+ * const mainnet = createMintClient();
+ *
+ * // Testnet
+ * const testnet = createMintClient({
+ *   isTestnet: true,
+ *   customRpcUrls: { [baseSepolia.id]: 'https://base-sepolia.g.alchemy.com/v2/<api-key>>' }
+ * });
+ * ```
+ */
 export function createMintClient(config: MintClientConfig = {}): MintClient {
   return new MintClientImpl(config);
 }

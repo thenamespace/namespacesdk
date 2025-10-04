@@ -1,4 +1,5 @@
 ![Namespace Ninja](https://i.postimg.cc/Nfcbq9jP/namespace.png)
+
 # Namespace SDK Monorepo
 
 This monorepo contains TypeScript SDK packages for interacting with the Namespace ecosystem. It's built using [Lerna](https://lerna.js.org/) for managing multiple packages.
@@ -8,20 +9,25 @@ This monorepo contains TypeScript SDK packages for interacting with the Namespac
 This monorepo contains the following SDK packages:
 
 ### [@thenamespace/addresses](./packages/addresses)
+
 Library containing all Namespace & ENS contract addresses.
 
 ### [@thenamespace/indexer](./packages/indexer)
+
 TypeScript SDK for interacting with the Namespace Indexer API - query L2 subnames, registries, and metadata.
 
-### [@namespacesdk/mint-manager](./packages/mint-manager)
+### [@thenamespace/mint-manager](./packages/mint-manager)
+
 Library for minting L2 subnames with comprehensive validation and error handling.
 
 ### [@thenamespace/offchain-manager](./packages/offchain-manager)
+
 TypeScript SDK for creating and managing ENS subnames off-chain with the Namespace API.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js >= 16.0.0
 - npm
 
