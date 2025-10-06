@@ -86,10 +86,32 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Ensure registry version of addresses is installed for mint-manager builds
-      - name: Ensure registry @thenamespace/addresses for mint-manager
-        if: ${{ inputs.package == 'mint-manager' }}
-        run: npm install -w @thenamespace/mint-manager @thenamespace/addresses@^1.0.15
+      # Build workspace dependencies first (in dependency order)
+      - name: Build workspace dependencies
+        run: |
+          # Build addresses package first since mint-manager depends on it
+          if [ "${{ inputs.package }}" = "mint-manager" ]; then
+            echo "Building @thenamespace/addresses dependency..."
+            npm run -w @thenamespace/addresses build
+          fi
+
+          # Add other workspace dependencies here as needed
+          # Example: if a package depends on indexer, add:
+          # if [ "${{ inputs.package }}" = "some-package" ]; then
+          #   echo "Building @thenamespace/indexer dependency..."
+          #   npm run -w @thenamespace/indexer build
+          # fi
+
+          # Future-proof: Check for any @thenamespace/* dependencies in package.json
+          # and build them if they exist as workspace packages
+          echo "Checking for other workspace dependencies..."
+          WORKSPACE_DEPS=$(jq -r '.dependencies | keys[] | select(startswith("@thenamespace/"))' packages/${{ inputs.package }}/package.json 2>/dev/null || echo "")
+          for dep in $WORKSPACE_DEPS; do
+            if [ "$dep" != "@thenamespace/${{ inputs.package }}" ] && [ -d "packages/${dep#@thenamespace/}" ]; then
+              echo "Building workspace dependency: $dep"
+              npm run -w "$dep" build
+            fi
+          done
 
       - name: Build selected package
         working-directory: packages/${{ inputs.package }}
