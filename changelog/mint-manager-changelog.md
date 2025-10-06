@@ -1,5 +1,10 @@
 # Changelog
 
+
+## [1.1.0] - 2025-10-06
+
+### Changed - Simplified client creation: `createMintClient()` now derives environment internally; pass `{ isTestnet: true }` for test usage. - Updated package scope in docs to `@thenamespace/mint-manager`. - Clarified usage examples and default mainnet (zero-config) flow.  ### Fixed - Testnet behavior now consistently uses Sepolia listings and staging API endpoints when `isTestnet: true`. - Minor README formatting/typing fixes.  ### Misc - Minor documentation cleanups and example tweaks.
+
 ## [1.1.0] - 2025-10-06
 
 ### Changed
