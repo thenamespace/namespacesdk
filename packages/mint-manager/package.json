@@ -16,7 +16,7 @@
   "dependencies": {
     "@ensdomains/address-encoder": "^1.1.2",
     "@ensdomains/content-hash": "2.5.7",
-    "@thenamespace/addresses": "^1.0.15",
+    "@thenamespace/addresses": "npm:@thenamespace/addresses@1.0.15",
     "@types/node": "^22.10.5",
     "axios": "^1.7.9",
     "ts-node": "^10.9.2",
