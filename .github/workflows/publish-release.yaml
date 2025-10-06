@@ -84,12 +84,12 @@ jobs:
           exit 1
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       # Ensure registry version of addresses is installed for mint-manager builds
       - name: Ensure registry @thenamespace/addresses for mint-manager
         if: ${{ inputs.package == 'mint-manager' }}
-        run: npm install -w @thenamespace/mint-manager @thenamespace/addresses@npm:^1.0.15
+        run: npm install -w @thenamespace/mint-manager @thenamespace/addresses@^1.0.15
 
       - name: Build selected package
         working-directory: packages/${{ inputs.package }}
