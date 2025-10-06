@@ -8,10 +8,10 @@ on:
         type: choice
         description: Package name
         options:
-         - offchain-manager
-         - addresses
-         - indexer
-         - mint-manager
+          - offchain-manager
+          - addresses
+          - indexer
+          - mint-manager
       version:
         type: string
         description: "version"
@@ -44,7 +44,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          registry-url: 'https://registry.npmjs.org/'
+          registry-url: "https://registry.npmjs.org/"
 
       - name: Read previous version from package.json
         id: previous-version
@@ -56,7 +56,7 @@ jobs:
 
       - name: Extract new version from input
         id: current-version
-        env: 
+        env:
           INPUT_VERSION: ${{ inputs.version }}
         run: |
 
@@ -86,10 +86,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # Ensure registry version of addresses is installed for mint-manager builds
+      - name: Ensure registry @thenamespace/addresses for mint-manager
+        if: ${{ inputs.package == 'mint-manager' }}
+        run: npm install -w @thenamespace/mint-manager @thenamespace/addresses@npm:^1.0.15
+
       - name: Build selected package
         working-directory: packages/${{ inputs.package }}
         run: npm run build
-
 
       - name: Update package version in package.json
         working-directory: packages/${{ inputs.package }}
@@ -123,7 +127,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           echo "📝 Inserting changelog for $VERSION"
-   
+
           FILE="changelog/${PACKAGE}-changelog.md"
           TEMP_FILE="${FILE}.tmp"
           DATE=$(date +'%Y-%m-%d')
