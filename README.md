@@ -1,5 +1,7 @@
 ![Namespace Ninja](https://i.postimg.cc/Nfcbq9jP/namespace.png)
 
+TypeScript SDKs on Namespace API. Mint, manage & query offchain and onchain ENS subnames.
+
 # Namespace SDK Monorepo
 
 This monorepo contains TypeScript SDK packages for interacting with the Namespace ecosystem. It's built using [Lerna](https://lerna.js.org/) for managing multiple packages.
