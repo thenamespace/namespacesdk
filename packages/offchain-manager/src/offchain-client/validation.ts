@@ -175,6 +175,7 @@ export const validateAddress = (address: string, chain: ChainName): void => {
         case ChainName.WorldChain:
         case ChainName.Zora:
         case ChainName.Celo:
+        case ChainName.Monad:
             // Ethereum-style addresses (EVM chains)
             if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
                 throw new ValidationError(`Invalid Ethereum-style address: ${address}`);
