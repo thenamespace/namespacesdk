@@ -1,5 +1,10 @@
 # Changelog
 
+
+## [1.0.7] - 2025-10-16
+
+### Added -  **Default EVM chain **: Supported default chain introduced in ENSIP 19 with chainId = 0
+
 All notable changes to the `@thenamespace/offchain-manager` package will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
