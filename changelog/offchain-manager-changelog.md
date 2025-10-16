@@ -1,5 +1,10 @@
 # Changelog
 
+
+## [1.0.6] - 2025-10-16
+
+### Added  - **New Blockchain Support**: Added support for Monad
+
 All notable changes to the `@thenamespace/offchain-manager` package will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
