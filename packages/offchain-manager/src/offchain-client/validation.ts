@@ -160,6 +160,7 @@ export const validateAddress = (address: string, chain: ChainName): void => {
     // Basic address validation based on chain
     switch (chain) {
         case ChainName.Ethereum:
+        case ChainName.Default:
         case ChainName.Arbitrum:
         case ChainName.Optimism:
         case ChainName.Base:

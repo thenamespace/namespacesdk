@@ -16,6 +16,8 @@
 export enum ChainName {
   /** Ethereum mainnet */
   Ethereum = "eth",
+  /** Default (EVM-compatible) */
+  Default = "default",
   /** Solana */
   Solana = "sol",
   /** Arbitrum One */
@@ -84,6 +86,10 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
   eth: {
     label: "Ethereum",
     coin: 60,
+  },
+  default: {
+    label: "Default",
+    coin: 2147483648,
   },
   base: {
     label: "Base",
