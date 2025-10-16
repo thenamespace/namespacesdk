@@ -62,6 +62,8 @@ export enum ChainName {
   Aptos = "aptos",
   /** Algorand */
   Algorand = "algorand",
+  /** Monad */
+  Monad = "monad",
 }
 
 /**
@@ -174,6 +176,10 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
   algorand: {
     label: "Algorand",
     coin: 8,
+  },
+  monad: {
+    label: "Monad",
+    coin: 10143,
   },
 };
 
