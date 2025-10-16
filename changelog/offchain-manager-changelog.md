@@ -1,15 +1,15 @@
 # Changelog
 
-
-## [1.0.6] - 2025-10-16
-
-### Added  - **New Blockchain Support**: Added support for Monad
-
 All notable changes to the `@thenamespace/offchain-manager` package will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2025-10-16
+
+### Added
+
+- **New Blockchain Support**: Added support for Monad
 
 ## [1.0.5] - 2025-08-21
 
@@ -25,16 +25,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.4] - 2025-08-20
 
- ### Fixed 
-  - **Coin Type Corrections**:  
-  - Fixed Sui coin type from `101` to `784` (correct SLIP-44 identifier)   
-  - Fixed Starknet coin type from `234567891` to `9004` (correct SLIP-44 identifier)   
-  - Updated test script to include Sui address validation testing  
-  ### Testing  
-   - **Enhanced Test Coverage**:   
-  - Added Sui address record testing in manual test suite  
-  - Improved validation for blockchain-specific coin types
+### Fixed
 
+- **Coin Type Corrections**:
+- Fixed Sui coin type from `101` to `784` (correct SLIP-44 identifier)
+- Fixed Starknet coin type from `234567891` to `9004` (correct SLIP-44 identifier)
+- Updated test script to include Sui address validation testing
+
+### Testing
+
+- **Enhanced Test Coverage**:
+- Added Sui address record testing in manual test suite
+- Improved validation for blockchain-specific coin types
 
 ## [1.0.3] - 2025-08-19
 
