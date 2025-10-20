@@ -5,6 +5,20 @@ All notable changes to the `@thenamespace/offchain-manager` package will be docu
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.0.8] - 2025-10-20
+
+## [1.0.8]
+- 2025-10-21 
+
+### Added 
+- **`setDefaultEvmAddress` method**: Set a default EVM address for all EVM-compatible chains with a single call
+- **EVM chain metadata**: Added `evm` flag to chain metadata for EVM compatibility identification 
+
+### Enhanced 
+- **Developer Experience**: Updated README and examples with `setDefaultEvmAddress` usage
+- **Multi-chain Support**: Method supports 17 EVM chains (Ethereum, Arbitrum, Optimism, Base, Polygon, BSC, Avalanche, Gnosis, zkSync, Linea, Scroll, Unichain, Berachain, WorldChain, Zora, Celo, Monad)
+
 ## [1.0.7] - 2025-10-16
 
 ### Added
