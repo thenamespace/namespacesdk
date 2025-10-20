@@ -79,6 +79,8 @@ export interface ChainMetadata {
   label: string;
   /** SLIP-0044 coin type used for ENS address records */
   coin: number;
+  /** Whether this chain is EVM-compatible and should mirror default EVM address */
+  evm?: boolean;
 }
 
 
@@ -86,42 +88,52 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
   eth: {
     label: "Ethereum",
     coin: 60,
+    evm: true,
   },
   default: {
     label: "Default",
     coin: 2147483648,
+    evm: true,
   },
   base: {
     label: "Base",
     coin: 8453,
+    evm: true,
   },
   op: {
     label: "Optimism",
     coin: 10,
+    evm: true,
   },
   arb: {
     label: "Arbitrum",
     coin: 42161,
+    evm: true,
   },
   bsc: {
     label: "BNB",
     coin: 56,
+    evm: true,
   },
   polygon: {
     label: "Polygon",
     coin: 137,
+    evm: true,
   },
   avax: {
     label: "Avax",
     coin: 43114,
+    evm: true,
   },
   gnosis: {
     label: "Gnosis",
     coin: 100,
+    evm: true,
   },
   zksync: {
     label: "ZkSync",
     coin: 324,
+    evm: true,
   },
   starknet: {
     label: "Starknet",
@@ -146,10 +158,12 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
   linea: {
     label: "Linea",
     coin: 59144,
+    evm: true,
   },
   scroll: {
     label: "Scroll",
     coin: 534352,
+    evm: true,
   },
   sui: {
     label: "Sui",
@@ -158,22 +172,27 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
   unichain: {
     label: "Unichain",
     coin: 130,
+    evm: true,
   },
   berachain: {
     label: "Berachain",
     coin: 80094,
+    evm: true,
   },
   world_chain: {
     label: "WorldChain",
     coin: 480,
+    evm: true,
   },
   zora: {
     label: "Zora",
     coin: 7777777,
+    evm: true,
   },
   celo: {
     label: "Celo",
     coin: 42220,
+    evm: true,
   },
   aptos: {
     label: "Aptos",
@@ -186,6 +205,7 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
   monad: {
     label: "Monad",
     coin: 10143,
+    evm: true,
   },
 };
 

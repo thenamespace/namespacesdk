@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import { SubnameDTO } from "../dto/subname.dto";
 import {
   _addAddressRecord,
+  _setDefaultEthereumAddress,
   _addDataRecord,
   _addTextRecord,
   _createSubname,
@@ -184,6 +185,19 @@ export interface OffchainClient {
    * ```
    */
   deleteAddressRecord(subname: string, chain: ChainName): Promise<void>;
+
+  /**
+   * Set a default EVM address for all EVM-compatible chains to a subname.
+   * This sets the same address for Ethereum, Arbitrum, Optimism, Base, Polygon, BSC, Avalanche, Gnosis, zkSync, Linea, Scroll, Unichain, Berachain, WorldChain, Zora, Celo, and Monad.
+   * @param subname - Full subname (e.g., 'alice.example.eth')
+   * @param value - EVM wallet address to set as default for all supported EVM chains
+   * @throws {ValidationError} When address format is invalid
+   * @example
+   * ```typescript
+   * await client.setDefaultEvmAddress('alice.example.eth', '0x...');
+   * ```
+   */
+  setDefaultEvmAddress(subname: string, value: string): Promise<void>;
 
   /**
    * Add a text record to a subname.
@@ -388,6 +402,18 @@ class HttpOffchainClient implements OffchainClient {
       this.fetchApiKeyForName(subname),
       subname,
       coin
+    );
+  }
+
+  public async setDefaultEvmAddress(
+    subname: string,
+    value: string
+  ): Promise<void> {
+    await _setDefaultEthereumAddress(
+      this.HTTP,
+      this.fetchApiKeyForName(subname),
+      subname,
+      value
     );
   }
 

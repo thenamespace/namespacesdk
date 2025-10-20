@@ -158,6 +158,13 @@ await client.addAddressRecord(
 await client.deleteAddressRecord("sub.example.eth", ChainName.Base);
 ```
 
+#### Set Default EVM Address
+
+```typescript
+// Sets the same EVM address for all EVM-compatible chains (Ethereum, Arbitrum, Optimism, Base, Polygon, BSC, Avalanche, Gnosis, zkSync, Linea, Scroll, Unichain, Berachain, WorldChain, Zora, Celo, and Monad)
+await client.setDefaultEvmAddress("sub.example.eth", "0xYourEthereumAddress");
+```
+
 #### Add a Text Record
 
 ```typescript
