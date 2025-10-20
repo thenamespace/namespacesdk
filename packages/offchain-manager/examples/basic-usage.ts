@@ -61,6 +61,10 @@ async function basicExample() {
             console.log('📋 Found existing subname:', existing?.fullName);
         }
 
+        // Set default EVM address for all EVM chains
+        await client.setDefaultEvmAddress('alice.happ1.eth', '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045');
+        console.log('✅ Set default EVM address for all EVM chains to alice.happ1.eth');
+
         // Get subnames for a domain
         const subnames = await client.getFilteredSubnames({
             parentName: 'happ1.eth',

@@ -7,6 +7,7 @@ import {
   subnameResponseToRequest,
 } from "./utils";
 import { CreateSubnameRequest } from "../dto/create-subname-request.dto";
+import { chainMetadata } from "../dto/chains";
 import { CreateSubnameRequest_Internal } from "../dto/internal-types";
 import { _getSingleSubname } from "./public-actions";
 import { UpdateSubnameRequest } from "../dto";
@@ -198,6 +199,35 @@ export const _deleteDataRecord = async (
   const request: CreateSubnameRequest_Internal = {
     ..._req,
     metadata: updatedData,
+  };
+
+  return client.post(`/api/v1/subnames`, request, {
+    headers: createAuthorizationHeaders(apiKey),
+  });
+};
+
+export const _setDefaultEthereumAddress = async (
+  client: AxiosInstance,
+  apiKey: string,
+  fullSubname: string,
+  value: string
+) => {
+  const subname = await _getSingleSubname(client, fullSubname);
+
+  const addresses = subname.addresses || {};
+
+  // Derive EVM chains from shared chainMetadata (evm=true)
+  Object.values(chainMetadata)
+    .filter((meta) => meta.evm)
+    .forEach((meta) => {
+      addresses[meta.coin] = value;
+    });
+
+  const _req = subnameResponseToRequest(subname);
+
+  const request: CreateSubnameRequest_Internal = {
+    ..._req,
+    addresses: mapAddrMapToAddressRecords(addresses),
   };
 
   return client.post(`/api/v1/subnames`, request, {
