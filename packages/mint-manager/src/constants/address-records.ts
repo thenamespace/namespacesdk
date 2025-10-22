@@ -90,7 +90,7 @@ export const chainMetadata: Record<ChainName, { label: string; coin: number }> =
     },
     scroll: {
       label: "Scroll",
-      coin: convertToCoinType(34352),
+      coin: convertToCoinType(534352),
     },
   };
 
