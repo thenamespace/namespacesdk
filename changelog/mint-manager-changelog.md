@@ -1,18 +1,14 @@
 # Changelog
 
-
-
 ## [1.1.1] - 2025-10-28
 
 ### Added
-- Default EVM chain configuration for address records: `ChainName.Default` with coin type `2147483648` (no conversion), using Ethereum-style validation. 
+
+- Default EVM chain configuration for address records: `ChainName.Default` with coin type `2147483648` (no conversion), using Ethereum-style validation.
 
 ### Fixed
+
 - Corrected Scroll coin type from `34352` to `534352`.
-
-## [1.1.0] - 2025-10-06
-
-### Changed - Simplified client creation: `createMintClient()` now derives environment internally; pass `{ isTestnet: true }` for test usage. - Updated package scope in docs to `@thenamespace/mint-manager`. - Clarified usage examples and default mainnet (zero-config) flow.  ### Fixed - Testnet behavior now consistently uses Sepolia listings and staging API endpoints when `isTestnet: true`. - Minor README formatting/typing fixes.  ### Misc - Minor documentation cleanups and example tweaks.
 
 ## [1.1.0] - 2025-10-06
 
