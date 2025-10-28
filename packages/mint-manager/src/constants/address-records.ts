@@ -1,5 +1,6 @@
 export enum ChainName {
   Ethereum = "eth",
+  Default = "default",
   Solana = "sol",
   Arbitrum = "arb",
   Optimism = "op",
@@ -26,6 +27,10 @@ export const chainMetadata: Record<ChainName, { label: string; coin: number }> =
     eth: {
       label: "Ethereum",
       coin: 60,
+    },
+    default: {
+      label: "Default",
+      coin: 2147483648,
     },
     base: {
       label: "Base",
@@ -85,7 +90,7 @@ export const chainMetadata: Record<ChainName, { label: string; coin: number }> =
     },
     scroll: {
       label: "Scroll",
-      coin: convertToCoinType(34352),
+      coin: convertToCoinType(534352),
     },
   };
 
