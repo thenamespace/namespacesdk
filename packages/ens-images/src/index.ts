@@ -1,0 +1,86 @@
+/**
+ * @fileoverview Namespace SDK - ENS Images
+ * 
+ * A TypeScript SDK for managing ENS avatar and header images with SIWE authentication.
+ * This library provides a simple interface for uploading, updating, and deleting
+ * avatar and header images for ENS subnames.
+ * 
+ * Supports both automatic and manual authentication flows:
+ * - Automatic: Uses provided wallet provider for signing
+ * - Manual: Developers handle signing themselves
+ * 
+ * @example
+ * ```typescript
+ * import { createAvatarClient } from '@thenamespace/ens-images';
+ * 
+ * // Initialize with provider (automatic signing)
+ * const client = createAvatarClient({
+ *   network: 'mainnet',
+ *   provider: walletProvider
+ * });
+ * 
+ * // Simple upload - SDK handles everything
+ * const result = await client.uploadAvatar({
+ *   subname: 'myavatar.offchainsub.eth',
+ *   file: avatarFile,
+ *   onProgress: (progress) => console.log(`Upload: ${progress}%`)
+ * });
+ * ```
+ * 
+ * @author Namespace Team
+ * @version 1.0.0
+ * @license MIT
+ */
+
+// Core client exports
+export {
+  createAvatarClient,
+  AvatarClient,
+} from './core/client';
+
+// Type exports
+export type {
+  AvatarSDKConfig,
+  WalletProvider,
+  UploadOptions,
+  UploadResult,
+  DeleteOptions,
+  DeleteResult,
+  SIWEMessageOptions,
+  SIWEMessageResult,
+  UploadWithSignatureOptions,
+  DeleteWithSignatureOptions,
+  NonceRequest,
+  NonceResponse
+} from './core/types';
+
+// Error exports
+export {
+  AvatarSDKError,
+  ErrorCodes,
+  createError
+} from './core/errors';
+
+// Utility exports
+export {
+  validateFile,
+  validateSubname,
+  validateAddress,
+  validateSIWEOptions,
+  AVATAR_MAX_SIZE,
+  HEADER_MAX_SIZE,
+  ALLOWED_FORMATS
+} from './utils/validation';
+
+// SIWE exports
+export {
+  generateSIWEMessage,
+  generateSIWEMessageWithOptions,
+  createAvatarNonceRequest,
+  createHeaderNonceRequest,
+  createCombinedNonceRequest,
+  isNonceExpired,
+  getDefaultChainId,
+  getDefaultDomain
+} from './auth/siwe';
+
