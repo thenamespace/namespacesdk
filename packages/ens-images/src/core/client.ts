@@ -7,6 +7,7 @@ import {
   DeleteOptions,
   DeleteResult,
   SIWEMessageOptions,
+  SIWEOptionsResolved,
   SIWEMessageResult,
   UploadWithSignatureOptions,
   DeleteWithSignatureOptions,
@@ -16,12 +17,11 @@ import {
 import { createError, ErrorCodes } from './errors';
 import { validateFile, validateSubname, validateAddress } from '../utils/validation';
 import {
-  generateSIWEMessageWithOptions,
+  generateSIWEMessage,
   createAvatarNonceRequest,
   createHeaderNonceRequest,
   isNonceExpired,
   getDefaultChainId,
-  getDefaultDomain
 } from '../auth/siwe';
 
 /**
@@ -96,17 +96,17 @@ class HttpAvatarClient implements AvatarClient {
   private readonly config: {
     apiUrl: string;
     network: 'mainnet' | 'sepolia';
-    websiteUrl: string;
+    domain: string;
     provider?: WalletProvider;
   };
 
-  constructor(config: AvatarSDKConfig = {}) {
+  constructor(config: AvatarSDKConfig) {
     // Set defaults
     const apiUrl = config.apiUrl || DEFAULT_API_URLS[config.network || 'mainnet'];
     this.config = {
       apiUrl,
       network: config.network || 'mainnet',
-      websiteUrl: config.websiteUrl || new URL(apiUrl).hostname,
+      domain: config.domain,
       provider: config.provider
     };
 
@@ -153,7 +153,11 @@ class HttpAvatarClient implements AvatarClient {
     }
 
     const address = await this.config.provider.getAddress();
-    const siweResult = await this.getSIWEMessageForAvatar({ address });
+    // Use initialized config domain
+    const siweResult = await this.getSIWEMessageForAvatar({ 
+      address,
+      domain: this.config.domain
+    });
     const signature = await this.config.provider.signMessage(siweResult.message);
 
     return this.uploadAvatarWithSignature({
@@ -170,7 +174,11 @@ class HttpAvatarClient implements AvatarClient {
     }
 
     const address = await this.config.provider.getAddress();
-    const siweResult = await this.getSIWEMessageForHeader({ address });
+    // Use initialized config domain
+    const siweResult = await this.getSIWEMessageForHeader({ 
+      address,
+      domain: this.config.domain
+    });
     const signature = await this.config.provider.signMessage(siweResult.message);
 
     return this.uploadHeaderWithSignature({
@@ -187,7 +195,11 @@ class HttpAvatarClient implements AvatarClient {
     }
 
     const address = await this.config.provider.getAddress();
-    const siweResult = await this.getSIWEMessageForAvatar({ address });
+    // Use initialized config domain
+    const siweResult = await this.getSIWEMessageForAvatar({ 
+      address,
+      domain: this.config.domain
+    });
     const signature = await this.config.provider.signMessage(siweResult.message);
 
     return this.deleteAvatarWithSignature({
@@ -204,7 +216,11 @@ class HttpAvatarClient implements AvatarClient {
     }
 
     const address = await this.config.provider.getAddress();
-    const siweResult = await this.getSIWEMessageForHeader({ address });
+    // Use initialized config domain
+    const siweResult = await this.getSIWEMessageForHeader({ 
+      address,
+      domain: this.config.domain
+    });
     const signature = await this.config.provider.signMessage(siweResult.message);
 
     return this.deleteHeaderWithSignature({
@@ -223,7 +239,21 @@ class HttpAvatarClient implements AvatarClient {
       throw createError.expiredNonce();
     }
 
-    const message = generateSIWEMessageWithOptions(options, nonceResponse.nonce);
+    // Resolve domain from options or config
+    const domain = options.domain || this.config.domain;
+    if (!domain) {
+      throw createError.invalidConfiguration('Domain is required. Provide it during initialization or in the method call.');
+    }
+
+    // Build resolved options with all required fields
+    const resolvedOptions: SIWEOptionsResolved = {
+      address: options.address,
+      domain: domain,
+      uri: options.uri, // Can be undefined - will be auto-generated as https://domain
+      chainId: options.chainId // Can be undefined - will default to 1
+    };
+
+    const message = generateSIWEMessage(resolvedOptions, nonceResponse.nonce);
 
     return {
       message,
@@ -240,7 +270,21 @@ class HttpAvatarClient implements AvatarClient {
       throw createError.expiredNonce();
     }
 
-    const message = generateSIWEMessageWithOptions(options, nonceResponse.nonce);
+    // Resolve domain from options or config
+    const domain = options.domain || this.config.domain;
+    if (!domain) {
+      throw createError.invalidConfiguration('Domain is required. Provide it during initialization or in the method call.');
+    }
+
+    // Build resolved options with all required fields
+    const resolvedOptions: SIWEOptionsResolved = {
+      address: options.address,
+      domain: domain,
+      uri: options.uri, // Can be undefined - will be auto-generated as https://domain
+      chainId: options.chainId // Can be undefined - will default to 1
+    };
+
+    const message = generateSIWEMessage(resolvedOptions, nonceResponse.nonce);
 
     return {
       message,
@@ -405,6 +449,6 @@ class HttpAvatarClient implements AvatarClient {
 /**
  * Create a new AvatarClient instance
  */
-export function createAvatarClient(config: AvatarSDKConfig = {}): AvatarClient {
+export function createAvatarClient(config: AvatarSDKConfig): AvatarClient {
   return new HttpAvatarClient(config);
 }

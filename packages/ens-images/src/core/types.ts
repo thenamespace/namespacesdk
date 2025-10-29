@@ -2,12 +2,12 @@
  * Configuration for the Avatar SDK
  */
 export interface AvatarSDKConfig {
-  /** API URL for the avatar service (defaults to production) */
+  /** API URL for the avatar service endpoint (defaults to production) */
   apiUrl?: string;
   /** Network to use (defaults to mainnet) */
   network?: 'mainnet' | 'sepolia';
-  /** Website URL for SIWE domain (defaults to apiUrl hostname) */
-  websiteUrl?: string;
+  /** Domain of the website integrating this SDK (required for SIWE authentication) */
+  domain: string;
   /** Optional provider for automatic signing */
   provider?: WalletProvider;
 }
@@ -73,16 +73,31 @@ export interface DeleteResult {
 }
 
 /**
- * Manual SIWE message generation options
+ * Manual SIWE message generation options (external API)
  */
 export interface SIWEMessageOptions {
   /** User's wallet address */
   address: string;
-  /** Custom domain for SIWE (optional) */
+  /** Domain for SIWE (optional if provided during initialization) */
   domain?: string;
-  /** Custom URI for SIWE (optional) */
+  /** Custom URI for SIWE (optional, will default to https://domain) */
   uri?: string;
   /** Custom chain ID (optional) */
+  chainId?: number;
+}
+
+/**
+ * Internal SIWE options with all required fields resolved
+ * Used internally after resolving domain from config
+ */
+export interface SIWEOptionsResolved {
+  /** User's wallet address */
+  address: string;
+  /** Domain for SIWE (required) */
+  domain: string;
+  /** Custom URI for SIWE (optional, will be auto-generated if not provided) */
+  uri?: string;
+  /** Chain ID (defaults to 1 if not provided) */
   chainId?: number;
 }
 

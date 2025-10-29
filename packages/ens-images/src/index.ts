@@ -66,7 +66,7 @@ export {
   validateFile,
   validateSubname,
   validateAddress,
-  validateSIWEOptions,
+  validateSIWEOptionsResolved,
   AVATAR_MAX_SIZE,
   HEADER_MAX_SIZE,
   ALLOWED_FORMATS
@@ -75,12 +75,10 @@ export {
 // SIWE exports
 export {
   generateSIWEMessage,
-  generateSIWEMessageWithOptions,
   createAvatarNonceRequest,
   createHeaderNonceRequest,
   createCombinedNonceRequest,
   isNonceExpired,
   getDefaultChainId,
-  getDefaultDomain
 } from './auth/siwe';
 

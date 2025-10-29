@@ -1,50 +1,41 @@
 import { SiweMessage } from 'siwe';
-import { SIWEMessageOptions, NonceRequest, NonceResponse } from '../core/types';
-import { validateSIWEOptions } from '../utils/validation';
+import { SIWEOptionsResolved, NonceRequest, NonceResponse } from '../core/types';
+import { validateSIWEOptionsResolved } from '../utils/validation';
 
 /**
- * Generate SIWE message for authentication
+ * Generate SIWE message with resolved options
+ * @param options - Fully resolved SIWE options with domain guaranteed
+ * @param nonce - Nonce from the server
+ * @returns Formatted SIWE message string
+ * 
+ * @internal This function expects all options to be resolved:
+ * - domain: must be provided (resolved from config or options)
+ * - uri: if not provided, will automatically be set to https://domain
+ * - chainId: if not provided, defaults to 1 (mainnet)
  */
 export function generateSIWEMessage(
-  address: string,
-  nonce: string,
-  domain: string,
-  chainId: number,
-  uri?: string
+  options: SIWEOptionsResolved,
+  nonce: string
 ): string {
+  // Validate all resolved options
+  validateSIWEOptionsResolved(options);
+  
+  // Apply defaults for optional fields
+  const uri = options.uri || `https://${options.domain}`;
+  const chainId = options.chainId || 1; // Default to mainnet
+  
   const message = new SiweMessage({
-    domain,
-    address,
+    domain: options.domain,
+    address: options.address,
     statement: `Sign in to Avatar Service`,
-    uri: uri || `https://${domain}`,
+    uri: uri,
     version: '1',
-    chainId,
+    chainId: chainId,
     nonce,
     issuedAt: new Date().toISOString(),
   });
 
   return message.prepareMessage();
-}
-
-/**
- * Generate SIWE message with options
- */
-export function generateSIWEMessageWithOptions(
-  options: SIWEMessageOptions,
-  nonce: string
-): string {
-  validateSIWEOptions(options);
-  
-  const domain = options.domain || 'avatars.namespace.ninja';
-  const chainId = options.chainId || 1; // Default to mainnet
-  
-  return generateSIWEMessage(
-    options.address,
-    nonce,
-    domain,
-    chainId,
-    options.uri
-  );
 }
 
 /**
@@ -89,12 +80,5 @@ export function isNonceExpired(expiresAt: number): boolean {
  */
 export function getDefaultChainId(network: 'mainnet' | 'sepolia'): number {
   return network === 'mainnet' ? 1 : 11155111;
-}
-
-/**
- * Get default domain for network
- */
-export function getDefaultDomain(network: 'mainnet' | 'sepolia'): string {
-  return network === 'mainnet' ? 'avatars.namespace.ninja' : 'avatars-sepolia.namespace.ninja';
 }
 

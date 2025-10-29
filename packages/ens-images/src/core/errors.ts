@@ -86,6 +86,12 @@ export const createError = {
       'Nonce has expired. Please request a new one.',
       ErrorCodes.EXPIRED_NONCE
     ),
+  
+  invalidConfiguration: (message: string) =>
+    new AvatarSDKError(
+      message,
+      ErrorCodes.INVALID_CONFIG
+    ),
     
   notSubnameOwner: (subname: string) =>
     new AvatarSDKError(

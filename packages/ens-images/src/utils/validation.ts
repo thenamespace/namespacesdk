@@ -14,7 +14,8 @@ export const ALLOWED_FORMATS = [
   'image/jpg', 
   'image/png',
   'image/gif',
-  'image/webp'
+  'image/webp',
+  'image/svg+xml'
 ];
 
 /**
@@ -74,21 +75,39 @@ export function validateAddress(address: string): void {
 }
 
 /**
- * Validate SIWE message options
+ * Validate resolved SIWE options (after domain resolution)
+ * At this point, all required fields must be present
  */
-export function validateSIWEOptions(options: { address: string; domain?: string; uri?: string; chainId?: number }): void {
+export function validateSIWEOptionsResolved(options: { address: string; domain: string; uri?: string; chainId?: number }): void {
+  // Validate address
   validateAddress(options.address);
   
-  if (options.domain && typeof options.domain !== 'string') {
-    throw new Error('Invalid domain: must be a string');
+  // Domain is required at this stage (after resolution)
+  if (!options.domain || typeof options.domain !== 'string' || options.domain.trim() === '') {
+    throw new Error('Domain is required and must be a non-empty string');
   }
   
-  if (options.uri && typeof options.uri !== 'string') {
-    throw new Error('Invalid URI: must be a string');
+  // URI validation (optional - will be auto-generated if not provided)
+  if (options.uri !== undefined) {
+    if (typeof options.uri !== 'string' || options.uri.trim() === '') {
+      throw new Error('URI must be a non-empty string if provided');
+    }
+    // Basic URI format validation
+    try {
+      new URL(options.uri);
+    } catch {
+      throw new Error('URI must be a valid URL');
+    }
   }
   
-  if (options.chainId && (typeof options.chainId !== 'number' || options.chainId <= 0)) {
-    throw new Error('Invalid chain ID: must be a positive number');
+  // Chain ID validation (optional - will default to 1 if not provided)
+  if (options.chainId !== undefined) {
+    if (typeof options.chainId !== 'number') {
+      throw new Error('Chain ID must be a number');
+    }
+    if (options.chainId !== 1 && options.chainId !== 11155111) {
+      throw new Error('Chain ID must be 1 (mainnet) or 11155111 (sepolia)');
+    }
   }
 }
 
