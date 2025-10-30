@@ -35,16 +35,20 @@ import { createAvatarClient } from "@thenamespace/ens-images";
 ### Initialize the Client
 
 ```typescript
-// 1) No-arg initialization (defaults to mainnet)
-const client = createAvatarClient();
+// 1) Initialize with domain (required)
+const client = createAvatarClient({
+  domain: "myapp.com", // Your website domain
+});
 
 // 2) Configure network
 const client = createAvatarClient({
+  domain: "myapp.com",
   network: "sepolia", // or "mainnet"
 });
 
 // 3) Initialize with provider (automatic signing)
 const client = createAvatarClient({
+  domain: "myapp.com",
   network: "mainnet",
   provider: walletProvider,
 });
@@ -59,6 +63,7 @@ import { createAvatarClient } from "@thenamespace/ens-images";
 
 // Initialize with provider
 const client = createAvatarClient({
+  domain: "myapp.com", // Your website domain
   network: "mainnet",
   provider: {
     getAddress: () => walletClient.account.address,
@@ -84,10 +89,11 @@ import { createAvatarClient } from "@thenamespace/ens-images";
 
 // Initialize without provider
 const client = createAvatarClient({
+  domain: "myapp.com", // Your website domain
   network: "mainnet",
 });
 
-// Get SIWE message
+// Get SIWE message (domain automatically used from initialization)
 const siweResult = await client.getSIWEMessageForAvatar({
   address: "0x...",
 });
@@ -137,9 +143,9 @@ createAvatarClient(config?: AvatarSDKConfig): AvatarClient
 
 ```typescript
 interface AvatarSDKConfig {
+  domain: string; // Your website domain (required for SIWE authentication)
   apiUrl?: string; // API endpoint (defaults to production)
   network?: "mainnet" | "sepolia"; // Network (defaults to mainnet)
-  websiteUrl?: string; // Website URL for SIWE (defaults to apiUrl hostname)
   provider?: WalletProvider; // Optional wallet provider
 }
 ```
@@ -200,6 +206,7 @@ const walletClient = createWalletClient({
 
 // Create SDK
 const client = createAvatarClient({
+  domain: "myapp.com", // Your website domain
   network: "mainnet",
   provider: {
     getAddress: () => walletClient.account.address,
@@ -228,6 +235,7 @@ const signer = await provider.getSigner();
 
 // Create SDK
 const client = createAvatarClient({
+  domain: "myapp.com", // Your website domain
   network: "mainnet",
   provider: {
     getAddress: () => signer.getAddress(),
@@ -263,6 +271,7 @@ export function AvatarUploader() {
 
     try {
       const client = createAvatarClient({
+        domain: "myapp.com", // Your website domain
         network: "mainnet",
         provider: window.ethereum, // Auto-detects provider
       });
