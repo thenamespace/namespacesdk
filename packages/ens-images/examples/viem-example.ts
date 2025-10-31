@@ -21,6 +21,7 @@ async function viemIntegrationExample() {
   // Create Avatar SDK client with Viem provider
   const client = createAvatarClient({
     network: 'mainnet',
+    domain: "example.com",
     provider: mockViemProvider
   });
 
@@ -46,6 +47,7 @@ async function viemIntegrationExample() {
     // Get SIWE message
     const siweResult = await client.getSIWEMessageForAvatar({
       address: '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'
+      // domain is automatically used from initialization
     });
 
     console.log('   ✅ SIWE message generated:');
@@ -101,6 +103,7 @@ const walletClient = createWalletClient({
 // Create Avatar SDK with Viem provider
 const client = createAvatarClient({
   network: 'mainnet',
+  domain: "example.com", // Your website domain
   provider: {
     getAddress: () => walletClient.account.address,
     signMessage: (msg) => walletClient.signMessage({ message: msg }),
