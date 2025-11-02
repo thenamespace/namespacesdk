@@ -8,12 +8,13 @@ export interface AvatarSDKConfig {
   network?: 'mainnet' | 'sepolia';
   /** Domain of the website integrating this SDK (required for SIWE authentication) */
   domain: string;
-  /** Optional provider for automatic signing */
-  provider?: WalletProvider;
+  /** Optional provider for automatic signing - can be a WalletProvider, Viem WalletClient, or Ethers Wallet/Signer */
+  provider?: WalletProvider | any;
 }
 
 /**
  * Wallet provider interface for automatic signing
+ * You can also pass Viem's WalletClient or Ethers' Wallet/Signer directly
  */
 export interface WalletProvider {
   /** Get the connected address */

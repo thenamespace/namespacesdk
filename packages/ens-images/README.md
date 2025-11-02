@@ -11,7 +11,7 @@ The `@thenamespace/ens-images` provides an easy-to-use client for managing ENS a
 ## Features
 
 - 🔐 **SIWE Authentication** - Secure Sign-In with Ethereum
-- 🌐 **Multi-Provider Support** - Works with any wallet implementation
+- 🌐 **Direct Wallet Integration** - Pass Viem, Ethers, or any wallet client directly - no adapters needed!
 - 📱 **Framework Agnostic** - Use with any frontend framework
 - 🎯 **TypeScript First** - Full type safety
 - ⚡ **Pre-registration Support** - Upload before ENS registration
@@ -58,18 +58,26 @@ const client = createAvatarClient({
 
 ### Automatic Flow (with Provider)
 
+**✨ NEW: Just pass your wallet client directly - no adapters needed!**
+
+#### With Viem
+
 ```typescript
 import { createAvatarClient } from "@thenamespace/ens-images";
+import { createWalletClient, http } from "viem";
+import { mainnet } from "viem/chains";
 
-// Initialize with provider
+const walletClient = createWalletClient({
+  account,
+  chain: mainnet,
+  transport: http(),
+});
+
+// Just pass the viem wallet client directly - no adapter needed!
 const client = createAvatarClient({
-  domain: "myapp.com", // Your website domain
+  domain: "myapp.com",
   network: "mainnet",
-  provider: {
-    getAddress: () => walletClient.account.address,
-    signMessage: (msg) => walletClient.signMessage({ message: msg }),
-    getChainId: () => walletClient.chain.id,
-  },
+  provider: walletClient, // Pass viem wallet client directly
 });
 
 // Upload avatar - SDK handles everything
@@ -80,6 +88,65 @@ const result = await client.uploadAvatar({
 });
 
 console.log("Avatar uploaded:", result.url);
+```
+
+#### With Ethers.js
+
+```typescript
+import { createAvatarClient } from "@thenamespace/ens-images";
+import { JsonRpcProvider, Wallet } from "ethers";
+
+const provider = new JsonRpcProvider(RPC_URL);
+const wallet = new Wallet(privateKey, provider);
+
+// Just pass the ethers wallet directly - no adapter needed!
+const client = createAvatarClient({
+  domain: "myapp.com",
+  network: "mainnet",
+  provider: wallet, // Pass ethers wallet directly
+});
+
+// Upload works the same way
+const result = await client.uploadAvatar({
+  subname: "myavatar.offchainsub.eth",
+  file: avatarFile,
+});
+```
+
+#### With Wagmi (React)
+
+```typescript
+import { createAvatarClient } from "@thenamespace/ens-images";
+import { useWalletClient } from "wagmi";
+
+function MyComponent() {
+  const { data: walletClient } = useWalletClient();
+
+  const client = createAvatarClient({
+    domain: "myapp.com",
+    network: "mainnet",
+    provider: walletClient, // Pass wagmi's wallet client directly
+  });
+
+  // Use the client...
+}
+```
+
+#### Custom Provider (Advanced)
+
+If you need to create a custom adapter:
+
+```typescript
+const customProvider = {
+  getAddress: () => "0x...",
+  signMessage: (msg) => signatureFunction(msg),
+  getChainId: () => 1,
+};
+
+const client = createAvatarClient({
+  domain: "myapp.com",
+  provider: customProvider,
+});
 ```
 
 ### Manual Flow (without Provider)
@@ -195,13 +262,13 @@ import { createAvatarClient } from "@thenamespace/ens-images";
 // Setup Viem
 const publicClient = createPublicClient({
   chain: mainnet,
-  transport: http("https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY"),
+  transport: http(),
 });
 
 const walletClient = createWalletClient({
   account: "0x...",
   chain: mainnet,
-  transport: http("https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY"),
+  transport: http(),
 });
 
 // Create SDK

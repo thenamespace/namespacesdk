@@ -6,17 +6,20 @@
  * avatar and header images for ENS subnames.
  * 
  * Supports both automatic and manual authentication flows:
- * - Automatic: Uses provided wallet provider for signing
+ * - Automatic: Pass your existing Viem WalletClient, Ethers Wallet/Signer, or WalletProvider directly
  * - Manual: Developers handle signing themselves
  * 
  * @example
  * ```typescript
  * import { createAvatarClient } from '@thenamespace/ens-images';
+ * import { createWalletClient } from 'viem'; // or import from 'ethers'
  * 
- * // Initialize with provider (automatic signing)
+ * // Initialize with your existing wallet client (Viem, Ethers, or WalletProvider)
+ * // No need to create adapters - just pass your wallet directly!
  * const client = createAvatarClient({
  *   network: 'mainnet',
- *   provider: walletProvider
+ *   domain: 'example.com',
+ *   provider: walletClient  // Pass viem/ethers wallet directly
  * });
  * 
  * // Simple upload - SDK handles everything
@@ -71,6 +74,11 @@ export {
   HEADER_MAX_SIZE,
   ALLOWED_FORMATS
 } from './utils/validation';
+
+// Wallet adapter exports (for advanced use cases)
+export {
+  adaptWallet
+} from './utils/wallet-adapters';
 
 // SIWE exports
 export {

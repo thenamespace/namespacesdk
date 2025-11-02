@@ -23,6 +23,7 @@ import {
   isNonceExpired,
   getDefaultChainId,
 } from '../auth/siwe';
+import { adaptWallet } from '../utils/wallet-adapters';
 
 /**
  * Main Avatar SDK client interface
@@ -103,11 +104,24 @@ class HttpAvatarClient implements AvatarClient {
   constructor(config: AvatarSDKConfig) {
     // Set defaults
     const apiUrl = config.apiUrl || DEFAULT_API_URLS[config.network || 'mainnet'];
+    
+    // Adapt the provider if provided
+    let adaptedProvider: WalletProvider | undefined;
+    if (config.provider) {
+      try {
+        adaptedProvider = adaptWallet(config.provider);
+      } catch (error) {
+        throw createError.invalidConfiguration(
+          error instanceof Error ? error.message : 'Invalid wallet provider'
+        );
+      }
+    }
+    
     this.config = {
       apiUrl,
       network: config.network || 'mainnet',
       domain: config.domain,
-      provider: config.provider
+      provider: adaptedProvider
     };
 
     this.http = axios.create({
