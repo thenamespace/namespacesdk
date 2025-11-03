@@ -1,0 +1,70 @@
+{
+  "name": "@thenamespace/avatar",
+  "version": "1.0.0",
+  "description": "TypeScript SDK for managing ENS avatar and header images with SIWE authentication",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [
+    "ens",
+    "ethereum",
+    "avatar",
+    "images",
+    "siwe",
+    "web3",
+    "sdk",
+    "namespace"
+  ],
+  "files": [
+    "/dist"
+  ],
+  "author": "Arti <arti@namespace.ninja>",
+  "contributors": [
+    "Harpreet Singh <harpreet@namespace.ninja>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thenamespace/namespacesdk",
+    "directory": "packages/avatar"
+  },
+  "homepage": "https://namespace.ninja",
+  "bugs": {
+    "url": "https://github.com/thenamespace/namespacesdk/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "siwe": "^3.0.0"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "start": "node dist/index.js",
+    "restart": "rimraf dist && tsc && node dist/index.js",
+    "dev": "ts-node examples/simple-usage.ts",
+    "test": "jest --testPathIgnorePatterns=e2e.test.ts",
+    "test:unit": "jest --testPathIgnorePatterns=e2e.test.ts",
+    "test:e2e": "RUN_E2E_TESTS=true jest tests/e2e.test.ts --runInBand",
+    "test:all": "jest",
+    "test:watch": "jest --watch --testPathIgnorePatterns=e2e.test.ts",
+    "test:coverage": "jest --coverage --testPathIgnorePatterns=e2e.test.ts",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run test:coverage",
+    "clean": "rimraf dist coverage"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.5",
+    "jest": "^29.7.0",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
