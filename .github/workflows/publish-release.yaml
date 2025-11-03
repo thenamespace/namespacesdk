@@ -12,6 +12,7 @@ on:
           - addresses
           - indexer
           - mint-manager
+          - avatar
       version:
         type: string
         description: "version"

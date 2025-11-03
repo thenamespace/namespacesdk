@@ -12,6 +12,7 @@ on:
           - addresses
           - indexer
           - mint-manager
+          - avatar
       version:
         type: string
         description: "Version to unpublish (e.g. 1.0.1)"
@@ -36,7 +37,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://registry.npmjs.org/'
+          registry-url: "https://registry.npmjs.org/"
 
       - name: Unpublish version from npm
         env:
