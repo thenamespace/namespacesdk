@@ -2,11 +2,11 @@
 
 # Namespace SDK - ENS Images
 
-[![npm version](https://img.shields.io/npm/v/@thenamespace/ens-images.svg)](https://www.npmjs.com/package/@thenamespace/ens-images)
+[![npm version](https://img.shields.io/npm/v/@thenamespace/avatar.svg)](https://www.npmjs.com/package/@thenamespace/avatar)
 
 ## Overview
 
-The `@thenamespace/ens-images` provides an easy-to-use client for managing ENS avatar and header images with SIWE authentication. With this SDK, developers can upload, update, and delete avatar and header images for ENS subnames.
+The `@thenamespace/avatar` provides an easy-to-use client for managing ENS avatar and header images with SIWE authentication. With this SDK, developers can upload, update, and delete avatar and header images for ENS subnames.
 
 ## Features
 
@@ -23,13 +23,13 @@ The `@thenamespace/ens-images` provides an easy-to-use client for managing ENS a
 ### Installation
 
 ```sh
-npm install @thenamespace/ens-images
+npm install @thenamespace/avatar
 ```
 
 ### Import the SDK
 
 ```typescript
-import { createAvatarClient } from "@thenamespace/ens-images";
+import { createAvatarClient } from "@thenamespace/avatar";
 ```
 
 ### Initialize the Client
@@ -63,7 +63,7 @@ const client = createAvatarClient({
 #### With Viem
 
 ```typescript
-import { createAvatarClient } from "@thenamespace/ens-images";
+import { createAvatarClient } from "@thenamespace/avatar";
 import { createWalletClient, http } from "viem";
 import { mainnet } from "viem/chains";
 
@@ -93,7 +93,7 @@ console.log("Avatar uploaded:", result.url);
 #### With Ethers.js
 
 ```typescript
-import { createAvatarClient } from "@thenamespace/ens-images";
+import { createAvatarClient } from "@thenamespace/avatar";
 import { JsonRpcProvider, Wallet } from "ethers";
 
 const provider = new JsonRpcProvider(RPC_URL);
@@ -116,7 +116,7 @@ const result = await client.uploadAvatar({
 #### With Wagmi (React)
 
 ```typescript
-import { createAvatarClient } from "@thenamespace/ens-images";
+import { createAvatarClient } from "@thenamespace/avatar";
 import { useWalletClient } from "wagmi";
 
 function MyComponent() {
@@ -152,7 +152,7 @@ const client = createAvatarClient({
 ### Manual Flow (without Provider)
 
 ```typescript
-import { createAvatarClient } from "@thenamespace/ens-images";
+import { createAvatarClient } from "@thenamespace/avatar";
 
 // Initialize without provider
 const client = createAvatarClient({
@@ -228,7 +228,7 @@ interface AvatarSDKConfig {
 The SDK provides comprehensive error handling with specific error types:
 
 ```typescript
-import { AvatarSDKError, ErrorCodes } from "@thenamespace/ens-images";
+import { AvatarSDKError, ErrorCodes } from "@thenamespace/avatar";
 
 try {
   await client.uploadAvatar(options);
@@ -257,7 +257,7 @@ try {
 ```typescript
 import { createWalletClient, createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
-import { createAvatarClient } from "@thenamespace/ens-images";
+import { createAvatarClient } from "@thenamespace/avatar";
 
 // Setup Viem
 const publicClient = createPublicClient({
@@ -294,7 +294,7 @@ const result = await client.uploadAvatar({
 
 ```typescript
 import { BrowserProvider } from "ethers";
-import { createAvatarClient } from "@thenamespace/ens-images";
+import { createAvatarClient } from "@thenamespace/avatar";
 
 // Setup Ethers
 const provider = new BrowserProvider(window.ethereum);
@@ -325,7 +325,7 @@ const result = await client.uploadHeader({
 
 ```typescript
 import React, { useState } from "react";
-import { createAvatarClient } from "@thenamespace/ens-images";
+import { createAvatarClient } from "@thenamespace/avatar";
 
 export function AvatarUploader() {
   const [uploading, setUploading] = useState(false);

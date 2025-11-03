@@ -11,7 +11,7 @@
  * 
  * @example
  * ```typescript
- * import { createAvatarClient } from '@thenamespace/ens-images';
+ * import { createAvatarClient } from '@thenamespace/avatar';
  * import { createWalletClient } from 'viem'; // or import from 'ethers'
  * 
  * // Initialize with your existing wallet client (Viem, Ethers, or WalletProvider)
