@@ -16,26 +16,46 @@ global.XMLHttpRequest = jest.fn(() => ({
   responseText: JSON.stringify({ url: 'https://example.com/image.jpg' }),
 })) as any;
 
+// Setup default axios.create mock
+const mockAxiosInstance = {
+  post: jest.fn(),
+  delete: jest.fn(),
+  interceptors: {
+    response: {
+      use: jest.fn()
+    }
+  }
+};
+
+mockAxios.create = jest.fn(() => mockAxiosInstance);
+
 describe('AvatarClient', () => {
   let client: ReturnType<typeof createAvatarClient>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset the axios.create mock
+    mockAxios.create.mockReturnValue(mockAxiosInstance);
+    
     client = createAvatarClient({
       network: 'mainnet',
+      domain: 'test-app.com',
       apiUrl: 'https://test-api.example.com'
     });
   });
 
   describe('Configuration', () => {
-    it('should create client with default configuration', () => {
-      const defaultClient = createAvatarClient();
+    it('should create client with domain', () => {
+      const defaultClient = createAvatarClient({
+        domain: 'example.com'
+      });
       expect(defaultClient).toBeDefined();
     });
 
     it('should create client with custom configuration', () => {
       const customClient = createAvatarClient({
         network: 'sepolia',
+        domain: 'custom-app.com',
         apiUrl: 'https://custom-api.example.com'
       });
       expect(customClient).toBeDefined();
@@ -44,25 +64,25 @@ describe('AvatarClient', () => {
 
   describe('SIWE Message Generation', () => {
     beforeEach(() => {
-      mockAxios.create.mockReturnValue({
-        post: jest.fn().mockResolvedValue({
-          data: {
-            nonce: 'test-nonce-123',
-            expiresAt: Date.now() + 60000
-          }
-        })
+      mockAxiosInstance.post = jest.fn().mockResolvedValue({
+        data: {
+          nonce: 'test-nonce-123',
+          expiresAt: Date.now() + 60000
+        }
       });
+      mockAxios.create.mockReturnValue(mockAxiosInstance);
     });
 
     it('should generate SIWE message for avatar', async () => {
       const result = await client.getSIWEMessageForAvatar({
         address: '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'
+        // domain is automatically used from initialization
       });
 
       expect(result).toHaveProperty('message');
       expect(result).toHaveProperty('nonce', 'test-nonce-123');
       expect(result).toHaveProperty('expiresAt');
-      expect(result.message).toContain('avatars.namespace.ninja wants you to sign in');
+      expect(result.message).toContain('test-app.com wants you to sign in');
     });
 
     it('should generate SIWE message for header', async () => {
@@ -76,13 +96,26 @@ describe('AvatarClient', () => {
     });
 
     it('should handle API errors when generating SIWE message', async () => {
-      mockAxios.create.mockReturnValue({
+      const mockErrorAxiosInstance = {
         post: jest.fn().mockRejectedValue({
           response: { status: 500, data: { message: 'Internal server error' } }
-        })
+        }),
+        delete: jest.fn(),
+        interceptors: {
+          response: {
+            use: jest.fn()
+          }
+        }
+      };
+      mockAxios.create.mockReturnValue(mockErrorAxiosInstance);
+      
+      const errorClient = createAvatarClient({
+        network: 'mainnet',
+        domain: 'test-app.com',
+        apiUrl: 'https://test-api.example.com'
       });
 
-      await expect(client.getSIWEMessageForAvatar({
+      await expect(errorClient.getSIWEMessageForAvatar({
         address: '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'
       })).rejects.toThrow('API Error 500: Internal server error');
     });
@@ -158,19 +191,19 @@ describe('AvatarClient', () => {
     };
 
     beforeEach(() => {
-      mockAxios.create.mockReturnValue({
-        post: jest.fn().mockResolvedValue({
-          data: {
-            nonce: 'test-nonce-123',
-            expiresAt: Date.now() + 60000
-          }
-        })
+      mockAxiosInstance.post = jest.fn().mockResolvedValue({
+        data: {
+          nonce: 'test-nonce-123',
+          expiresAt: Date.now() + 60000
+        }
       });
+      mockAxios.create.mockReturnValue(mockAxiosInstance);
     });
 
     it('should upload avatar with provider', async () => {
       const clientWithProvider = createAvatarClient({
         network: 'mainnet',
+        domain: 'test-app.com',
         provider: mockProvider
       });
 
@@ -195,7 +228,7 @@ describe('AvatarClient', () => {
         })
       };
       
-      (global.XMLHttpRequest as jest.Mock).mockImplementation(() => mockXHR);
+      (global.XMLHttpRequest as unknown as jest.Mock).mockImplementation(() => mockXHR);
 
       const result = await clientWithProvider.uploadAvatar({
         subname: 'test.eth',
@@ -219,26 +252,55 @@ describe('AvatarClient', () => {
 
   describe('Error Handling', () => {
     it('should handle network errors', async () => {
-      mockAxios.create.mockReturnValue({
+      const mockNetworkErrorInstance = {
         post: jest.fn().mockRejectedValue({
           request: {},
           message: 'Network Error'
-        })
+        }),
+        delete: jest.fn(),
+        interceptors: {
+          response: {
+            use: jest.fn()
+          }
+        }
+      };
+      mockAxios.create.mockReturnValue(mockNetworkErrorInstance);
+      
+      const networkErrorClient = createAvatarClient({
+        network: 'mainnet',
+        domain: 'test-app.com',
+        apiUrl: 'https://test-api.example.com'
       });
 
-      await expect(client.getSIWEMessageForAvatar({
+      await expect(networkErrorClient.getSIWEMessageForAvatar({
         address: '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'
       })).rejects.toThrow('Network error occurred. Please check your connection.');
     });
 
     it('should handle authentication errors', async () => {
-      mockAxios.create.mockReturnValue({
+      const mockAuthErrorInstance = {
+        post: jest.fn(),
         delete: jest.fn().mockRejectedValue({
           response: { status: 401, data: { message: 'Unauthorized' } }
-        })
+        }),
+        interceptors: {
+          response: {
+            use: jest.fn((success, error) => {
+              // Simulate interceptor
+              return error;
+            })
+          }
+        }
+      };
+      mockAxios.create.mockReturnValue(mockAuthErrorInstance);
+      
+      const authErrorClient = createAvatarClient({
+        network: 'mainnet',
+        domain: 'test-app.com',
+        apiUrl: 'https://test-api.example.com'
       });
 
-      await expect(client.deleteAvatarWithSignature({
+      await expect(authErrorClient.deleteAvatarWithSignature({
         subname: 'test.eth',
         message: 'test message',
         signature: '0x' + 'a'.repeat(130),
@@ -247,13 +309,29 @@ describe('AvatarClient', () => {
     });
 
     it('should handle ownership errors', async () => {
-      mockAxios.create.mockReturnValue({
+      const mockOwnershipErrorInstance = {
+        post: jest.fn(),
         delete: jest.fn().mockRejectedValue({
           response: { status: 403, data: { message: 'Forbidden' } }
-        })
+        }),
+        interceptors: {
+          response: {
+            use: jest.fn((success, error) => {
+              // Simulate interceptor
+              return error;
+            })
+          }
+        }
+      };
+      mockAxios.create.mockReturnValue(mockOwnershipErrorInstance);
+      
+      const ownershipErrorClient = createAvatarClient({
+        network: 'mainnet',
+        domain: 'test-app.com',
+        apiUrl: 'https://test-api.example.com'
       });
 
-      await expect(client.deleteAvatarWithSignature({
+      await expect(ownershipErrorClient.deleteAvatarWithSignature({
         subname: 'test.eth',
         message: 'test message',
         signature: '0x' + 'a'.repeat(130),
@@ -296,7 +374,7 @@ describe('AvatarClient', () => {
         })
       };
       
-      (global.XMLHttpRequest as jest.Mock).mockImplementation(() => mockXHR);
+      (global.XMLHttpRequest as unknown as jest.Mock).mockImplementation(() => mockXHR);
 
       await client.uploadAvatarWithSignature({
         subname: 'test.eth',

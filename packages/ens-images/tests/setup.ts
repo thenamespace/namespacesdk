@@ -81,12 +81,10 @@ global.File = class File extends Blob {
 global.URL = class URL {
   constructor(public href: string) {}
   
-  get hostname() {
-    try {
-      return new URL(this.href).hostname;
-    } catch {
-      return 'localhost';
-    }
+  get hostname(): string {
+    // Extract hostname from href
+    const match = this.href.match(/^https?:\/\/([^/:]+)/);
+    return match ? match[1] : 'localhost';
   }
 } as any;
 

@@ -1,4 +1,7 @@
 import { createAvatarClient } from '../src/index';
+import { JsonRpcProvider, Wallet } from 'ethers';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 /**
  * Ethers.js integration example for the Avatar SDK
@@ -7,45 +10,79 @@ import { createAvatarClient } from '../src/index';
 async function ethersIntegrationExample() {
   console.log('🔌 Ethers.js Integration Example\n');
 
-  // Mock Ethers.js setup (in real usage, you'd use actual Ethers.js)
-  const mockEthersProvider = {
-    getAddress: async () => '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a',
-    signMessage: async (message: string) => {
-      console.log(`   🔐 Signing message with Ethers.js: ${message.substring(0, 50)}...`);
-      // In real usage, this would be: await signer.signMessage(message)
-      return '0x' + 'b'.repeat(130); // Mock signature
-    },
-    getChainId: async () => 1 // Mainnet
-  };
+  // Real Ethers.js setup with private key
+  console.log('Setting up Ethers.js wallet...');
+  const privateKey = '0xd4e66100d9372d1369dc91c44c007df237d0bbb4a24782bda93d1201ff341276';
+  const provider = new JsonRpcProvider('https://eth.llamarpc.com');
+  const wallet = new Wallet(privateKey, provider);
+  
+  console.log(`✅ Wallet connected: ${wallet.address}\n`);
 
-  // Create Avatar SDK client with Ethers.js provider
+  // Create Avatar SDK client - just pass the ethers wallet directly!
+  // No need to create an adapter object anymore
   const client = createAvatarClient({
     network: 'mainnet',
-    provider: mockEthersProvider
+    domain: "happysingh.com",
+    provider: wallet  // Pass ethers wallet directly
   });
 
   try {
+    // Load the Goku image
+    console.log('Loading image file...');
+    const imagePath = join(__dirname, 'goku.jpeg');
+    const imageBuffer = readFileSync(imagePath);
+    const gokuFile = new File([new Uint8Array(imageBuffer)], 'goku.jpeg', { type: 'image/jpeg' });
+    console.log(`✅ Image loaded: ${gokuFile.name} (${gokuFile.size} bytes)\n`);
+
     console.log('1. Automatic avatar upload with Ethers.js provider...');
-    console.log('   Note: This would require an actual file');
-    console.log('   const result = await client.uploadAvatar({');
-    console.log('     subname: "myavatar.offchainsub.eth",');
-    console.log('     file: avatarFile,');
-    console.log('     onProgress: (progress) => console.log(`Upload: ${progress}%`)');
-    console.log('   });');
+    console.log(`   Subname: grgr.happygame.eth`);
+    console.log(`   File size: ${gokuFile.size} bytes`);
+    
+    try {
+      const result = await client.uploadAvatar({
+        subname: "grgr.happygame.eth",
+        file: gokuFile,
+        onProgress: (progress) => console.log(`   Upload progress: ${progress.toFixed(1)}%`)
+      });
+      
+      console.log('   ✅ Upload successful:');
+      console.log(`   URL: ${result.url}`);
+      console.log(`   File Size: ${result.fileSize} bytes`);
+      console.log(`   Uploaded At: ${result.uploadedAt}`);
+      console.log(`   Is Update: ${result.isUpdate}`);
+      if (result.pending) {
+        console.log(`   Status: Pending (${result.message})`);
+      }
+    } catch (uploadError) {
+      console.log('   ❌ Upload failed:');
+      console.log(`   Error: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`);
+    }
     console.log();
 
     console.log('2. Automatic header upload with Ethers.js provider...');
-    console.log('   const result = await client.uploadHeader({');
-    console.log('     subname: "myavatar.offchainsub.eth",');
-    console.log('     file: headerFile');
-    console.log('   });');
+    console.log(`   Subname: grgr.happygame.eth`);
+    console.log(`   File size: ${gokuFile.size} bytes`);
+    
+    try {
+      const headerResult = await client.uploadHeader({
+        subname: "grgr.happygame.eth",
+        file: gokuFile
+      });
+      
+      console.log('   ✅ Header upload successful:');
+      console.log(`   URL: ${headerResult.url}`);
+      console.log(`   File Size: ${headerResult.fileSize} bytes`);
+    } catch (uploadError) {
+      console.log('   ❌ Header upload failed:');
+      console.log(`   Error: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`);
+    }
     console.log();
 
     console.log('3. Manual flow with Ethers.js (for advanced use cases)...');
     
-    // Get SIWE message
+    // Get SIWE message for header
     const siweResult = await client.getSIWEMessageForHeader({
-      address: '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'
+      address: wallet.address
     });
 
     console.log('   ✅ SIWE message generated for header:');
@@ -53,19 +90,32 @@ async function ethersIntegrationExample() {
     console.log(`   Nonce: ${siweResult.nonce}`);
     console.log();
 
-    // Sign with Ethers.js (mock)
-    const signature = await mockEthersProvider.signMessage(siweResult.message);
+    // Sign with Ethers.js
+    console.log('   Signing SIWE message...');
+    const signature = await wallet.signMessage(siweResult.message);
     console.log(`   ✅ Message signed: ${signature.substring(0, 20)}...`);
     console.log();
 
     console.log('4. Upload header with signature...');
-    console.log('   const result = await client.uploadHeaderWithSignature({');
-    console.log('     subname: "myavatar.offchainsub.eth",');
-    console.log('     file: headerFile,');
-    console.log('     message: siweResult.message,');
-    console.log('     signature,');
-    console.log('     address: "0x54b06711C8022faf11EC347F2bDc68A91eA03a3a"');
-    console.log('   });');
+    console.log(`   Subname: grgr.happygame.eth`);
+    console.log(`   File size: ${gokuFile.size} bytes`);
+    
+    try {
+      const result = await client.uploadHeaderWithSignature({
+        subname: "grgr.happygame.eth",
+        file: gokuFile,
+        message: siweResult.message,
+        signature,
+        address: wallet.address
+      });
+      
+      console.log('   ✅ Upload with signature successful:');
+      console.log(`   URL: ${result.url}`);
+      console.log(`   File Size: ${result.fileSize} bytes`);
+    } catch (uploadError) {
+      console.log('   ❌ Upload with signature failed:');
+      console.log(`   Error: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`);
+    }
     console.log();
 
   } catch (error) {
@@ -74,92 +124,89 @@ async function ethersIntegrationExample() {
 }
 
 /**
- * Real Ethers.js setup example (commented out for demo)
- */
-function realEthersSetupExample() {
-  console.log('\n📝 Real Ethers.js Setup Example (commented out):\n');
-  
-  console.log(`
-// Real Ethers.js setup would look like this:
-
-import { BrowserProvider } from 'ethers';
-import { createAvatarClient } from '@thenamespace/ens-images';
-
-// Setup Ethers.js
-const provider = new BrowserProvider(window.ethereum);
-const signer = await provider.getSigner();
-
-// Create Avatar SDK with Ethers.js provider
-const client = createAvatarClient({
-  network: 'mainnet',
-  provider: {
-    getAddress: () => signer.getAddress(),
-    signMessage: (msg) => signer.signMessage(msg),
-    getChainId: async () => {
-      const network = await provider.getNetwork();
-      return Number(network.chainId);
-    }
-  }
-});
-
-// Upload header
-const result = await client.uploadHeader({
-  subname: 'myavatar.offchainsub.eth',
-  file: headerFile
-});
-
-console.log('Header uploaded:', result.url);
-  `);
-}
-
-/**
  * Delete operations example
  */
 async function deleteOperationsExample() {
   console.log('\n🗑️ Delete Operations Example\n');
 
-  const mockProvider = {
-    getAddress: async () => '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a',
-    signMessage: async (message: string) => {
-      console.log(`   🔐 Signing delete message: ${message.substring(0, 50)}...`);
-      return '0x' + 'c'.repeat(130);
-    },
-    getChainId: async () => 1
-  };
+  // Real Ethers.js setup for delete operations
+  console.log('Setting up Ethers.js wallet for delete operations...');
+  const privateKey = '0xd4e66100d9372d1369dc91c44c007df237d0bbb4a24782bda93d1201ff341276';
+  const provider = new JsonRpcProvider('https://eth.llamarpc.com');
+  const wallet = new Wallet(privateKey, provider);
+  
+  console.log(`✅ Wallet connected: ${wallet.address}\n`);
 
+  // Pass ethers wallet directly - no adapter needed!
   const client = createAvatarClient({
     network: 'mainnet',
-    provider: mockProvider
+    domain: "happysingh.com",
+    provider: wallet  // Pass ethers wallet directly
   });
 
   try {
     console.log('1. Delete avatar (automatic with provider)...');
-    console.log('   const result = await client.deleteAvatar({');
-    console.log('     subname: "myavatar.offchainsub.eth"');
-    console.log('   });');
+    console.log(`   Subname: grgr.happygame.eth`);
+    
+    try {
+      const result = await client.deleteAvatar({
+        subname: "grgr.happygame.eth"
+      });
+      
+      console.log('   ✅ Delete successful:');
+      console.log(`   Message: ${result.message}`);
+    } catch (deleteError) {
+      console.log('   ❌ Delete failed:');
+      console.log(`   Error: ${deleteError instanceof Error ? deleteError.message : String(deleteError)}`);
+    }
     console.log();
 
     console.log('2. Delete header (automatic with provider)...');
-    console.log('   const result = await client.deleteHeader({');
-    console.log('     subname: "myavatar.offchainsub.eth"');
-    console.log('   });');
+    console.log(`   Subname: grgr.happygame.eth`);
+    
+    try {
+      const result = await client.deleteHeader({
+        subname: "grgr.happygame.eth"
+      });
+      
+      console.log('   ✅ Delete successful:');
+      console.log(`   Message: ${result.message}`);
+    } catch (deleteError) {
+      console.log('   ❌ Delete failed:');
+      console.log(`   Error: ${deleteError instanceof Error ? deleteError.message : String(deleteError)}`);
+    }
     console.log();
 
     console.log('3. Manual delete with signature...');
     
     // Get SIWE message for delete
     const siweResult = await client.getSIWEMessageForAvatar({
-      address: '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'
+      address: wallet.address
     });
 
-    const signature = await mockProvider.signMessage(siweResult.message);
+    console.log('   ✅ SIWE message generated');
+    console.log(`   Nonce: ${siweResult.nonce}`);
     
-    console.log('   const result = await client.deleteAvatarWithSignature({');
-    console.log('     subname: "myavatar.offchainsub.eth",');
-    console.log('     message: siweResult.message,');
-    console.log('     signature,');
-    console.log('     address: "0x54b06711C8022faf11EC347F2bDc68A91eA03a3a"');
-    console.log('   });');
+    const signature = await wallet.signMessage(siweResult.message);
+    console.log(`   ✅ Message signed: ${signature.substring(0, 20)}...`);
+    console.log();
+    
+    console.log(`   Subname: grgr.happygame.eth`);
+    
+    try {
+      const result = await client.deleteAvatarWithSignature({
+        subname: "grgr.happygame.eth",
+        message: siweResult.message,
+        signature,
+        address: wallet.address
+      });
+      
+      console.log('   ✅ Delete with signature successful:');
+      console.log(`   Message: ${result.message}`);
+    } catch (deleteError) {
+      console.log('   ❌ Delete with signature failed:');
+      console.log(`   Error: ${deleteError instanceof Error ? deleteError.message : String(deleteError)}`);
+    }
     console.log();
 
   } catch (error) {
@@ -170,7 +217,6 @@ async function deleteOperationsExample() {
 // Run examples
 async function main() {
   await ethersIntegrationExample();
-  realEthersSetupExample();
   await deleteOperationsExample();
   
   console.log('\n🎉 Ethers.js integration examples completed!');
@@ -183,7 +229,6 @@ if (require.main === module) {
 
 export {
   ethersIntegrationExample,
-  realEthersSetupExample,
   deleteOperationsExample
 };
 

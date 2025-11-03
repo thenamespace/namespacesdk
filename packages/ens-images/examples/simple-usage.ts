@@ -45,13 +45,13 @@ async function simpleUsageExamples() {
       
       const publicClient = createPublicClient({
         chain: mainnet,
-        transport: http('https://eth-mainnet.g.alchemy.com/v2/pA1pwxPFLf_i6YgvfylQLmL9dmhQsUUp') // Using demo endpoint
+        transport: http()
       });
       
       const walletClient = createWalletClient({
         account,
         chain: mainnet,
-        transport: http('https://eth-mainnet.g.alchemy.com/v2/pA1pwxPFLf_i6YgvfylQLmL9dmhQsUUp')
+        transport: http()
       });
       
       console.log(`   ✅ Wallet connected: ${account.address}`);
@@ -116,29 +116,21 @@ async function providerUsageExamples() {
   
   const publicClient = createPublicClient({
     chain: mainnet,
-    transport: http('https://eth-mainnet.g.alchemy.com/v2/pA1pwxPFLf_i6YgvfylQLmL9dmhQsUUp')
+    transport: http()
   });
   
   const walletClient = createWalletClient({
     account,
     chain: mainnet,
-    transport: http('https://eth-mainnet.g.alchemy.com/v2/pA1pwxPFLf_i6YgvfylQLmL9dmhQsUUp')
+    transport: http()
   });
   
-  const realProvider = {
-    getAddress: async () => account.address,
-    signMessage: async (message: string) => {
-      console.log(`   Signing message: ${message}`);
-      return await walletClient.signMessage({ message });
-    },
-    getChainId: async () => walletClient.chain.id
-  };
-
-  // Create client with provider (automatic flow)
+  // Create client with Viem wallet client directly (automatic flow)
+  // No need to create an adapter - just pass the wallet client!
   const client = createAvatarClient({
     network: 'mainnet',
     domain: "happysingh.com",
-    provider: realProvider
+    provider: walletClient  // Pass viem wallet client directly
   });
 
   try {

@@ -6,7 +6,7 @@ import { createAvatarClient, AvatarSDKError, ErrorCodes } from '../src/index';
  * This example shows how to integrate the Avatar SDK with React
  */
 
-// Mock wallet provider for React
+// Mock wallet provider for React demo purposes
 const createMockProvider = () => ({
   getAddress: async () => '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a',
   signMessage: async (message: string) => {
@@ -15,6 +15,20 @@ const createMockProvider = () => ({
   },
   getChainId: async () => 1
 });
+
+// In a real app, you can pass wallet clients directly from wagmi, ethers, or viem:
+// 
+// Example with wagmi (v2):
+// import { useWalletClient } from 'wagmi'
+// const { data: walletClient } = useWalletClient()
+// provider: walletClient  // Pass wagmi's wallet client directly!
+//
+// Example with ethers:
+// import { useEthersProvider, useEthersSigner } from './your-ethers-hooks'
+// const signer = useEthersSigner()
+// provider: signer  // Pass ethers signer directly!
+//
+// No need to create adapter objects - the SDK handles it automatically!
 
 /**
  * Avatar Uploader Component
@@ -33,6 +47,7 @@ export function AvatarUploader() {
 
     try {
       const client = createAvatarClient({
+        domain: 'example.com',
         network: 'mainnet',
         provider: createMockProvider()
       });
@@ -167,11 +182,17 @@ export function ManualAvatarUploader() {
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const client = createAvatarClient({ network: 'mainnet' });
+  const client = createAvatarClient({ 
+    domain: 'example.com',
+    network: 'mainnet' 
+  });
 
   const generateSIWEMessage = useCallback(async () => {
     try {
-      const siweResult = await client.getSIWEMessageForAvatar({ address });
+      const siweResult = await client.getSIWEMessageForAvatar({ 
+        address
+        // domain is automatically used from initialization
+      });
       setSiweMessage(siweResult.message);
       setError(null);
     } catch (err) {
@@ -328,7 +349,7 @@ export function ErrorHandlingExample() {
   const testFileTooLarge = useCallback(() => {
     try {
       // This would normally be caught by validation
-      const client = createAvatarClient();
+      const client = createAvatarClient({ domain: 'example.com' });
       // Simulate file too large error
       throw new Error('File too large. Max size for avatar: 2MB');
     } catch (err) {
