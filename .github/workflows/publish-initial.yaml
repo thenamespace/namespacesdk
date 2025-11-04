@@ -1,0 +1,223 @@
+---
+name: Publish Initial Package Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        type: choice
+        description: Package name
+        options:
+          - avatar
+      version:
+        type: string
+        description: "Initial version (e.g. 1.0.0)"
+        default: "1.0.0"
+      changelog:
+        type: string
+        description: "Changelog (markdown format, do NOT include version or date header. Use sections like ### Added, ### Changed, etc.)"
+        default: ""
+      discord_notify:
+        type: boolean
+        description: "If checked, the release will notify on discord"
+        default: false
+
+jobs:
+  publish-initial:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Read current version from package.json
+        id: current-version
+        working-directory: packages/${{ inputs.package }}
+        run: |
+          version=$(jq -r '.version' package.json)
+          echo "Current version in package.json: $version"
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Validate version format
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          # Ensure semver format
+          if [[ ! "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "❌ Invalid version format. Must follow semantic versioning (e.g., 1.0.0 or 1.0.0-suffix)"
+            exit 1
+          fi
+
+          version="${{ inputs.version }}"
+          echo "Initial version to publish: $version"
+
+      - name: Check if package exists on npm
+        id: check-npm
+        run: |
+          PACKAGE_NAME="@thenamespace/${{ inputs.package }}"
+
+          if npm view "$PACKAGE_NAME" version 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "⚠️  Package $PACKAGE_NAME already exists on npm"
+            LATEST_VERSION=$(npm view "$PACKAGE_NAME" version)
+            echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+            echo "Latest published version: $LATEST_VERSION"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "✅ Package $PACKAGE_NAME does not exist on npm - ready for initial publish"
+          fi
+
+      - name: Warn if package already exists
+        if: steps.check-npm.outputs.exists == 'true'
+        run: |
+          echo "⚠️  WARNING: Package @thenamespace/${{ inputs.package }} already exists on npm!"
+          echo "Current published version: ${{ steps.check-npm.outputs.latest_version }}"
+          echo "You are trying to publish version: ${{ inputs.version }}"
+          echo ""
+          echo "If you want to publish a new version of an existing package, use the 'Publish New Package Version' workflow instead."
+          echo ""
+          echo "❌ Stopping workflow to prevent conflicts."
+          exit 1
+
+      - name: Validate changelog
+        run: |
+          if [ -z "${{ inputs.changelog }}" ]; then
+            echo "❌ Changelog is required for initial publish."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build workspace dependencies
+        run: |
+          # Build the addresses package as it's a dependency for mint-manager
+          if [ -d "packages/addresses" ]; then
+            echo "Building @thenamespace/addresses..."
+            npm run build --workspace=@thenamespace/addresses
+          fi
+
+      - name: Build selected package
+        working-directory: packages/${{ inputs.package }}
+        run: npm run build
+
+      - name: Update package version in package.json
+        working-directory: packages/${{ inputs.package }}
+        run: |
+          npm version ${{ inputs.version }} --no-git-tag-version
+
+      - name: Publish package to npm registry (initial release)
+        working-directory: packages/${{ inputs.package }}
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Commit and push version bump and tag
+        env:
+          VERSION: ${{ inputs.version }}
+          CHANGELOG: ${{ inputs.changelog }}
+          PACKAGE: ${{ inputs.package }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          echo "📝 Creating changelog for initial release $VERSION"
+
+          FILE="changelog/${PACKAGE}-changelog.md"
+          TEMP_FILE="${FILE}.tmp"
+          DATE=$(date +'%Y-%m-%d')
+          HEADER="## [${VERSION}] - ${DATE}"
+
+          if [ ! -f "$FILE" ]; then
+            echo -e "# Changelog\n" > "$FILE"
+          fi
+
+          # Find the line number of the "# Changelog" header
+          HEADER_LINE=$(grep -n "^# Changelog" "$FILE" | cut -d: -f1)
+          if [ -z "$HEADER_LINE" ]; then
+            # If not found, just prepend
+            HEADER_LINE=0
+          fi
+
+          # Find the line number after the intro section (after the first blank line following '# Changelog')
+          INTRO_END_LINE=$(awk '/^# Changelog/{flag=1; next} flag && /^$/{print NR; exit}' "$FILE")
+          if [ -z "$INTRO_END_LINE" ]; then
+            # Fallback: if not found, use header line
+            HEADER_LINE=$(grep -n "^# Changelog" "$FILE" | cut -d: -f1)
+            if [ -z "$HEADER_LINE" ]; then
+              HEADER_LINE=0
+            fi
+            INTRO_END_LINE=$((HEADER_LINE + 1))
+          fi
+
+          # Process the changelog input to ensure proper formatting
+          # Handle both multi-line and single-line input from GitHub UI
+          PRETTY_CHANGELOG=$(echo "$CHANGELOG" | sed -E 's/\\n/\n/g' | sed -E 's/\\1/\n/g' | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
+
+          # Write up to and including the intro
+          if [ "$INTRO_END_LINE" -gt 0 ]; then
+            head -n "$INTRO_END_LINE" "$FILE" > "$TEMP_FILE"
+          fi
+          # Add the new entry
+          echo -e "\n${HEADER}\n\n${PRETTY_CHANGELOG}\n" >> "$TEMP_FILE"
+          # Add the rest of the file
+          if [ "$INTRO_END_LINE" -gt 0 ]; then
+            tail -n "+$((INTRO_END_LINE + 1))" "$FILE" >> "$TEMP_FILE"
+          fi
+          mv "$TEMP_FILE" "$FILE"
+
+          # Commit the updated package.json with new version
+          git add packages/$PACKAGE/package.json
+          git add changelog/*
+          git commit -m "chore($PACKAGE): initial release v$VERSION"
+
+          # Create a tag with the version
+          TAG="${PACKAGE}-${VERSION}"
+
+          git tag -a "$TAG" -m "Initial release $TAG"
+
+          # Push commit and tag
+          git push origin HEAD
+          git push origin "$TAG"
+
+      - name: Post update to Discord
+        if: ${{ inputs.discord_notify == true }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+          VERSION: ${{ inputs.version }}
+          CHANGELOG: ${{ inputs.changelog }}
+          PACKAGE: ${{ inputs.package }}
+        run: |
+          MESSAGE="🎉 **Initial Release!** Published *@thenamespace/${PACKAGE}* version \`${VERSION}\` for the first time!\n\n📝 ${CHANGELOG}"
+
+          curl -X POST -H "Content-Type: application/json" \
+            -d "{\"content\": \"$MESSAGE\"}" \
+            "$DISCORD_WEBHOOK_URL"
+
+      - name: Summary
+        run: |
+          echo "## 🎉 Initial Package Published Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Package**: @thenamespace/${{ inputs.package }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag**: ${{ inputs.package }}-${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Installation" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "npm install @thenamespace/${{ inputs.package }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [npm Package](https://www.npmjs.com/package/@thenamespace/${{ inputs.package }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Release](https://github.com/thenamespace/namespacesdk/releases/tag/${{ inputs.package }}-${{ inputs.version }})" >> $GITHUB_STEP_SUMMARY
