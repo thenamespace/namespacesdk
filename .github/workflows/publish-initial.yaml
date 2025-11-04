@@ -114,7 +114,15 @@ jobs:
       - name: Update package version in package.json
         working-directory: packages/${{ inputs.package }}
         run: |
-          npm version ${{ inputs.version }} --no-git-tag-version
+          CURRENT_VERSION=$(jq -r '.version' package.json)
+          TARGET_VERSION="${{ inputs.version }}"
+
+          if [ "$CURRENT_VERSION" = "$TARGET_VERSION" ]; then
+            echo "✅ Version is already $TARGET_VERSION, no update needed"
+          else
+            echo "Updating version from $CURRENT_VERSION to $TARGET_VERSION"
+            npm version $TARGET_VERSION --no-git-tag-version
+          fi
 
       - name: Publish package to npm registry (initial release)
         working-directory: packages/${{ inputs.package }}
