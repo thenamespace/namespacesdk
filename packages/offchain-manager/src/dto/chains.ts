@@ -206,7 +206,7 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
   },
   monad: {
     label: "Monad",
-    coin: 10143,
+    coin: 143,
     evm: true,
   },
   push: {
