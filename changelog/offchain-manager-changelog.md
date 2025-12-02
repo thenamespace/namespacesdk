@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+## [1.0.10] - 2025-12-02
+
+### Changed 
+- **Monad Mainnet Support**: Updated Monad coin type from `10143` (testnet) to `143` (mainnet) for production network compatibility
+
 ## [1.0.9] - 2025-10-28
 
 ###Added:    
