@@ -1,6 +1,6 @@
 {
   "name": "@thenamespace/addresses",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "Library that contains all the Namespace & ENS contract addresses",
   "license": "MIT",
   "main": "dist/index.js",
