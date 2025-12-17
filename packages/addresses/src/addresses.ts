@@ -71,14 +71,14 @@ const ensContracts: Record<number, EnsContracts> = {
     [mainnetId]: {
         ensRegistry: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
         nameWrapper: "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401",
-        ethRegistrarController: "0x253553366Da8546fC250F225fe3d25d0C782303b",
+        ethRegistrarController: "0x59E16fcCd424Cc24e280Be16E11Bcd56fb0CE547",
         publicResolver: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
         universalResolver: "0xce01f8eee7E479C928F8919abD53E553a36CeF67"
     },
     [sepoliaId]: {
         ensRegistry: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
         nameWrapper: "0x0635513f179D50A207757E05759CbD106d7dFcE8",
-        ethRegistrarController: "0xFED6a969AaA60E4961FCD3EBF1A2e8913ac65B72",
+        ethRegistrarController: "0xfb3cE5D01e0f33f41DbB39035dB9745962F1f968",
         publicResolver: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
         universalResolver: "0xc8af999e38273d658be1b921b88a9ddf005769cc"
     }
