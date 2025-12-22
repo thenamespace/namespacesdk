@@ -11,7 +11,6 @@ export interface L1ContractAddresses {
     nameWrapperProxy: Address
     hybridResolver: Address
     oldHybridResolver: Address
-    bulkEnsRegistrar: Address
 }
 
 export interface L2ContractAddresses {
@@ -27,6 +26,7 @@ export interface EnsContracts {
     publicResolver: Address
     ethRegistrarController: Address
     universalResolver: Address
+    unwrappedRegistrarController: Address
 }
 
 const l1Contracts: Record<number, L1ContractAddresses> = {
@@ -35,7 +35,7 @@ const l1Contracts: Record<number, L1ContractAddresses> = {
         nameWrapperProxy: "0x25ADB7e69390FbfeEe26F3C8053955d4D4428Afd",
         hybridResolver: "0xe5A0277018879679d18cCDb66B52BD06f7fE95FD",
         oldHybridResolver: "0x0dcD506D1Be162E50A2b434028A9a148F2686444",
-        bulkEnsRegistrar: "0x99393f6ceb39a6fdefdfeed1606669b16c49c453"
+        bulkEnsRegistrar: "0x99393f6ceb39a6fdefdfeed1606669b16c49c453",
     },
     [sepoliaId]: {
         mintController: "0x313442ba3A0b12193787BD162f99Ed3C415F2886",
@@ -72,15 +72,17 @@ const ensContracts: Record<number, EnsContracts> = {
         ensRegistry: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
         nameWrapper: "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401",
         ethRegistrarController: "0x59E16fcCd424Cc24e280Be16E11Bcd56fb0CE547",
-        publicResolver: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
-        universalResolver: "0xce01f8eee7E479C928F8919abD53E553a36CeF67"
+        publicResolver: "0xF29100983E058B709F3D539b0c765937B804AC15",
+        universalResolver: "0xce01f8eee7E479C928F8919abD53E553a36CeF67",
+        unwrappedRegistrarController: "0x59E16fcCd424Cc24e280Be16E11Bcd56fb0CE547"
     },
     [sepoliaId]: {
         ensRegistry: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
         nameWrapper: "0x0635513f179D50A207757E05759CbD106d7dFcE8",
         ethRegistrarController: "0xfb3cE5D01e0f33f41DbB39035dB9745962F1f968",
-        publicResolver: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
-        universalResolver: "0xc8af999e38273d658be1b921b88a9ddf005769cc"
+        publicResolver: "0xE99638b40E4Fff0129D56f03b55b6bbC4BBE49b5",
+        universalResolver: "0xc8af999e38273d658be1b921b88a9ddf005769cc",
+        unwrappedRegistrarController: "0xfb3cE5D01e0f33f41DbB39035dB9745962F1f968"
     }
 }
 
