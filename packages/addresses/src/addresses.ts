@@ -11,6 +11,7 @@ export interface L1ContractAddresses {
     nameWrapperProxy: Address
     hybridResolver: Address
     oldHybridResolver: Address
+    bulkEnsRegistrar: Address
 }
 
 export interface L2ContractAddresses {
