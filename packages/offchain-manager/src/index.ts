@@ -34,8 +34,6 @@
  * @license MIT
  */
 
-import { ChainName, CreateSubnameRequest } from "./dto";
-import { createOffchainClient } from "./offchain-client";
 
 // Core client exports
 export {
