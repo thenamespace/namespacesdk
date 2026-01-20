@@ -186,6 +186,63 @@ describe('OffchainClient Integration Tests', () => {
                 addresses: [{ chain: ChainName.Ethereum, value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' }]
             });
         });
+
+        it('should send custom headers provided in config with authenticated requests', async () => {
+            const clientWithHeaders = createOffchainClient({
+                mode: 'sepolia',
+                defaultApiKey: 'config-default-key',
+                customHeaders: {
+                    'x-custom-header': 'from-config',
+                },
+            });
+
+            server.use(
+                http.post(`${baseURL}/api/v1/subnames`, async ({ request }) => {
+                    const authToken = request.headers.get('x-auth-token');
+                    expect(authToken).toBe('config-default-key');
+
+                    const custom = request.headers.get('x-custom-header');
+                    expect(custom).toBe('from-config');
+
+                    return HttpResponse.json({ success: true });
+                }),
+            );
+
+            await clientWithHeaders.createSubname({
+                parentName: 'example.eth',
+                label: 'test',
+                addresses: [{ chain: ChainName.Ethereum, value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' }],
+            });
+        });
+
+        it('should send custom headers set via setCustomHeaders with authenticated requests', async () => {
+            const clientWithHeaders = createOffchainClient({
+                mode: 'sepolia',
+                defaultApiKey: 'config-default-key',
+            });
+
+            clientWithHeaders.setCustomHeaders({
+                'x-custom-header': 'from-setter',
+            });
+
+            server.use(
+                http.post(`${baseURL}/api/v1/subnames`, async ({ request }) => {
+                    const authToken = request.headers.get('x-auth-token');
+                    expect(authToken).toBe('config-default-key');
+
+                    const custom = request.headers.get('x-custom-header');
+                    expect(custom).toBe('from-setter');
+
+                    return HttpResponse.json({ success: true });
+                }),
+            );
+
+            await clientWithHeaders.createSubname({
+                parentName: 'example.eth',
+                label: 'test',
+                addresses: [{ chain: ChainName.Ethereum, value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' }],
+            });
+        });
     });
 
     describe('Subname Operations', () => {

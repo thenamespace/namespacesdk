@@ -17,7 +17,8 @@ const AUTH_HEADER = "x-auth-token";
 export const _createSubname = (
   client: AxiosInstance,
   apiKey: string,
-  createRequest: CreateSubnameRequest
+  createRequest: CreateSubnameRequest,
+  customHeaders?: Record<string, any>
 ) => {
   const request: CreateSubnameRequest_Internal = {
     label: createRequest.label,
@@ -31,7 +32,7 @@ export const _createSubname = (
   };
 
   return client.post("/api/v1/subnames", request, {
-    headers: createAuthorizationHeaders(apiKey),
+    headers: createAuthorizationHeaders(apiKey, customHeaders),
   });
 };
 
@@ -39,7 +40,8 @@ export const _updateSubname = async (
   client: AxiosInstance,
   apiKey: string,
   fullSubname: string,
-  updateRequest: UpdateSubnameRequest
+  updateRequest: UpdateSubnameRequest,
+  customHeaders?: Record<string, any>
 ) => {
   const subname = await _getSingleSubname(client, fullSubname);
 
@@ -53,9 +55,11 @@ export const _updateSubname = async (
     ttl: updateRequest.ttl,
   };
 
-  return client.post("/api/v1/subnames", request, {
-    headers: createAuthorizationHeaders(apiKey),
-  }).then(res => res.data);
+  return client
+    .post("/api/v1/subnames", request, {
+      headers: createAuthorizationHeaders(apiKey, customHeaders),
+    })
+    .then((res) => res.data);
 };
 
 export const _addAddressRecord = async (
@@ -63,7 +67,8 @@ export const _addAddressRecord = async (
   apiKey: string,
   fullSubname: string,
   coin: number,
-  value: string
+  value: string,
+  customHeaders?: Record<string, any>
 ) => {
   const subname = await _getSingleSubname(client, fullSubname);
 
@@ -78,7 +83,7 @@ export const _addAddressRecord = async (
   };
 
   return client.post(`/api/v1/subnames`, request, {
-    headers: createAuthorizationHeaders(apiKey),
+    headers: createAuthorizationHeaders(apiKey, customHeaders),
   });
 };
 
@@ -87,6 +92,7 @@ export const _deleteAddressRecord = async (
   apiKey: string,
   fullSubname: string,
   coin: number,
+  customHeaders?: Record<string, any>
 ) => {
   const subname = await _getSingleSubname(client, fullSubname);
 
@@ -101,17 +107,18 @@ export const _deleteAddressRecord = async (
   };
 
   return client.post(`/api/v1/subnames`, request, {
-    headers: createAuthorizationHeaders(apiKey),
+    headers: createAuthorizationHeaders(apiKey, customHeaders),
   });
 };
 
 export const _deleteSubname = (
   client: AxiosInstance,
   apiKey: string,
-  fullSubname: string
+  fullSubname: string,
+  customHeaders?: Record<string, any>
 ) => {
   return client.delete(`/api/v1/subnames/${fullSubname}`, {
-    headers: createAuthorizationHeaders(apiKey),
+    headers: createAuthorizationHeaders(apiKey, customHeaders),
   });
 };
 
@@ -120,7 +127,8 @@ export const _addTextRecord = async (
   apiKey: string,
   fullSubname: string,
   key: string,
-  value: string
+  value: string,
+  customHeaders?: Record<string, any>
 ) => {
   const subname = await _getSingleSubname(client, fullSubname);
   const _req = subnameResponseToRequest(subname);
@@ -134,7 +142,7 @@ export const _addTextRecord = async (
   };
 
   return client.post(`/api/v1/subnames`, request, {
-    headers: createAuthorizationHeaders(apiKey),
+    headers: createAuthorizationHeaders(apiKey, customHeaders),
   });
 };
 
@@ -142,7 +150,8 @@ export const _deleteTextRecord = async (
   client: AxiosInstance,
   apiKey: string,
   fullSubname: string,
-  key: string
+  key: string,
+  customHeaders?: Record<string, any>
 ) => {
   const subname = await _getSingleSubname(client, fullSubname);
   const texts = subname.texts || {};
@@ -155,7 +164,7 @@ export const _deleteTextRecord = async (
   };
 
   return client.post(`/api/v1/subnames`, request, {
-    headers: createAuthorizationHeaders(apiKey),
+    headers: createAuthorizationHeaders(apiKey, customHeaders),
   });
 };
 
@@ -164,7 +173,8 @@ export const _addDataRecord = async (
   apiKey: string,
   fullSubname: string,
   key: string,
-  value: string
+  value: string,
+  customHeaders?: Record<string, any>
 ) => {
   const subname = await _getSingleSubname(client, fullSubname);
 
@@ -177,7 +187,7 @@ export const _addDataRecord = async (
   };
 
   return client.post(`/api/v1/subnames`, request, {
-    headers: createAuthorizationHeaders(apiKey),
+    headers: createAuthorizationHeaders(apiKey, customHeaders),
   });
 };
 
@@ -185,10 +195,13 @@ export const _deleteDataRecord = async (
   client: AxiosInstance,
   apiKey: string,
   fullSubname: string,
-  key: string
+  key: string,
+  customHeaders?: Record<string, any>
 ) => {
   const subname = await client
-    .get<SubnameDTO>(`/api/v1/subnames/${fullSubname}`)
+    .get<SubnameDTO>(`/api/v1/subnames/${fullSubname}`, {
+      headers: customHeaders,
+    })
     .then((res) => res.data);
 
   const updatedData = Object.entries(subname.metadata)
@@ -202,7 +215,7 @@ export const _deleteDataRecord = async (
   };
 
   return client.post(`/api/v1/subnames`, request, {
-    headers: createAuthorizationHeaders(apiKey),
+    headers: createAuthorizationHeaders(apiKey, customHeaders),
   });
 };
 
@@ -210,7 +223,8 @@ export const _setDefaultEthereumAddress = async (
   client: AxiosInstance,
   apiKey: string,
   fullSubname: string,
-  value: string
+  value: string,
+  customHeaders?: Record<string, any>
 ) => {
   const subname = await _getSingleSubname(client, fullSubname);
 
@@ -231,12 +245,26 @@ export const _setDefaultEthereumAddress = async (
   };
 
   return client.post(`/api/v1/subnames`, request, {
-    headers: createAuthorizationHeaders(apiKey),
+    headers: createAuthorizationHeaders(apiKey, customHeaders),
   });
 };
 
-const createAuthorizationHeaders = (apiKey: string) => {
-  return {
+const createAuthorizationHeaders = (
+  apiKey: string,
+  customHeaders?: Record<string, any>
+) => {
+  const base = {
     [AUTH_HEADER]: `${apiKey}`,
+  };
+
+  if (!customHeaders) {
+    return base;
+  }
+
+  // NOTE: If customHeaders includes the same auth header key (x-auth-token),
+  // it will explicitly override the API key value.
+  return {
+    ...base,
+    ...customHeaders,
   };
 };

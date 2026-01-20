@@ -73,6 +73,25 @@ export interface OffchainClient {
   setDefaultApiKey(apiKey: string): void;
 
   /**
+   * Set custom HTTP headers to be sent with each request.
+   * Useful for tracing, multi-tenant routing, or additional auth metadata.
+   *
+   * WARNING: The API key is sent using the "x-auth-token" header by default.
+   * If you pass a header with the same name here, it will overwrite the
+   * API key value used for authentication.
+   *
+   * @param headers - A record of header keys and values
+   * @example
+   * ```typescript
+   * client.setCustomHeaders({
+   *   'x-trace-id': '123',
+   *   'x-tenant-id': 'my-tenant',
+   * });
+   * ```
+   */
+  setCustomHeaders(headers: Record<string, any>): void;
+
+  /**
    * Create a new ENS subname with optional records.
    * @param request - Subname creation parameters
    * @throws {ValidationError} When request parameters are invalid
@@ -337,17 +356,30 @@ export interface OffchainClientConfig extends AxiosRequestConfig {
    * Equivalent to calling client.setApiKey(name, key) for each entry after initialization.
    */
   domainApiKeys?: Record<string, string>;
+
+  /**
+   * Support for optional custom headers that can be sent with each request.
+   *
+   * WARNING: The API key is sent using the "x-auth-token" header by default.
+   * If you set a header with the same name in customHeaders, it will overwrite
+   * the API key value used for authentication.
+   */
+  customHeaders?: Record<string, any>;
 }
 
 class HttpOffchainClient implements OffchainClient {
   private HTTP: AxiosInstance;
   private apiKeys: Record<string, string> = {};
   private defaultApiKey?: string;
+  private customHeaders?: Record<string, any>;
 
   constructor(private readonly config: OffchainClientConfig = {}) {
     const mode = config.mode || "mainnet";
     const uri = config.backendUri || backendUris[mode];
-    this.HTTP = axios.create({ ...this.config, baseURL: uri });
+    this.HTTP = axios.create({
+      ...this.config,
+      baseURL: uri,
+    });
 
     // Initialize authentication from config if provided
     if (config.defaultApiKey) {
@@ -358,6 +390,10 @@ class HttpOffchainClient implements OffchainClient {
         this.setApiKey(ensName, apiKey);
       }
     }
+
+    if (config.customHeaders) {
+      this.setCustomHeaders(config.customHeaders);
+    }
   }
   public async updateSubname(
     subname: string,
@@ -367,7 +403,8 @@ class HttpOffchainClient implements OffchainClient {
       this.HTTP,
       this.fetchApiKeyForName(subname),
       subname,
-      request
+      request,
+      this.customHeaders
     );
   }
 
@@ -385,7 +422,8 @@ class HttpOffchainClient implements OffchainClient {
       this.fetchApiKeyForName(subname),
       subname,
       coin,
-      value
+      value,
+      this.customHeaders
     );
   }
   public async deleteAddressRecord(
@@ -401,7 +439,8 @@ class HttpOffchainClient implements OffchainClient {
       this.HTTP,
       this.fetchApiKeyForName(subname),
       subname,
-      coin
+      coin,
+      this.customHeaders
     );
   }
 
@@ -413,7 +452,8 @@ class HttpOffchainClient implements OffchainClient {
       this.HTTP,
       this.fetchApiKeyForName(subname),
       subname,
-      value
+      value,
+      this.customHeaders
     );
   }
 
@@ -469,7 +509,8 @@ class HttpOffchainClient implements OffchainClient {
     await _createSubname(
       this.HTTP,
       this.fetchApiKeyForName(request.parentName, false),
-      request
+      request,
+      this.customHeaders
     );
   }
 
@@ -477,7 +518,8 @@ class HttpOffchainClient implements OffchainClient {
     await _deleteSubname(
       this.HTTP,
       this.fetchApiKeyForName(fullSubname),
-      fullSubname
+      fullSubname,
+      this.customHeaders
     );
   }
 
@@ -487,7 +529,8 @@ class HttpOffchainClient implements OffchainClient {
       this.fetchApiKeyForName(subname),
       subname,
       key,
-      value
+      value,
+      this.customHeaders
     );
   }
 
@@ -496,7 +539,8 @@ class HttpOffchainClient implements OffchainClient {
       this.HTTP,
       this.fetchApiKeyForName(fullSubname),
       fullSubname,
-      key
+      key,
+      this.customHeaders
     );
   }
 
@@ -506,7 +550,8 @@ class HttpOffchainClient implements OffchainClient {
       this.fetchApiKeyForName(subname),
       subname,
       key,
-      value
+      value,
+      this.customHeaders
     );
   }
 
@@ -515,7 +560,8 @@ class HttpOffchainClient implements OffchainClient {
       this.HTTP,
       this.fetchApiKeyForName(fullSubname),
       fullSubname,
-      key
+      key,
+      this.customHeaders
     );
   }
 
@@ -523,6 +569,16 @@ class HttpOffchainClient implements OffchainClient {
     query: QuerySubnamesRequest
   ): Promise<PagedResponse<SubnameDTO[]>> {
     return _getFilteredSubnames(this.HTTP, query);
+  }
+
+  public setCustomHeaders(headers: Record<string, any>): void {
+    this.customHeaders = headers || {};
+
+    // Apply custom headers as Axios defaults so they are sent with all requests
+    this.HTTP.defaults.headers.common = {
+      ...(this.HTTP.defaults.headers.common || {}),
+      ...this.customHeaders,
+    };
   }
 
   public setApiKey(ensName: string, apiKey: string) {
