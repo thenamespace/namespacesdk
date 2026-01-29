@@ -28,6 +28,7 @@ export interface EnsContracts {
     ethRegistrarController: Address
     universalResolver: Address
     unwrappedRegistrarController: Address
+    baseRegistrar: Address
 }
 
 const l1Contracts: Record<number, L1ContractAddresses> = {
@@ -75,7 +76,8 @@ const ensContracts: Record<number, EnsContracts> = {
         ethRegistrarController: "0x59E16fcCd424Cc24e280Be16E11Bcd56fb0CE547",
         publicResolver: "0xF29100983E058B709F3D539b0c765937B804AC15",
         universalResolver: "0xce01f8eee7E479C928F8919abD53E553a36CeF67",
-        unwrappedRegistrarController: "0x59E16fcCd424Cc24e280Be16E11Bcd56fb0CE547"
+        unwrappedRegistrarController: "0x59E16fcCd424Cc24e280Be16E11Bcd56fb0CE547",
+        baseRegistrar: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85"
     },
     [sepoliaId]: {
         ensRegistry: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
@@ -83,7 +85,8 @@ const ensContracts: Record<number, EnsContracts> = {
         ethRegistrarController: "0xfb3cE5D01e0f33f41DbB39035dB9745962F1f968",
         publicResolver: "0xE99638b40E4Fff0129D56f03b55b6bbC4BBE49b5",
         universalResolver: "0xc8af999e38273d658be1b921b88a9ddf005769cc",
-        unwrappedRegistrarController: "0xfb3cE5D01e0f33f41DbB39035dB9745962F1f968"
+        unwrappedRegistrarController: "0xfb3cE5D01e0f33f41DbB39035dB9745962F1f968",
+        baseRegistrar: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85"
     }
 }
 
