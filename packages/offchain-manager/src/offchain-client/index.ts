@@ -11,6 +11,7 @@ import {
   _deleteSubname,
   _deleteTextRecord,
   _updateSubname,
+  AUTH_HEADER,
 } from "./private-actions";
 import {
   _getDataRecord,
@@ -401,7 +402,7 @@ class HttpOffchainClient implements OffchainClient {
   ): Promise<void> {
     return _updateSubname(
       this.HTTP,
-      this.fetchApiKeyForName(subname),
+      this.fetchApiKeyForName(subname, true, this.hasTokenAuth(this.customHeaders)),
       subname,
       request,
       this.customHeaders
@@ -419,7 +420,7 @@ class HttpOffchainClient implements OffchainClient {
     }
     await _addAddressRecord(
       this.HTTP,
-      this.fetchApiKeyForName(subname),
+      this.fetchApiKeyForName(subname, true, this.hasTokenAuth(this.customHeaders)),
       subname,
       coin,
       value,
@@ -437,7 +438,7 @@ class HttpOffchainClient implements OffchainClient {
 
     await _deleteAddressRecord(
       this.HTTP,
-      this.fetchApiKeyForName(subname),
+      this.fetchApiKeyForName(subname, true, this.hasTokenAuth(this.customHeaders)),
       subname,
       coin,
       this.customHeaders
@@ -450,7 +451,7 @@ class HttpOffchainClient implements OffchainClient {
   ): Promise<void> {
     await _setDefaultEthereumAddress(
       this.HTTP,
-      this.fetchApiKeyForName(subname),
+      this.fetchApiKeyForName(subname, true, this.hasTokenAuth(this.customHeaders)),
       subname,
       value,
       this.customHeaders
@@ -508,7 +509,7 @@ class HttpOffchainClient implements OffchainClient {
   public async createSubname(request: CreateSubnameRequest) {
     await _createSubname(
       this.HTTP,
-      this.fetchApiKeyForName(request.parentName, false),
+      this.fetchApiKeyForName(request.parentName, false, this.hasTokenAuth(this.customHeaders)),
       request,
       this.customHeaders
     );
@@ -517,7 +518,7 @@ class HttpOffchainClient implements OffchainClient {
   public async deleteSubname(fullSubname: string) {
     await _deleteSubname(
       this.HTTP,
-      this.fetchApiKeyForName(fullSubname),
+        this.fetchApiKeyForName(fullSubname, true, this.hasTokenAuth(this.customHeaders)),
       fullSubname,
       this.customHeaders
     );
@@ -526,7 +527,7 @@ class HttpOffchainClient implements OffchainClient {
   public async addTextRecord(subname: string, key: string, value: string) {
     await _addTextRecord(
       this.HTTP,
-      this.fetchApiKeyForName(subname),
+        this.fetchApiKeyForName(subname, true, this.hasTokenAuth(this.customHeaders)),
       subname,
       key,
       value,
@@ -537,7 +538,7 @@ class HttpOffchainClient implements OffchainClient {
   public async deleteTextRecord(fullSubname: string, key: string) {
     await _deleteTextRecord(
       this.HTTP,
-      this.fetchApiKeyForName(fullSubname),
+      this.fetchApiKeyForName(fullSubname, true, this.hasTokenAuth(this.customHeaders)),
       fullSubname,
       key,
       this.customHeaders
@@ -547,7 +548,7 @@ class HttpOffchainClient implements OffchainClient {
   public async addDataRecord(subname: string, key: string, value: string) {
     await _addDataRecord(
       this.HTTP,
-      this.fetchApiKeyForName(subname),
+      this.fetchApiKeyForName(subname, true, this.hasTokenAuth(this.customHeaders)),
       subname,
       key,
       value,
@@ -558,7 +559,7 @@ class HttpOffchainClient implements OffchainClient {
   public async deleteDataRecord(fullSubname: string, key: string) {
     await _deleteDataRecord(
       this.HTTP,
-      this.fetchApiKeyForName(fullSubname),
+      this.fetchApiKeyForName(fullSubname, true, this.hasTokenAuth(this.customHeaders)),
       fullSubname,
       key,
       this.customHeaders
@@ -589,12 +590,21 @@ class HttpOffchainClient implements OffchainClient {
     this.defaultApiKey = apiKey;
   }
 
-  private fetchApiKeyForName = (name: string, isSubname: boolean = true) => {
+  private hasTokenAuth = (headers?: Record<string,string>): boolean => {
+
+    if (!headers) {
+      return false;
+    }
+
+    return headers[AUTH_HEADER] !== undefined && headers[AUTH_HEADER].length > 0;
+  }
+
+  private fetchApiKeyForName = (name: string, isSubname: boolean, tokenAuth: boolean) => {
     const extractParent = () => {
       const split = name.split(".");
       const splitLen = split.length;
 
-      if (splitLen < 2) {
+      if (splitLen < 2 && !tokenAuth) {
         throw Error(`Invalid ENS name: ${name}`);
       }
 
@@ -612,7 +622,11 @@ class HttpOffchainClient implements OffchainClient {
     if (this.defaultApiKey) {
       return this.defaultApiKey;
     }
-    throw new Error(`Api key is not present for name: ${parentName}. Use setApiKey() or setDefaultApiKey() to configure authentication.`);
+
+    if (!tokenAuth) {
+      throw new Error(`Api key is not present for name: ${parentName}. Use setApiKey() or setDefaultApiKey() to configure authentication.`);
+    }
+    return "";
   };
 }
 
