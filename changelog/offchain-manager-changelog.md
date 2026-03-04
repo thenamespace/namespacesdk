@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+## [1.0.12] - 2026-03-04
+
+Fixed the issue with authentication when custom token is provided
+
 ## [1.0.11] - 2026-01-20
 
 Add support for custom headers with api requests toward offchain-manager service
