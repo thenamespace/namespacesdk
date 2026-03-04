@@ -12,7 +12,7 @@ import { CreateSubnameRequest_Internal } from "../dto/internal-types";
 import { _getSingleSubname } from "./public-actions";
 import { UpdateSubnameRequest } from "../dto";
 
-const AUTH_HEADER = "x-auth-token";
+export const AUTH_HEADER = "x-auth-token";
 
 export const _createSubname = (
   client: AxiosInstance,
