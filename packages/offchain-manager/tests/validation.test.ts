@@ -123,6 +123,42 @@ describe('Validation Functions', () => {
             expect(() => validateAddress(validAlgorandAddress, ChainName.Algorand)).not.toThrow();
         });
 
+        it('should validate Polkadot addresses', () => {
+            // SS58 prefix 0 — Polkadot addresses are 47-48 chars and start with "1"
+            // (computed via @polkadot/util-crypto encodeAddress(pubkey, 0))
+            const validDot1 = '15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5';
+            const validDot2 = '14E5nqKAp3oAJcmzgZhUD2RcptBeUBScxKHgJKU4HPNcKVf3';
+            expect(() => validateAddress(validDot1, ChainName.Polkadot)).not.toThrow();
+            expect(() => validateAddress(validDot2, ChainName.Polkadot)).not.toThrow();
+        });
+
+        it('should reject invalid Polkadot addresses', () => {
+            // Vara address (wrong leading "kG")
+            expect(() => validateAddress('kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW', ChainName.Polkadot)).toThrow(ValidationError);
+            // Too short
+            expect(() => validateAddress('1FRM', ChainName.Polkadot)).toThrow(ValidationError);
+            // EVM-style address rejected
+            expect(() => validateAddress('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', ChainName.Polkadot)).toThrow(ValidationError);
+        });
+
+        it('should validate Vara Network addresses', () => {
+            // SS58 prefix 137 — Vara addresses always start with "kG" and are 49 chars long
+            // (computed via @polkadot/util-crypto encodeAddress(pubkey, 137))
+            const validVaraAddress = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
+            expect(() => validateAddress(validVaraAddress, ChainName.Vara)).not.toThrow();
+            const anotherValidVara = 'kGfXzQ99jakxFMQEox9iQYQ6zfMkwScJTScuPLSovqxjPbkXW';
+            expect(() => validateAddress(anotherValidVara, ChainName.Vara)).not.toThrow();
+        });
+
+        it('should reject invalid Vara Network addresses', () => {
+            // Polkadot address (SS58 prefix 0, leading "1")
+            expect(() => validateAddress('15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5', ChainName.Vara)).toThrow(ValidationError);
+            // Too short
+            expect(() => validateAddress('kGfo5pfYwgDbm3yKBV4', ChainName.Vara)).toThrow(ValidationError);
+            // EVM-style address rejected
+            expect(() => validateAddress('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', ChainName.Vara)).toThrow(ValidationError);
+        });
+
         it('should validate EVM-compatible chain addresses', () => {
             const validEVMAddress = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
             
