@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+## [1.0.13] - 2026-05-01
+
+### Added                                                                                                                                    
+- **Polkadot Network**: Added support for Polkadot (`ChainName.Polkadot`, coin type 354, SS58 prefix 0)  
+- **Vara Network**: Added support for Vara Network (`ChainName.Vara`, coin type 913, SS58 prefix 137)
+
 ## [1.0.12] - 2026-03-04
 
 Fixed the issue with authentication when custom token is provided
