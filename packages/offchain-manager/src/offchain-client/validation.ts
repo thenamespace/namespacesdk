@@ -1,6 +1,18 @@
 import { ValidationError } from './errors';
 import { ChainName } from '../dto';
 
+// Validates a Substrate SS58 address by leading characters, length range, and base58 charset.
+const isValidSs58 = (
+    value: string,
+    leadingChars: string,
+    minLen: number,
+    maxLen: number = minLen,
+): boolean => {
+    if (value.length < minLen || value.length > maxLen) return false;
+    if (!value.startsWith(leadingChars)) return false;
+    return /^[1-9A-HJ-NP-Za-km-z]+$/.test(value);
+};
+
 /**
  * Validates that a string is a properly formatted ENS domain name.
  * ENS supports many TLDs including .eth, .com, .art, .xyz, and others through ENS import.
@@ -146,7 +158,13 @@ export const validateSubname = (subname: string): void => {
  * 
  * // NEAR addresses (.near suffix)
  * validateAddress('alice.near', ChainName.Near); // ✅
- * 
+ *
+ * // Polkadot addresses (SS58, prefix 0 → 47-48 chars starting with "1")
+ * validateAddress('15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5', ChainName.Polkadot); // ✅
+ *
+ * // Vara Network addresses (SS58, prefix 137 → 49 chars starting with "kG")
+ * validateAddress('kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW', ChainName.Vara); // ✅
+ *
  * // Invalid examples
  * validateAddress('invalid', ChainName.Ethereum); // ❌ Throws ValidationError
  * validateAddress('0x123', ChainName.Ethereum); // ❌ Throws ValidationError (too short)
@@ -242,7 +260,21 @@ export const validateAddress = (address: string, chain: ChainName): void => {
                 throw new ValidationError(`Invalid Algorand address: ${address}`);
             }
             break;
-        
+
+        case ChainName.Polkadot:
+            // SS58 prefix 0 — addresses are 47-48 chars and start with "1"
+            if (!isValidSs58(address, '1', 47, 48)) {
+                throw new ValidationError(`Invalid Polkadot address: ${address}`);
+            }
+            break;
+
+        case ChainName.Vara:
+            // SS58 prefix 137 — addresses are 49 chars and always start with "kG"
+            if (!isValidSs58(address, 'kG', 49)) {
+                throw new ValidationError(`Invalid Vara address: ${address}`);
+            }
+            break;
+
         default:
             throw new ValidationError(`Unsupported chain: ${chain}`);
     }

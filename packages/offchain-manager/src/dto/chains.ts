@@ -68,6 +68,10 @@ export enum ChainName {
   Monad = "monad",
   /** Push Chain */
   Push = "push",
+  /** Polkadot */
+  Polkadot = "dot",
+  /** Vara Network */
+  Vara = "vara",
 }
 
 /**
@@ -213,6 +217,14 @@ export const chainMetadata: Record<ChainName, ChainMetadata> = {
     label: "Push Chain",
     coin: 42101,
     evm: true,
+  },
+  dot: {
+    label: "Polkadot",
+    coin: 354,
+  },
+  vara: {
+    label: "Vara",
+    coin: 913,
   },
 };
 
