@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/thenamespace/namespacesdk/release/assets/namespace-logo-light.png">
+  <img alt="Namespace" src="https://raw.githubusercontent.com/thenamespace/namespacesdk/release/assets/namespace-logo-dark.png" width="320">
+</picture>
+
 # @thenamespace/indexer
 
 A TypeScript SDK for interacting with the Namespace Indexer API. Query L2 subnames, registries, and metadata with full TypeScript support.

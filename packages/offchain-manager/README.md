@@ -1,4 +1,7 @@
-![Namespace Ninja](https://i.postimg.cc/Nfcbq9jP/namespace.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/thenamespace/namespacesdk/release/assets/namespace-logo-light.png">
+  <img alt="Namespace" src="https://raw.githubusercontent.com/thenamespace/namespacesdk/release/assets/namespace-logo-dark.png" width="320">
+</picture>
 
 # Namespace SDK - Offchain Manager
 
@@ -24,7 +27,7 @@ import { createOffchainClient } from "@thenamespace/offchain-manager";
 
 ### Initialize the Client
 
-To use the SDK, create an instance using the `createOffchainClient` factory function and set your API key, which you can obtain from [https://dev.namespace.ninja](https://dev.namespace.ninja).
+To use the SDK, create an instance using the `createOffchainClient` factory function and set your API key, which you can obtain from the [Namespace app](https://app.namespace.ninja/offchain?activeTab=apiKeys).
 
 ```typescript
 // 1) No-arg initialization (defaults to mainnet)
@@ -262,11 +265,11 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Support
 
-For any issues or feature requests, please open an issue on [GitHub](https://github.com/your-repo/namespace-sdk/issues).
+For any issues or feature requests, please open an issue on [GitHub](https://github.com/thenamespace/namespacesdk/issues).
 
 ## Contributing
 
-Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTING.md) before submitting a pull request.
+Contributions are welcome! Please read our [contributing guidelines](https://github.com/thenamespace/namespacesdk/blob/release/CONTRIBUTING.md) before submitting a pull request.
 
 ## Questions? Join our Builders Group chat
 

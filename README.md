@@ -1,4 +1,7 @@
-![Namespace Ninja](https://i.postimg.cc/Nfcbq9jP/namespace.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/thenamespace/namespacesdk/release/assets/namespace-logo-light.png">
+  <img alt="Namespace" src="https://raw.githubusercontent.com/thenamespace/namespacesdk/release/assets/namespace-logo-dark.png" width="320">
+</picture>
 
 TypeScript SDKs on Namespace API. Mint, manage & query offchain and onchain ENS subnames.
 

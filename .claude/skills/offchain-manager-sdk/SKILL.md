@@ -26,7 +26,7 @@ const client = createOffchainClient({
 });
 ```
 
-Use `'sepolia'` for testing, `'mainnet'` for production. Get API keys at https://dev.namespace.ninja
+Use `'sepolia'` for testing, `'mainnet'` for production. Get API keys at https://app.namespace.ninja/offchain?activeTab=apiKeys
 
 ### 2. Check availability before creating
 
