@@ -33,7 +33,7 @@ This document outlines how to test the Namespace SDK offchain-manager package be
 
 ### **Prerequisites**
 
-1. Get an API key from [Namespace Dev Portal](https://dev.namespace.ninja)
+1. Get an API key from the [Namespace app](https://app.namespace.ninja/offchain?activeTab=apiKeys)
 2. Have a test domain ready
 3. Install dependencies: `npm install`
 

@@ -54,7 +54,7 @@ export interface OffchainClient {
   /**
    * Set API key for a specific ENS domain.
    * @param ensName - The ENS domain name (e.g., 'example.eth')
-   * @param apiKey - Domain Based API key obtained from https://dev.namespace.ninja
+   * @param apiKey - Domain Based API key obtained from https://app.namespace.ninja/offchain?activeTab=apiKeys
    * @example
    * ```typescript
    * client.setApiKey('example.eth', 'your-domain-based-api-key');
@@ -65,7 +65,7 @@ export interface OffchainClient {
   /**
    * Set a default API key to be used for all your ENS domains with Namespace Resolver.
    * This is useful when you want to use the same API key for all domains registered with the same address.
-   * @param apiKey - Address Based API key obtained from https://dev.namespace.ninja
+   * @param apiKey - Address Based API key obtained from https://app.namespace.ninja/offchain?activeTab=apiKeys
    * @example
    * ```typescript
    * client.setDefaultApiKey('your-address-based-api-key');

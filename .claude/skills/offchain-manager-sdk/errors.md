@@ -38,7 +38,7 @@ try {
   await client.createSubname({ parentName: 'example.eth', label: 'alice' });
 } catch (error) {
   if (error instanceof AuthenticationError) {
-    // Invalid API key — get one at https://dev.namespace.ninja
+    // Invalid API key — get one at https://app.namespace.ninja/offchain?activeTab=apiKeys
   } else if (error instanceof SubnameAlreadyExistsError) {
     // Already registered — try a different label
   } else if (error instanceof ValidationError) {
