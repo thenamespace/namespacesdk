@@ -4,6 +4,8 @@ import {
   WalletProvider,
   UploadOptions,
   UploadResult,
+  AvatarUploadResult,
+  HeaderUploadResult,
   DeleteOptions,
   DeleteResult,
   SIWEMessageOptions,
@@ -14,7 +16,7 @@ import {
   NonceRequest,
   NonceResponse
 } from './types';
-import { createError, ErrorCodes } from './errors';
+import { AvatarSDKError, createError } from './errors';
 import { validateFile, validateSubname, validateAddress } from '../utils/validation';
 import {
   generateSIWEMessage,
@@ -26,18 +28,26 @@ import {
 import { adaptWallet } from '../utils/wallet-adapters';
 
 /**
+ * Axios errors may retain request configs and multipart bodies containing SIWE
+ * signatures. Keep only the human-readable message when exposing a cause.
+ */
+function safeError(error: unknown): Error | undefined {
+  return error instanceof Error ? new Error(error.message) : undefined;
+}
+
+/**
  * Main Avatar SDK client interface
  */
 export interface AvatarClient {
   /**
    * Upload avatar image (simplified - uses provider if available)
    */
-  uploadAvatar(options: UploadOptions): Promise<UploadResult>;
+  uploadAvatar(options: UploadOptions): Promise<AvatarUploadResult>;
   
   /**
    * Upload header image (simplified - uses provider if available)
    */
-  uploadHeader(options: UploadOptions): Promise<UploadResult>;
+  uploadHeader(options: UploadOptions): Promise<HeaderUploadResult>;
   
   /**
    * Delete avatar image (simplified - uses provider if available)
@@ -63,12 +73,12 @@ export interface AvatarClient {
   /**
    * Upload avatar with pre-signed message
    */
-  uploadAvatarWithSignature(options: UploadWithSignatureOptions): Promise<UploadResult>;
+  uploadAvatarWithSignature(options: UploadWithSignatureOptions): Promise<AvatarUploadResult>;
   
   /**
    * Upload header with pre-signed message
    */
-  uploadHeaderWithSignature(options: UploadWithSignatureOptions): Promise<UploadResult>;
+  uploadHeaderWithSignature(options: UploadWithSignatureOptions): Promise<HeaderUploadResult>;
   
   /**
    * Delete avatar with pre-signed message
@@ -140,32 +150,36 @@ class HttpAvatarClient implements AvatarClient {
           // Server responded with error status
           const status = error.response.status;
           const data = error.response.data as any;
-          
-          if (status === 401) {
-            throw createError.invalidSignature();
-          } else if (status === 403) {
-            throw createError.notSubnameOwner('unknown');
-          } else if (status === 400) {
-            throw createError.apiError(status, data?.message || 'Bad Request');
-          } else {
-            throw createError.apiError(status, data?.message || 'API Error');
-          }
+          const serviceError = data?.error;
+          const message =
+            serviceError?.message ||
+            serviceError?.details?.message ||
+            data?.message ||
+            error.message ||
+            'API Error';
+          throw createError.apiError(
+            status,
+            message,
+            serviceError?.details?.code || serviceError?.code || data?.code,
+            serviceError?.details || data?.details
+          );
         } else if (error.request) {
           // Request was made but no response received
-          throw createError.networkError(error);
+          throw createError.networkError(safeError(error));
         } else {
           // Something else happened
-          throw createError.networkError(error);
+          throw createError.networkError(safeError(error));
         }
       }
     );
   }
 
-  async uploadAvatar(options: UploadOptions): Promise<UploadResult> {
+  async uploadAvatar(options: UploadOptions): Promise<AvatarUploadResult> {
     if (!this.config.provider) {
       throw createError.missingProvider();
     }
 
+    await this.ensureProviderNetwork();
     const address = await this.config.provider.getAddress();
     // Use initialized config domain
     const siweResult = await this.getSIWEMessageForAvatar({ 
@@ -182,11 +196,12 @@ class HttpAvatarClient implements AvatarClient {
     });
   }
 
-  async uploadHeader(options: UploadOptions): Promise<UploadResult> {
+  async uploadHeader(options: UploadOptions): Promise<HeaderUploadResult> {
     if (!this.config.provider) {
       throw createError.missingProvider();
     }
 
+    await this.ensureProviderNetwork();
     const address = await this.config.provider.getAddress();
     // Use initialized config domain
     const siweResult = await this.getSIWEMessageForHeader({ 
@@ -208,6 +223,7 @@ class HttpAvatarClient implements AvatarClient {
       throw createError.missingProvider();
     }
 
+    await this.ensureProviderNetwork();
     const address = await this.config.provider.getAddress();
     // Use initialized config domain
     const siweResult = await this.getSIWEMessageForAvatar({ 
@@ -229,6 +245,7 @@ class HttpAvatarClient implements AvatarClient {
       throw createError.missingProvider();
     }
 
+    await this.ensureProviderNetwork();
     const address = await this.config.provider.getAddress();
     // Use initialized config domain
     const siweResult = await this.getSIWEMessageForHeader({ 
@@ -264,7 +281,7 @@ class HttpAvatarClient implements AvatarClient {
       address: options.address,
       domain: domain,
       uri: options.uri, // Can be undefined - will be auto-generated as https://domain
-      chainId: options.chainId // Can be undefined - will default to 1
+      chainId: options.chainId ?? getDefaultChainId(this.config.network)
     };
 
     const message = generateSIWEMessage(resolvedOptions, nonceResponse.nonce);
@@ -295,7 +312,7 @@ class HttpAvatarClient implements AvatarClient {
       address: options.address,
       domain: domain,
       uri: options.uri, // Can be undefined - will be auto-generated as https://domain
-      chainId: options.chainId // Can be undefined - will default to 1
+      chainId: options.chainId ?? getDefaultChainId(this.config.network)
     };
 
     const message = generateSIWEMessage(resolvedOptions, nonceResponse.nonce);
@@ -307,7 +324,7 @@ class HttpAvatarClient implements AvatarClient {
     };
   }
 
-  async uploadAvatarWithSignature(options: UploadWithSignatureOptions): Promise<UploadResult> {
+  async uploadAvatarWithSignature(options: UploadWithSignatureOptions): Promise<AvatarUploadResult> {
     validateSubname(options.subname);
     validateFile(options.file, 'avatar');
     validateAddress(options.address);
@@ -316,10 +333,10 @@ class HttpAvatarClient implements AvatarClient {
       message: options.message,
       signature: options.signature,
       address: options.address
-    }, options.onProgress);
+    }, options.onProgress) as Promise<AvatarUploadResult>;
   }
 
-  async uploadHeaderWithSignature(options: UploadWithSignatureOptions): Promise<UploadResult> {
+  async uploadHeaderWithSignature(options: UploadWithSignatureOptions): Promise<HeaderUploadResult> {
     validateSubname(options.subname);
     validateFile(options.file, 'header');
     validateAddress(options.address);
@@ -328,7 +345,7 @@ class HttpAvatarClient implements AvatarClient {
       message: options.message,
       signature: options.signature,
       address: options.address
-    }, options.onProgress);
+    }, options.onProgress) as Promise<HeaderUploadResult>;
   }
 
   async deleteAvatarWithSignature(options: DeleteWithSignatureOptions): Promise<DeleteResult> {
@@ -358,10 +375,13 @@ class HttpAvatarClient implements AvatarClient {
       const response = await this.http.post<NonceResponse>('/auth/nonce', request);
       return response.data;
     } catch (error) {
+      if (error instanceof AvatarSDKError) {
+        throw error;
+      }
       if (error instanceof AxiosError) {
         throw createError.apiError(error.response?.status || 500, error.message);
       }
-      throw createError.networkError(error as Error);
+      throw createError.networkError(safeError(error));
     }
   }
 
@@ -371,7 +391,7 @@ class HttpAvatarClient implements AvatarClient {
     type: 'avatar' | 'header',
     siweData: { message: string; signature: string; address: string },
     onProgress?: (progress: number) => void
-  ): Promise<UploadResult> {
+  ): Promise<AvatarUploadResult | HeaderUploadResult> {
     const formData = new FormData();
     
     // Handle both File and Buffer
@@ -390,13 +410,16 @@ class HttpAvatarClient implements AvatarClient {
 
     try {
       const response = await this.uploadWithProgress(
-        `/profile/${this.config.network}/${subname}/${type}`,
+        this.getMutationPath(subname, type),
         formData,
         onProgress
       );
-      return response.data;
+      return this.normalizeUploadResult(response.data, type);
     } catch (error) {
-      throw createError.uploadFailed(error as Error);
+      if (error instanceof AvatarSDKError) {
+        throw error;
+      }
+      throw createError.uploadFailed(safeError(error));
     }
   }
 
@@ -407,7 +430,7 @@ class HttpAvatarClient implements AvatarClient {
   ): Promise<DeleteResult> {
     try {
       const response = await this.http.delete(
-        `/profile/${this.config.network}/${subname}/${type}`,
+        this.getMutationPath(subname, type),
         {
           data: {
             siweMessage: siweData.message,
@@ -418,8 +441,80 @@ class HttpAvatarClient implements AvatarClient {
       );
       return response.data;
     } catch (error) {
-      throw createError.deleteFailed(error as Error);
+      if (error instanceof AvatarSDKError) {
+        throw error;
+      }
+      throw createError.deleteFailed(safeError(error));
     }
+  }
+
+  /**
+   * Header media mutations use the compact `/h` route. The multipart field,
+   * SIWE nonce scope, and SIWE verification action remain `header`.
+   */
+  private getMutationPath(subname: string, type: 'avatar' | 'header'): string {
+    const mediaPath = type === 'header' ? 'h' : 'avatar';
+    return `/profile/${this.config.network}/${subname}/${mediaPath}`;
+  }
+
+  /**
+   * Metadata Service responses use media-specific URL keys. Keep the SDK's
+   * historical `url` field while exposing the service response fields too.
+   */
+  private normalizeUploadResult(
+    result: UploadResult,
+    type: 'avatar' | 'header'
+  ): AvatarUploadResult | HeaderUploadResult {
+    const mediaUrl = type === 'header' ? result.headerUrl : result.avatarUrl;
+    const url = mediaUrl || result.url;
+    if (!url) {
+      throw createError.apiError(
+        502,
+        `Metadata Service response did not include ${type === 'header' ? 'headerUrl' : 'avatarUrl'}`
+      );
+    }
+    try {
+      if (!/^https?:\/\//i.test(url)) {
+        throw new Error('Unsupported URL protocol');
+      }
+      new URL(url);
+    } catch {
+      throw createError.apiError(
+        502,
+        `Metadata Service returned an invalid ${type === 'header' ? 'headerUrl' : 'avatarUrl'}`
+      );
+    }
+
+    return type === 'header'
+      ? { ...result, url, headerUrl: url }
+      : { ...result, url, avatarUrl: url };
+  }
+
+  private async ensureProviderNetwork(): Promise<void> {
+    const provider = this.config.provider;
+    if (!provider) {
+      throw createError.missingProvider();
+    }
+
+    const expectedChainId = getDefaultChainId(this.config.network);
+    let actualChainId = await provider.getChainId();
+    if (actualChainId === expectedChainId) {
+      return;
+    }
+
+    if (provider.switchChain) {
+      try {
+        await provider.switchChain(expectedChainId);
+      } catch {
+        throw createError.providerChainMismatch(expectedChainId, actualChainId);
+      }
+      actualChainId = await provider.getChainId();
+      if (actualChainId === expectedChainId) {
+        return;
+      }
+    }
+
+    throw createError.providerChainMismatch(expectedChainId, actualChainId);
   }
 
   private async uploadWithProgress(
@@ -427,13 +522,9 @@ class HttpAvatarClient implements AvatarClient {
     formData: FormData,
     onProgress?: (progress: number) => void
   ): Promise<any> {
-    const fullUrl = `${this.config.apiUrl}${url}`;
-    console.log(`   🔗 Upload URL: ${fullUrl}`);
-    console.log(`   📤 FormData prepared for upload`);
-
     try {
       // Use axios for better Node.js compatibility
-      const response = await this.http.post(fullUrl, formData, {
+      const response = await this.http.post(`${this.config.apiUrl}${url}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -446,15 +537,8 @@ class HttpAvatarClient implements AvatarClient {
         }
       });
 
-      console.log(`   📡 Response status: ${response.status}`);
-      console.log(`   📡 Response data:`, response.data);
       return { data: response.data };
     } catch (error: any) {
-      console.log(`   ❌ Upload error:`, error.message);
-      if (error.response) {
-        console.log(`   📡 Error response status: ${error.response.status}`);
-        console.log(`   📡 Error response data:`, error.response.data);
-      }
       throw error;
     }
   }

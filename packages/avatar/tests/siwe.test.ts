@@ -25,7 +25,7 @@ describe('SIWE Authentication', () => {
       expect(message).toContain('0x4f9E47C8b5EB5d0508CDAC175aa29e4b7EE529E9');
       expect(message).toContain('https://example.com');
       expect(message).toContain('testnonce123ABC');
-      expect(message).toContain('Sign in to Avatar Service');
+      expect(message).toContain('Authorize a metadata update');
     });
 
     it('should generate message with default URI from domain', () => {
@@ -361,4 +361,3 @@ describe('SIWE Authentication', () => {
     });
   });
 });
-

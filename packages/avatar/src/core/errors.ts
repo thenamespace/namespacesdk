@@ -4,12 +4,23 @@
 export class AvatarSDKError extends Error {
   public readonly code: string;
   public readonly originalError?: Error;
+  public readonly status?: number;
+  public readonly serviceCode?: string;
+  public readonly details?: unknown;
 
-  constructor(message: string, code: string, originalError?: Error) {
+  constructor(
+    message: string,
+    code: string,
+    originalError?: Error,
+    metadata?: { status?: number; serviceCode?: string; details?: unknown }
+  ) {
     super(message);
     this.name = 'AvatarSDKError';
     this.code = code;
     this.originalError = originalError;
+    this.status = metadata?.status;
+    this.serviceCode = metadata?.serviceCode;
+    this.details = metadata?.details;
     
     // Maintains proper stack trace for where our error was thrown (only available on V8)
     if (Error.captureStackTrace) {
@@ -46,6 +57,7 @@ export const ErrorCodes = {
   // Provider errors
   PROVIDER_NOT_CONNECTED: 'PROVIDER_NOT_CONNECTED',
   PROVIDER_ERROR: 'PROVIDER_ERROR',
+  PROVIDER_CHAIN_MISMATCH: 'PROVIDER_CHAIN_MISMATCH',
   
   // Configuration errors
   INVALID_CONFIG: 'INVALID_CONFIG',
@@ -112,10 +124,18 @@ export const createError = {
       originalError
     ),
     
-  apiError: (status: number, message: string) =>
+  apiError: (
+    status: number,
+    message: string,
+    serviceCode?: string,
+    details?: unknown,
+    originalError?: Error
+  ) =>
     new AvatarSDKError(
       `API Error ${status}: ${message}`,
-      ErrorCodes.API_ERROR
+      ErrorCodes.API_ERROR,
+      originalError,
+      { status, serviceCode, details }
     ),
     
   providerNotConnected: () =>
@@ -128,6 +148,14 @@ export const createError = {
     new AvatarSDKError(
       'Wallet provider is required for this operation',
       ErrorCodes.MISSING_PROVIDER
+    ),
+
+  providerChainMismatch: (expectedChainId: number, actualChainId: number) =>
+    new AvatarSDKError(
+      `Wallet is connected to chain ${actualChainId}, but the configured SDK network requires chain ${expectedChainId}. Switch the wallet network and try again.`,
+      ErrorCodes.PROVIDER_CHAIN_MISMATCH,
+      undefined,
+      { details: { expectedChainId, actualChainId } }
     ),
     
   uploadFailed: (originalError?: Error) =>
@@ -144,4 +172,3 @@ export const createError = {
       originalError
     ),
 };
-

@@ -106,7 +106,7 @@ describe('Wallet Adapters', () => {
       expect(chainId).toBe(11155111);
     });
 
-    it('should default to mainnet chain ID if no chain', async () => {
+    it('should reject when a Viem wallet does not expose its chain', async () => {
       const mockViemWallet = {
         account: { address: '0x4f9E47C8b5EB5d0508CDAC175aa29e4b7EE529E9' },
         chain: {}, // No id
@@ -114,9 +114,9 @@ describe('Wallet Adapters', () => {
       };
 
       const adapted = adaptWallet(mockViemWallet);
-      const chainId = await adapted.getChainId();
-      
-      expect(chainId).toBe(1);
+      await expect(adapted.getChainId()).rejects.toThrow(
+        'does not expose its connected chain ID'
+      );
     });
 
     it('should throw error if Viem wallet has no account', async () => {
@@ -239,16 +239,16 @@ describe('Wallet Adapters', () => {
       expect(chainId).toBe(11155111);
     });
 
-    it('should default to mainnet if no provider', async () => {
+    it('should reject when an Ethers wallet does not expose its chain', async () => {
       const mockEthersWallet = {
         address: '0x4f9E47C8b5EB5d0508CDAC175aa29e4b7EE529E9',
         signMessage: jest.fn()
       };
 
       const adapted = adaptWallet(mockEthersWallet);
-      const chainId = await adapted.getChainId();
-      
-      expect(chainId).toBe(1);
+      await expect(adapted.getChainId()).rejects.toThrow(
+        'does not expose its connected chain ID'
+      );
     });
 
     it('should throw error if Ethers wallet has no address', () => {
@@ -350,4 +350,3 @@ describe('Wallet Adapters', () => {
     });
   });
 });
-

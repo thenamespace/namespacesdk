@@ -64,10 +64,21 @@ describe('Avatar SDK Errors', () => {
       expect(ErrorCodes.API_ERROR).toBe('API_ERROR');
       expect(ErrorCodes.PROVIDER_NOT_CONNECTED).toBe('PROVIDER_NOT_CONNECTED');
       expect(ErrorCodes.PROVIDER_ERROR).toBe('PROVIDER_ERROR');
+      expect(ErrorCodes.PROVIDER_CHAIN_MISMATCH).toBe('PROVIDER_CHAIN_MISMATCH');
       expect(ErrorCodes.INVALID_CONFIG).toBe('INVALID_CONFIG');
       expect(ErrorCodes.MISSING_PROVIDER).toBe('MISSING_PROVIDER');
       expect(ErrorCodes.UPLOAD_FAILED).toBe('UPLOAD_FAILED');
       expect(ErrorCodes.DELETE_FAILED).toBe('DELETE_FAILED');
+    });
+
+    it('should expose expected and actual chains for provider mismatch errors', () => {
+      const error = createError.providerChainMismatch(11155111, 1);
+
+      expect(error.code).toBe(ErrorCodes.PROVIDER_CHAIN_MISMATCH);
+      expect(error.details).toEqual({
+        expectedChainId: 11155111,
+        actualChainId: 1
+      });
     });
 
     it('should have unique error codes', () => {
@@ -351,4 +362,3 @@ describe('Avatar SDK Errors', () => {
     });
   });
 });
-

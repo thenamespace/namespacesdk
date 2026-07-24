@@ -1,4 +1,4 @@
-import { SiweMessage } from 'siwe';
+import { SiweMessage } from '@signinwithethereum/siwe';
 import { SIWEOptionsResolved, NonceRequest, NonceResponse } from '../core/types';
 import { validateSIWEOptionsResolved } from '../utils/validation';
 
@@ -11,7 +11,7 @@ import { validateSIWEOptionsResolved } from '../utils/validation';
  * @internal This function expects all options to be resolved:
  * - domain: must be provided (resolved from config or options)
  * - uri: if not provided, will automatically be set to https://domain
- * - chainId: if not provided, defaults to 1 (mainnet)
+ * - chainId: must be resolved by the client for the configured network
  */
 export function generateSIWEMessage(
   options: SIWEOptionsResolved,
@@ -22,12 +22,12 @@ export function generateSIWEMessage(
   
   // Apply defaults for optional fields
   const uri = options.uri || `https://${options.domain}`;
-  const chainId = options.chainId || 1; // Default to mainnet
+  const chainId = options.chainId ?? 1;
   
   const message = new SiweMessage({
     domain: options.domain,
     address: options.address,
-    statement: `Sign in to Avatar Service`,
+    statement: 'Authorize a metadata update',
     uri: uri,
     version: '1',
     chainId: chainId,
@@ -81,4 +81,3 @@ export function isNonceExpired(expiresAt: number): boolean {
 export function getDefaultChainId(network: 'mainnet' | 'sepolia'): number {
   return network === 'mainnet' ? 1 : 11155111;
 }
-

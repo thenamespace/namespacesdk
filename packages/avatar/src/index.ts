@@ -47,6 +47,8 @@ export type {
   WalletProvider,
   UploadOptions,
   UploadResult,
+  AvatarUploadResult,
+  HeaderUploadResult,
   DeleteOptions,
   DeleteResult,
   SIWEMessageOptions,
@@ -89,4 +91,3 @@ export {
   isNonceExpired,
   getDefaultChainId,
 } from './auth/siwe';
-

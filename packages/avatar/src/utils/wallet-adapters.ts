@@ -67,8 +67,13 @@ function createViemAdapter(walletClient: any): WalletProvider {
       if (walletClient.chain?.id) {
         return walletClient.chain.id;
       }
-      return 1; // Default to mainnet
-    }
+      throw new Error('Viem wallet client does not expose its connected chain ID');
+    },
+    switchChain: typeof walletClient.switchChain === 'function'
+      ? async (chainId: number) => {
+          await walletClient.switchChain({ id: chainId });
+        }
+      : undefined
   };
 }
 
@@ -95,8 +100,15 @@ function createEthersAdapter(wallet: any): WalletProvider {
         const network = await wallet.provider.getNetwork();
         return Number(network.chainId);
       }
-      return 1; // Default to mainnet
-    }
+      throw new Error('Ethers wallet does not expose its connected chain ID');
+    },
+    switchChain: wallet.provider && typeof wallet.provider.send === 'function'
+      ? async (chainId: number) => {
+          await wallet.provider.send('wallet_switchEthereumChain', [
+            { chainId: `0x${chainId.toString(16)}` }
+          ]);
+        }
+      : undefined
   };
 }
 
@@ -127,4 +139,3 @@ export function adaptWallet(wallet: any): WalletProvider {
     'Unsupported wallet type. Please provide a Viem WalletClient, Ethers Wallet/Signer, or an object implementing the WalletProvider interface.'
   );
 }
-
