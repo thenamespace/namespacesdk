@@ -1,0 +1,4 @@
+interface:
+  display_name: "Namespace Avatar SDK"
+  short_description: "Maintain and release the Namespace Avatar SDK"
+  default_prompt: "Use $namespace-avatar-sdk to maintain, secure, test, or release @thenamespace/avatar."
