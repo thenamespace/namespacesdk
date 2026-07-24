@@ -13,7 +13,8 @@ The `@thenamespace/avatar` provides an easy-to-use client for managing ENS avata
 
 ## Features
 
-- 🔐 **SIWE Authentication** - Secure Sign-In with Ethereum
+- 🔐 **SIWE v4 Authentication** - Secure Sign-In with Ethereum for EOA and
+  deployed smart-contract wallet signatures supported by the Metadata Service
 - 🌐 **Direct Wallet Integration** - Pass Viem, Ethers, or any wallet client directly - no adapters needed!
 - 📱 **Framework Agnostic** - Use with any frontend framework
 - 🎯 **TypeScript First** - Full type safety
@@ -220,6 +221,27 @@ interface AvatarSDKConfig {
 }
 ```
 
+The SDK automatically uses chain ID `1` for `mainnet` and `11155111` for
+`sepolia` when building SIWE messages. An explicit `chainId` may still be
+provided to the manual message methods, but it must match the configured
+network for the Metadata Service to accept the mutation.
+
+`mainnet` is the default SDK network. Sepolia is used only when
+`network: "sepolia"` is explicitly configured. Before every automatic
+upload/delete operation, the SDK compares `provider.getChainId()` with the
+configured network. It uses `provider.switchChain()` when available; otherwise
+it throws `PROVIDER_CHAIN_MISMATCH` before requesting or signing a SIWE message.
+
+### Metadata Service routes
+
+Avatar mutations use
+`/profile/{network}/{subname}/avatar`. Header mutations use the compact
+`/profile/{network}/{subname}/h` endpoint. Header nonce scopes and multipart
+field names remain `header`.
+
+Authenticated uploads send `siweMessage`, `siweSignature`, and `address`
+alongside the media file. Deletes send the same three fields as JSON.
+
 ### File Validation
 
 - **Avatar**: Max 2MB
@@ -252,6 +274,13 @@ try {
   }
 }
 ```
+
+Metadata Service failures are normalized as `AvatarSDKError`. The stable SDK
+`code` is `API_ERROR`, while `status`, `serviceCode`, and `details` preserve the
+HTTP status and the service's structured error envelope. Automatic operations
+also use `PROVIDER_CHAIN_MISMATCH` when the wallet cannot be switched to the
+configured network. The SDK does not special-case signature formats or perform
+client-side ERC-6492 handling.
 
 ## Examples
 

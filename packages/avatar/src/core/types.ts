@@ -23,6 +23,8 @@ export interface WalletProvider {
   signMessage(message: string): Promise<string>;
   /** Get the current chain ID */
   getChainId(): Promise<number>;
+  /** Switch the connected wallet to a chain, when supported */
+  switchChain?(chainId: number): Promise<void>;
 }
 
 /**
@@ -41,8 +43,16 @@ export interface UploadOptions {
  * Upload result
  */
 export interface UploadResult {
-  /** URL of the uploaded image */
+  /** URL of the uploaded image (stable SDK alias) */
   url: string;
+  /** Avatar URL returned by the Metadata Service for avatar uploads */
+  avatarUrl?: string;
+  /** Compact header URL returned by the Metadata Service for header uploads */
+  headerUrl?: string;
+  /** ENS subname returned by the Metadata Service */
+  subname?: string;
+  /** Network returned by the Metadata Service */
+  network?: 'mainnet' | 'sepolia';
   /** Upload timestamp */
   uploadedAt: string;
   /** File size in bytes */
@@ -53,6 +63,16 @@ export interface UploadResult {
   pending?: boolean;
   /** Optional message from the server */
   message?: string;
+}
+
+/** Avatar upload response with the canonical public avatar URL */
+export interface AvatarUploadResult extends UploadResult {
+  avatarUrl: string;
+}
+
+/** Header upload response with the canonical public header URL */
+export interface HeaderUploadResult extends UploadResult {
+  headerUrl: string;
 }
 
 /**
@@ -98,7 +118,7 @@ export interface SIWEOptionsResolved {
   domain: string;
   /** Custom URI for SIWE (optional, will be auto-generated if not provided) */
   uri?: string;
-  /** Chain ID (defaults to 1 if not provided) */
+  /** Chain ID (resolved from the configured network if not provided) */
   chainId?: number;
 }
 
@@ -157,4 +177,3 @@ export interface NonceResponse {
   /** Expiration timestamp */
   expiresAt: number;
 }
-

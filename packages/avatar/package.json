@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "axios": "^1.7.9",
-    "siwe": "^3.0.0"
+    "@signinwithethereum/siwe": "^4.2.0"
   },
   "scripts": {
     "build": "rimraf dist && tsc",

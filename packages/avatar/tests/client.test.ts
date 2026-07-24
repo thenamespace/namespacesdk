@@ -95,6 +95,20 @@ describe('AvatarClient', () => {
       expect(result).toHaveProperty('expiresAt');
     });
 
+    it('should use the configured network as the default SIWE chain', async () => {
+      const sepoliaClient = createAvatarClient({
+        network: 'sepolia',
+        domain: 'test-app.com',
+        apiUrl: 'https://test-api.example.com'
+      });
+
+      const result = await sepoliaClient.getSIWEMessageForAvatar({
+        address: '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'
+      });
+
+      expect(result.message).toContain('Chain ID: 11155111');
+    });
+
     it('should handle API errors when generating SIWE message', async () => {
       const mockErrorAxiosInstance = {
         post: jest.fn().mockRejectedValue({
@@ -183,6 +197,96 @@ describe('AvatarClient', () => {
     });
   });
 
+  describe('Metadata Service mutation routes', () => {
+    const signedRequest = {
+      subname: 'test.eth',
+      message: 'signed SIWE message',
+      signature: '0x' + 'a'.repeat(130),
+      address: '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'
+    };
+
+    it('should upload headers through the compact /h endpoint', async () => {
+      mockAxiosInstance.post.mockResolvedValue({
+        data: {
+          headerUrl: 'https://avtr.cc/test.eth/h',
+          uploadedAt: new Date().toISOString(),
+          fileSize: 1024,
+          isUpdate: false
+        }
+      });
+
+      const result = await client.uploadHeaderWithSignature({
+        ...signedRequest,
+        file: new File(['header'], 'header.jpg', { type: 'image/jpeg' })
+      });
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+        'https://test-api.example.com/profile/mainnet/test.eth/h',
+        expect.any(FormData),
+        expect.any(Object)
+      );
+      expect(result.url).toBe('https://avtr.cc/test.eth/h');
+      expect(result.headerUrl).toBe('https://avtr.cc/test.eth/h');
+    });
+
+    it('should delete headers through the compact /h endpoint', async () => {
+      mockAxiosInstance.delete.mockResolvedValue({
+        data: {
+          message: 'Header deleted successfully',
+          deletedAt: new Date().toISOString()
+        }
+      });
+
+      await client.deleteHeaderWithSignature(signedRequest);
+
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
+        '/profile/mainnet/test.eth/h',
+        {
+          data: {
+            siweMessage: signedRequest.message,
+            siweSignature: signedRequest.signature,
+            address: signedRequest.address
+          }
+        }
+      );
+    });
+
+    it('should keep avatar mutations on the /avatar endpoint', async () => {
+      mockAxiosInstance.delete.mockResolvedValue({
+        data: {
+          message: 'Avatar deleted successfully',
+          deletedAt: new Date().toISOString()
+        }
+      });
+
+      await client.deleteAvatarWithSignature(signedRequest);
+
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
+        '/profile/mainnet/test.eth/avatar',
+        expect.any(Object)
+      );
+    });
+
+    it('should reject unsafe media URL schemes returned by the service', async () => {
+      mockAxiosInstance.post.mockResolvedValue({
+        data: {
+          headerUrl: 'javascript:alert(1)',
+          uploadedAt: new Date().toISOString(),
+          fileSize: 1024,
+          isUpdate: false
+        }
+      });
+
+      await expect(client.uploadHeaderWithSignature({
+        ...signedRequest,
+        file: new File(['header'], 'header.jpg', { type: 'image/jpeg' })
+      })).rejects.toMatchObject({
+        code: ErrorCodes.API_ERROR,
+        status: 502
+      });
+    });
+  });
+
   describe('Provider Integration', () => {
     const mockProvider = {
       getAddress: jest.fn().mockResolvedValue('0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'),
@@ -198,6 +302,70 @@ describe('AvatarClient', () => {
         }
       });
       mockAxios.create.mockReturnValue(mockAxiosInstance);
+    });
+
+    it('should reject before signing when the provider is on the wrong chain', async () => {
+      const wrongChainProvider = {
+        getAddress: jest.fn().mockResolvedValue('0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'),
+        signMessage: jest.fn(),
+        getChainId: jest.fn().mockResolvedValue(1)
+      };
+      const sepoliaClient = createAvatarClient({
+        network: 'sepolia',
+        domain: 'example.com',
+        provider: wrongChainProvider
+      });
+
+      await expect(sepoliaClient.uploadAvatar({
+        subname: 'test.eth',
+        file: new File(['avatar'], 'avatar.jpg', { type: 'image/jpeg' })
+      })).rejects.toMatchObject({
+        code: ErrorCodes.PROVIDER_CHAIN_MISMATCH,
+        details: { expectedChainId: 11155111, actualChainId: 1 }
+      });
+      expect(wrongChainProvider.signMessage).not.toHaveBeenCalled();
+      expect(mockAxiosInstance.post).not.toHaveBeenCalled();
+    });
+
+    it('should switch a capable provider before requesting and signing SIWE', async () => {
+      let chainId = 1;
+      const switchableProvider = {
+        getAddress: jest.fn().mockResolvedValue('0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'),
+        signMessage: jest.fn().mockResolvedValue('0x' + 'a'.repeat(130)),
+        getChainId: jest.fn().mockImplementation(async () => chainId),
+        switchChain: jest.fn().mockImplementation(async (nextChainId: number) => {
+          chainId = nextChainId;
+        })
+      };
+      mockAxiosInstance.post
+        .mockResolvedValueOnce({
+          data: { nonce: 'switchchain123', expiresAt: Date.now() + 60000 }
+        })
+        .mockResolvedValueOnce({
+          data: {
+            avatarUrl: 'https://avtr.cc/test.eth',
+            uploadedAt: new Date().toISOString(),
+            fileSize: 6,
+            isUpdate: false
+          }
+        });
+      const sepoliaClient = createAvatarClient({
+        network: 'sepolia',
+        domain: 'example.com',
+        provider: switchableProvider
+      });
+
+      const result = await sepoliaClient.uploadAvatar({
+        subname: 'test.eth',
+        file: new File(['avatar'], 'avatar.jpg', { type: 'image/jpeg' })
+      });
+
+      expect(switchableProvider.switchChain).toHaveBeenCalledWith(11155111);
+      expect(switchableProvider.signMessage).toHaveBeenCalledWith(
+        expect.stringContaining('Chain ID: 11155111')
+      );
+      expect(result.avatarUrl).toBe('https://avtr.cc/test.eth');
+      expect(result.url).toBe(result.avatarUrl);
     });
 
     it('should upload avatar with provider', async () => {
@@ -243,6 +411,44 @@ describe('AvatarClient', () => {
         subname: 'test.eth',
         file
       })).rejects.toThrow('Wallet provider is required for this operation');
+    });
+  });
+
+  describe('Service error normalization', () => {
+    it('should retain the Metadata Service error code, status, and details', () => {
+      const rejected = mockAxiosInstance.interceptors.response.use.mock.calls[0][1];
+
+      try {
+        rejected({
+          message: 'Request failed with status code 401',
+          response: {
+            status: 401,
+            data: {
+              error: {
+                code: 'UNAUTHORIZED',
+                message: 'SIWE chain ID does not match the requested network',
+                details: {
+                  code: 'INVALID_CHAIN_ID',
+                  expected: 11155111,
+                  received: 1
+                }
+              }
+            }
+          }
+        });
+        throw new Error('Expected interceptor to throw');
+      } catch (error) {
+        expect(error).toMatchObject({
+          code: ErrorCodes.API_ERROR,
+          status: 401,
+          serviceCode: 'INVALID_CHAIN_ID',
+          details: {
+            expected: 11155111,
+            received: 1
+          }
+        });
+        expect((error as AvatarSDKError).originalError).toBeUndefined();
+      }
     });
   });
 
@@ -365,4 +571,3 @@ describe('AvatarClient', () => {
     });
   });
 });
-
