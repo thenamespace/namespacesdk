@@ -449,11 +449,13 @@ class HttpAvatarClient implements AvatarClient {
   }
 
   /**
-   * Header media mutations use the compact `/h` route. The multipart field,
-   * SIWE nonce scope, and SIWE verification action remain `header`.
+   * Header media mutations use `/header`. The compact `/h` path is reserved
+   * for the stable public header URL returned by the Metadata Service. The
+   * multipart field, SIWE nonce scope, and verification action remain
+   * `header`.
    */
   private getMutationPath(subname: string, type: 'avatar' | 'header'): string {
-    const mediaPath = type === 'header' ? 'h' : 'avatar';
+    const mediaPath = type === 'header' ? 'header' : 'avatar';
     return `/profile/${this.config.network}/${subname}/${mediaPath}`;
   }
 
@@ -518,13 +520,14 @@ class HttpAvatarClient implements AvatarClient {
   }
 
   private async uploadWithProgress(
-    url: string,
+    path: string,
     formData: FormData,
     onProgress?: (progress: number) => void
   ): Promise<any> {
     try {
-      // Use axios for better Node.js compatibility
-      const response = await this.http.post(`${this.config.apiUrl}${url}`, formData, {
+      // The Axios instance owns the API origin through baseURL. Keep the
+      // mutation path relative so upload and delete share the same routing.
+      const response = await this.http.post(path, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

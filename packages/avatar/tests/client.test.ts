@@ -205,7 +205,7 @@ describe('AvatarClient', () => {
       address: '0x54b06711C8022faf11EC347F2bDc68A91eA03a3a'
     };
 
-    it('should upload headers through the compact /h endpoint', async () => {
+    it('should upload headers through /header while keeping the header multipart field', async () => {
       mockAxiosInstance.post.mockResolvedValue({
         data: {
           headerUrl: 'https://avtr.cc/test.eth/h',
@@ -221,15 +221,18 @@ describe('AvatarClient', () => {
       });
 
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
-        'https://test-api.example.com/profile/mainnet/test.eth/h',
+        '/profile/mainnet/test.eth/header',
         expect.any(FormData),
         expect.any(Object)
       );
+      const formData = mockAxiosInstance.post.mock.calls[0][1] as FormData;
+      expect(formData.get('header')).toBeInstanceOf(File);
+      expect(formData.has('h')).toBe(false);
       expect(result.url).toBe('https://avtr.cc/test.eth/h');
       expect(result.headerUrl).toBe('https://avtr.cc/test.eth/h');
     });
 
-    it('should delete headers through the compact /h endpoint', async () => {
+    it('should delete headers through the /header endpoint', async () => {
       mockAxiosInstance.delete.mockResolvedValue({
         data: {
           message: 'Header deleted successfully',
@@ -240,7 +243,7 @@ describe('AvatarClient', () => {
       await client.deleteHeaderWithSignature(signedRequest);
 
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
-        '/profile/mainnet/test.eth/h',
+        '/profile/mainnet/test.eth/header',
         {
           data: {
             siweMessage: signedRequest.message,
@@ -265,6 +268,45 @@ describe('AvatarClient', () => {
         '/profile/mainnet/test.eth/avatar',
         expect.any(Object)
       );
+    });
+
+    it('should prefer canonical headerUrl over the compatibility url field', async () => {
+      mockAxiosInstance.post.mockResolvedValue({
+        data: {
+          headerUrl: 'https://avtr.cc/test.eth/h',
+          url: 'https://legacy.example.com/test.eth/header.jpg',
+          uploadedAt: new Date().toISOString(),
+          fileSize: 1024,
+          isUpdate: false
+        }
+      });
+
+      const result = await client.uploadHeaderWithSignature({
+        ...signedRequest,
+        file: new File(['header'], 'header.jpg', { type: 'image/jpeg' })
+      });
+
+      expect(result.headerUrl).toBe('https://avtr.cc/test.eth/h');
+      expect(result.url).toBe('https://avtr.cc/test.eth/h');
+    });
+
+    it('should accept url as a compatibility fallback for header uploads', async () => {
+      mockAxiosInstance.post.mockResolvedValue({
+        data: {
+          url: 'https://legacy.example.com/test.eth/header.jpg',
+          uploadedAt: new Date().toISOString(),
+          fileSize: 1024,
+          isUpdate: false
+        }
+      });
+
+      const result = await client.uploadHeaderWithSignature({
+        ...signedRequest,
+        file: new File(['header'], 'header.jpg', { type: 'image/jpeg' })
+      });
+
+      expect(result.headerUrl).toBe('https://legacy.example.com/test.eth/header.jpg');
+      expect(result.url).toBe('https://legacy.example.com/test.eth/header.jpg');
     });
 
     it('should reject unsafe media URL schemes returned by the service', async () => {
