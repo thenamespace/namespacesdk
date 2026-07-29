@@ -1,6 +1,13 @@
 # Avatar SDK Changelog
 
 
+
+## [2.0.1] - 2026-07-29
+
+### Fixed 
+- Fixed an unintended regression introduced in `2.0.0` that sent header upload   and deletion requests to the public `/h` route instead of the Metadata   Service mutation endpoint.
+- Restored header mutations to   `/profile/{network}/{subname}/header`.
+
 ## [2.0.0] - 2026-07-24
 
 ## Added 
