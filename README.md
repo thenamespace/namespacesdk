@@ -3,79 +3,93 @@
   <img alt="Namespace" src="https://raw.githubusercontent.com/thenamespace/namespacesdk/release/assets/namespace-logo-dark.png" width="320">
 </picture>
 
-TypeScript SDKs on Namespace API. Mint, manage & query offchain and onchain ENS subnames.
+# Namespace SDK
 
-# Namespace SDK Monorepo
+TypeScript SDKs for building with Namespace and ENS. Mint and manage subnames,
+query indexed data, resolve deployed contract addresses, and manage ENS profile
+images.
 
-This monorepo contains TypeScript SDK packages for interacting with the Namespace ecosystem. It's built using [Lerna](https://lerna.js.org/) for managing multiple packages.
+## Packages
 
-## 📦 Packages
+| Package | Use it to |
+| --- | --- |
+| [`@thenamespace/addresses`](./packages/addresses) | Look up Namespace and ENS contract addresses by chain. |
+| [`@thenamespace/avatar`](./packages/avatar) | Upload and delete ENS avatar and header images using SIWE authentication. |
+| [`@thenamespace/indexer`](./packages/indexer) | Query L2 subnames, registries, and metadata through the Namespace Indexer API. |
+| [`@thenamespace/mint-manager`](./packages/mint-manager) | Check availability and mint ENS subnames on Mainnet and supported L2 networks. |
+| [`@thenamespace/offchain-manager`](./packages/offchain-manager) | Create, update, query, and delete gasless offchain ENS subnames and records. |
 
-This monorepo contains the following SDK packages:
+Each package is published independently on npm and has its own installation,
+API, and usage documentation.
 
-### [@thenamespace/addresses](./packages/addresses)
+## Installation
 
-Library containing all Namespace & ENS contract addresses.
+Install only the package your application needs:
 
-### [@thenamespace/indexer](./packages/indexer)
+```sh
+npm install @thenamespace/offchain-manager
+```
 
-TypeScript SDK for interacting with the Namespace Indexer API - query L2 subnames, registries, and metadata.
+Replace `@thenamespace/offchain-manager` with any package listed above.
 
-### [@thenamespace/mint-manager](./packages/mint-manager)
+## Work on the monorepo
 
-Library for minting L2 subnames with comprehensive validation and error handling.
+### Requirements
 
-### [@thenamespace/offchain-manager](./packages/offchain-manager)
-
-TypeScript SDK for creating and managing ENS subnames off-chain with the Namespace API.
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js >= 16.0.0
+- Node.js 16 or newer
 - npm
 
-### Installation
+### Setup
 
-```bash
-# Clone the repository
+```sh
 git clone https://github.com/thenamespace/namespacesdk.git
 cd namespacesdk
-
-# Install dependencies for all packages
 npm install
-
 ```
 
-## 📁 Project Structure
+The repository uses npm workspaces and Lerna. Run package scripts from the
+repository root with npm's `--workspace` option:
 
+```sh
+# Build one package
+npm run build --workspace=@thenamespace/avatar
+
+# Run the Avatar SDK unit tests
+npm test --workspace=@thenamespace/avatar
+
+# Type-check the Avatar SDK
+npm run type-check --workspace=@thenamespace/avatar
 ```
+
+Available scripts differ by package; check the relevant package's
+`package.json` before running a command.
+
+## Repository structure
+
+```text
 namespacesdk/
 ├── packages/
-│   ├── addresses/          # Contract addresses library
-│   ├── indexer/           # Indexer API SDK
-│   ├── mint-manager/      # L2 subname minting library
-│   └── offchain-manager/  # Off-chain subname management SDK
-├── lerna.json            # Lerna configuration
-└── package.json          # Root package.json (monorepo config)
+│   ├── addresses/          # Namespace and ENS contract addresses
+│   ├── avatar/             # ENS avatar and header image management
+│   ├── indexer/            # Namespace Indexer API client
+│   ├── mint-manager/       # ENS subname availability and minting
+│   └── offchain-manager/   # Gasless offchain subname management
+├── changelog/              # Package release history and release notes
+├── lerna.json
+└── package.json
 ```
 
-## 🤝 Contributing
+## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Run `npm run test` to ensure all tests pass
-6. Submit a pull request
+Contributions are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) for the
+development workflow, package-specific checks, and pull request guidelines.
 
-## 📄 License
+## Resources
 
-This project is licensed under the MIT License.
-
-## 🔗 Links
-
-- [Namespace Website](https://namespace.ninja)
+- [Namespace](https://namespace.ninja)
 - [Documentation](https://docs.namespace.ninja)
-- [GitHub Issues](https://github.com/thenamespace/namespacesdk/issues)
+- [GitHub issues](https://github.com/thenamespace/namespacesdk/issues)
+
+## License
+
+Licensed under the MIT License.
