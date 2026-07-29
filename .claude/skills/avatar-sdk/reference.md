@@ -128,7 +128,7 @@ interface UploadResult {
   url: string;
   /** Avatar URL returned by the Metadata Service (avatar uploads) */
   avatarUrl?: string;
-  /** Compact header URL returned by the Metadata Service (header uploads) */
+  /** Stable public header URL returned by the Metadata Service (uses `/h`) */
   headerUrl?: string;
   /** Subname echoed back by the service */
   subname?: string;
@@ -291,8 +291,9 @@ Base URL (both networks): `https://metadata.namespace.ninja`
 | `/auth/nonce` | POST | Get SIWE nonce (body: `{ address, scope }`) |
 | `/profile/{network}/{subname}/avatar` | POST | Upload avatar (multipart) |
 | `/profile/{network}/{subname}/avatar` | DELETE | Delete avatar (JSON) |
-| `/profile/{network}/{subname}/h` | POST | Upload header (multipart, field name `header`) |
-| `/profile/{network}/{subname}/h` | DELETE | Delete header (JSON) |
+| `/profile/{network}/{subname}/header` | POST | Upload header (multipart, field name `header`) |
+| `/profile/{network}/{subname}/header` | DELETE | Delete header (JSON) |
 
-Header mutations use the compact `/h` route; the multipart field name, SIWE nonce
-scope, and SIWE verification action remain `header`.
+Header mutations use `/header`; the stable public URL returned in `headerUrl`
+uses `/h`. The multipart field name, SIWE nonce scope, and SIWE verification
+action remain `header`.

@@ -235,9 +235,11 @@ it throws `PROVIDER_CHAIN_MISMATCH` before requesting or signing a SIWE message.
 ### Metadata Service routes
 
 Avatar mutations use
-`/profile/{network}/{subname}/avatar`. Header mutations use the compact
-`/profile/{network}/{subname}/h` endpoint. Header nonce scopes and multipart
-field names remain `header`.
+`/profile/{network}/{subname}/avatar`. Header mutations use
+`/profile/{network}/{subname}/header`. The stable public header URL returned in
+`headerUrl` uses the compact `/h` path (for example,
+`https://avtr.cc/alice.eth/h`). Header nonce scopes and multipart field names
+remain `header`.
 
 Authenticated uploads send `siweMessage`, `siweSignature`, and `address`
 alongside the media file. Deletes send the same three fields as JSON.

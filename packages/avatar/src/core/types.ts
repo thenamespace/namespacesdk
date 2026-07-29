@@ -47,7 +47,7 @@ export interface UploadResult {
   url: string;
   /** Avatar URL returned by the Metadata Service for avatar uploads */
   avatarUrl?: string;
-  /** Compact header URL returned by the Metadata Service for header uploads */
+  /** Stable public header URL returned by the Metadata Service (uses `/h`) */
   headerUrl?: string;
   /** ENS subname returned by the Metadata Service */
   subname?: string;

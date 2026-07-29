@@ -417,7 +417,7 @@ const header: HeaderUploadResult = await client.uploadHeader({
 });
 
 console.log(header.url);        // stable public URL
-console.log(header.headerUrl);  // canonical header URL (compact /h route)
+console.log(header.headerUrl);  // canonical public URL (uses the compact /h path)
 ```
 
 Before each automatic upload/delete, the SDK checks `signer.getChainId()`
