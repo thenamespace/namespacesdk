@@ -17,7 +17,7 @@ import {
   NonceResponse
 } from './types';
 import { AvatarSDKError, createError } from './errors';
-import { validateFile, validateSubname, validateAddress } from '../utils/validation';
+import { validateFile, validateSubname, validateAddress, normalizeSubname } from '../utils/validation';
 import {
   generateSIWEMessage,
   createAvatarNonceRequest,
@@ -456,7 +456,8 @@ class HttpAvatarClient implements AvatarClient {
    */
   private getMutationPath(subname: string, type: 'avatar' | 'header'): string {
     const mediaPath = type === 'header' ? 'header' : 'avatar';
-    return `/profile/${this.config.network}/${subname}/${mediaPath}`;
+    const normalizedSubname = normalizeSubname(subname);
+    return `/profile/${this.config.network}/${encodeURIComponent(normalizedSubname)}/${mediaPath}`;
   }
 
   /**

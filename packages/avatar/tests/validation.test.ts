@@ -1,6 +1,7 @@
 import { 
   validateFile, 
   validateSubname, 
+  normalizeSubname,
   validateAddress,
   validateSIWEOptionsResolved,
   AVATAR_MAX_SIZE,
@@ -125,16 +126,32 @@ describe('Validation Utilities', () => {
       expect(() => validateSubname('user123.eth')).not.toThrow();
     });
 
+    it('should accept a Unicode subname', () => {
+      expect(() => validateSubname('àlias.eth')).not.toThrow();
+    });
+
+    it('should accept a nested Unicode subname', () => {
+      expect(() => validateSubname('用户.parent.eth')).not.toThrow();
+    });
+
+    it('should accept a valid emoji subname', () => {
+      expect(() => validateSubname('💩.eth')).not.toThrow();
+    });
+
+    it('should normalize decomposed Unicode to NFC', () => {
+      expect(normalizeSubname('a\u0300lias.eth')).toBe('àlias.eth');
+    });
+
+    it('should normalize uppercase letters to lowercase', () => {
+      expect(normalizeSubname('TestName.eth')).toBe('testname.eth');
+    });
+
     it('should reject subname without domain', () => {
       expect(() => validateSubname('justname')).toThrow('Invalid ENS subname format');
     });
 
     it('should reject empty subname', () => {
       expect(() => validateSubname('')).toThrow('Invalid ENS subname format');
-    });
-
-    it('should reject subname with uppercase letters', () => {
-      expect(() => validateSubname('TestName.eth')).toThrow('Invalid ENS subname format');
     });
 
     it('should reject subname with spaces', () => {
@@ -151,6 +168,14 @@ describe('Validation Utilities', () => {
 
     it('should reject subname with leading dot', () => {
       expect(() => validateSubname('.name.eth')).toThrow('Invalid ENS subname format');
+    });
+
+    it('should reject mixed-script confusables', () => {
+      expect(() => validateSubname('aа.eth')).toThrow('Invalid ENS subname format');
+    });
+
+    it('should reject a label starting with a combining mark', () => {
+      expect(() => validateSubname('\u0300alias.eth')).toThrow('Invalid ENS subname format');
     });
 
     it('should reject null subname', () => {
@@ -315,4 +340,3 @@ describe('Validation Utilities', () => {
     });
   });
 });
-

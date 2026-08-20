@@ -1,3 +1,4 @@
+import { ens_normalize } from '@adraffy/ens-normalize';
 import { createError, ErrorCodes } from '../core/errors';
 
 /**
@@ -45,18 +46,35 @@ export function validateFile(file: File | Buffer, type: 'avatar' | 'header'): vo
 }
 
 /**
- * Validate ENS subname format
+ * Normalize an ENS subname according to ENSIP-15.
+ *
+ * The Avatar SDK requires a complete name with at least one parent label. The
+ * normalizer handles Unicode composition, case folding, emoji sequences,
+ * script mixing, and confusable characters.
  */
-export function validateSubname(subname: string): void {
+export function normalizeSubname(subname: string): string {
   if (!subname || typeof subname !== 'string') {
     throw createError.invalidSubname(subname);
   }
-  
-  // Basic ENS subname validation
-  const subnameRegex = /^[a-z0-9-]+\.([a-z0-9-]+\.)*[a-z0-9-]+$/;
-  if (!subnameRegex.test(subname)) {
+
+  try {
+    const normalizedSubname = ens_normalize(subname);
+
+    if (!normalizedSubname.includes('.')) {
+      throw createError.invalidSubname(subname);
+    }
+
+    return normalizedSubname;
+  } catch {
     throw createError.invalidSubname(subname);
   }
+}
+
+/**
+ * Validate ENS subname format while preserving the existing public void API.
+ */
+export function validateSubname(subname: string): void {
+  normalizeSubname(subname);
 }
 
 /**
@@ -110,4 +128,3 @@ export function validateSIWEOptionsResolved(options: { address: string; domain: 
     }
   }
 }
-
