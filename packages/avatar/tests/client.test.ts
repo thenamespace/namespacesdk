@@ -270,6 +270,67 @@ describe('AvatarClient', () => {
       );
     });
 
+    it('should upload an avatar using the canonical Unicode subname', async () => {
+      mockAxiosInstance.post.mockResolvedValue({
+        data: {
+          avatarUrl: 'https://avtr.cc/àlias.eth',
+          uploadedAt: new Date().toISOString(),
+          fileSize: 6,
+          isUpdate: false
+        }
+      });
+
+      await client.uploadAvatarWithSignature({
+        ...signedRequest,
+        subname: 'A\u0300LIAS.eth',
+        file: new File(['avatar'], 'avatar.jpg', { type: 'image/jpeg' })
+      });
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+        '/profile/mainnet/%C3%A0lias.eth/avatar',
+        expect.any(FormData),
+        expect.any(Object)
+      );
+    });
+
+    it('should encode reserved characters in a normalized ENS route segment', async () => {
+      mockAxiosInstance.delete.mockResolvedValue({
+        data: {
+          message: 'Avatar deleted successfully',
+          deletedAt: new Date().toISOString()
+        }
+      });
+
+      await client.deleteAvatarWithSignature({
+        ...signedRequest,
+        subname: '#️⃣.eth'
+      });
+
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
+        '/profile/mainnet/%23%E2%83%A3.eth/avatar',
+        expect.any(Object)
+      );
+    });
+
+    it('should delete using a lowercase canonical subname', async () => {
+      mockAxiosInstance.delete.mockResolvedValue({
+        data: {
+          message: 'Avatar deleted successfully',
+          deletedAt: new Date().toISOString()
+        }
+      });
+
+      await client.deleteAvatarWithSignature({
+        ...signedRequest,
+        subname: 'TestName.eth'
+      });
+
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
+        '/profile/mainnet/testname.eth/avatar',
+        expect.any(Object)
+      );
+    });
+
     it('should prefer canonical headerUrl over the compatibility url field', async () => {
       mockAxiosInstance.post.mockResolvedValue({
         data: {
