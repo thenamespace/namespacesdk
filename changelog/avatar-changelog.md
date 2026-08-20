@@ -2,6 +2,13 @@
 
 
 
+
+## [2.0.2] - 2026-08-20
+
+### Fixed 
+- Added support for Unicode ENS subnames such as `àlias.eth`.
+- Added ENSIP-15 normalization for subnames.
+
 ## [2.0.1] - 2026-07-29
 
 ### Fixed 
