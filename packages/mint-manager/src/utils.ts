@@ -7,6 +7,8 @@ import {
   toHex,
 } from "viem";
 import { EnsRecords } from "./types";
+import { createError, reasonFrom } from "./errors";
+import { assertAddress } from "./validation";
 import { getCoderByCoinType } from "@ensdomains/address-encoder";
 import { chainMetadata } from "./constants/address-records";
 //@ts-ignore
@@ -51,27 +53,50 @@ export const convertEnsRecordsToResolverData = (
       if (typeof addr.chain === "number") {
         addressCoin = addr.chain;
       } else {
-        const supportedChain = chainMetadata[addr.chain];
+        // hasOwnProperty, not truthiness: a bare `chainMetadata[key]` lookup
+        // reaches inherited members, so "constructor" would pass the guard and
+        // yield an undefined coin type.
+        const supportedChain = Object.prototype.hasOwnProperty.call(
+          chainMetadata,
+          addr.chain
+        )
+          ? chainMetadata[addr.chain]
+          : undefined;
         if (!supportedChain) {
-          console.info(`Cannot find coin for chain: ${addr.chain}`);
-          continue;
-        } else {
-          addressCoin = supportedChain.coin;
+          // Previously this logged and skipped, so a typo in a chain name meant
+          // the user paid to mint and silently got no address record.
+          throw createError.unsupportedChain(
+            addr.chain,
+            Object.keys(chainMetadata)
+          );
         }
+        addressCoin = supportedChain.coin;
       }
 
       if (addressCoin === ETH_COIN) {
         resolverData.push(
           encodeFunctionData({
             abi: ResolverAbi,
-            args: [subnameNode, BigInt(ETH_COIN), addr.value as Address],
+            args: [
+              subnameNode,
+              BigInt(ETH_COIN),
+              assertAddress(addr.value, `addresses[${addr.chain}]`),
+            ],
             functionName: "setAddr",
           })
         );
       } else {
         const addrEncoder = getCoderByCoinType(addressCoin);
-        if (addrEncoder) {
-          const decodedAddr = addrEncoder.decode(addr.value);
+        if (!addrEncoder) {
+          throw createError.unsupportedChain(addr.chain);
+        }
+        {
+          let decodedAddr: Uint8Array;
+          try {
+            decodedAddr = addrEncoder.decode(addr.value);
+          } catch (err) {
+            throw createError.invalidAddress(addr.value, `addresses[${addr.chain}]`);
+          }
           const hexAddr = toHex(decodedAddr);
           resolverData.push(
             encodeFunctionData({
@@ -88,10 +113,21 @@ export const convertEnsRecordsToResolverData = (
   // There is currently an issue with content-hash library
   // [ERR_PACKAGE_PATH_NOT_EXPORTED]
   if (records.contenthash) {
-    const encodedValue = encode(
-      records.contenthash.type as any,
-      records.contenthash.value
-    );
+    let encodedValue: string;
+    try {
+      encodedValue = encode(
+        records.contenthash.type as any,
+        records.contenthash.value
+      );
+    } catch (err) {
+      // The codec table rejects unknown identifiers and malformed values with
+      // a bare library error that names neither the field nor the record.
+      throw createError.invalidName(
+        records.contenthash.value,
+        `could not be encoded as a "${records.contenthash.type}" contenthash: ${reasonFrom(err)}`,
+        err
+      );
+    }
     resolverData.push(
       encodeFunctionData({
         abi: ResolverAbi,

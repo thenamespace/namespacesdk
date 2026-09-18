@@ -1,2 +1,17 @@
-dist
+# Dependencies
 node_modules
+
+# Build output
+dist
+*.tsbuildinfo
+
+# Test output
+coverage
+
+# Secrets - never commit real values, use .env.example
+.env
+.env.*
+!.env.example
+
+# Packing artifacts
+*.tgz

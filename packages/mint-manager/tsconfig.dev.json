@@ -1,0 +1,9 @@
+// Typechecks examples/ and checks/, which the build's tsconfig deliberately
+// excludes. Without this, broken examples ship green.
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["examples/**/*", "checks/**/*"]
+}
