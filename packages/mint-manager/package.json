@@ -1,28 +1,35 @@
 {
   "name": "@thenamespace/mint-manager",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "Library for minting l2 subnames",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./dist": "./dist/index.js",
+    "./dist/abi": "./dist/abi/index.js",
+    "./*.js": "./*.js",
+    "./*.json": "./*.json",
+    "./*.d.ts": "./*.d.ts",
+    "./*": "./*.js"
+  },
   "keywords": [
     "sdk",
     "offchain",
     "namespace"
   ],
   "files": [
-    "/dist"
+    "/dist",
+    "LICENSE",
+    "README.md"
   ],
-  "dependencies": {
-    "@ensdomains/address-encoder": "^1.1.2",
-    "@ensdomains/content-hash": "2.5.7",
-    "@thenamespace/addresses": "^1.0.15",
-    "@types/node": "^22.10.5",
-    "axios": "^1.7.9",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.3",
-    "viem": "^2.24.3"
-  },
   "author": "Arti <arti@namespace.ninja>",
   "contributors": [
     "Harpreet Singh <harpreet@namespace.ninja>"
@@ -33,14 +40,45 @@
     "directory": "packages/mint-manager"
   },
   "homepage": "https://namespace.ninja",
+  "bugs": {
+    "url": "https://github.com/thenamespace/namespacesdk/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@adraffy/ens-normalize": "1.11.1",
+    "@ensdomains/address-encoder": "^1.1.2",
+    "@ensdomains/content-hash": "2.5.7",
+    "@thenamespace/addresses": "^1.0.15",
+    "axios": "^1.7.9"
+  },
+  "peerDependencies": {
+    "viem": "^2.24.3"
+  },
   "scripts": {
     "build": "rimraf dist && tsc",
-    "start": "node dist/index.js",
-    "restart": "rimraf dist && tsc && node dist/index.js",
+    "clean": "rimraf dist coverage",
+    "typecheck": "tsc --noEmit -p tsconfig.dev.json",
+    "test": "jest --testPathIgnorePatterns=e2e.test.ts",
+    "test:watch": "jest --watch --testPathIgnorePatterns=e2e.test.ts",
+    "test:coverage": "jest --coverage --testPathIgnorePatterns=e2e.test.ts",
+    "test:e2e": "RUN_E2E_TESTS=true jest tests/e2e.test.ts --runInBand",
     "example:testnet": "ts-node ./examples/testnet-usage.ts",
-    "example:availability": "ts-node ./examples/availability-checks.ts"
+    "example:availability": "ts-node ./examples/availability-checks.ts",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "rimraf": "^6.0.1"
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.5",
+    "jest": "^29.7.0",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "viem": "^2.24.3"
   }
 }

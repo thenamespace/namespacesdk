@@ -177,7 +177,9 @@ export function getChainDisplayName(chainId: number): string {
  * @returns True if value is a supported network ID
  */
 export function isSupportedNetworkId(value: any): value is number {
-  return typeof value === 'number' && Object.values(SUPPORTED_NETWORK_IDS).includes(value);
+  // Object.values() on an `as const` object yields a narrow literal union, which
+  // rejects a plain `number` argument. Widen it so the guard accepts any input.
+  return typeof value === 'number' && (Object.values(SUPPORTED_NETWORK_IDS) as number[]).includes(value);
 }
 
 /**
@@ -187,6 +189,6 @@ export function isSupportedNetworkId(value: any): value is number {
  * @returns True if value is a valid ChainName
  */
 export function isValidChainName(value: any): value is ChainName {
-  return typeof value === 'string' && Object.values(ChainName).includes(value);
+  return typeof value === 'string' && (Object.values(ChainName) as string[]).includes(value as ChainName);
 }
 
