@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+## [1.1.2] - 2026-10-22
+
+Added HybridResolverV2 address that supports both EnsV1 and EnsV2
+
 ## [1.1.1] - 2026-01-29
 
 Added ENS BaseRegistrar address in EnsContracts
