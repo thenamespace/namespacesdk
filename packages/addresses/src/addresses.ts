@@ -11,6 +11,7 @@ export interface L1ContractAddresses {
     nameWrapperProxy: Address
     hybridResolver: Address
     oldHybridResolver: Address
+    hybridResolverV2: Address
     bulkEnsRegistrar: Address
 }
 
@@ -37,6 +38,7 @@ const l1Contracts: Record<number, L1ContractAddresses> = {
         nameWrapperProxy: "0x25ADB7e69390FbfeEe26F3C8053955d4D4428Afd",
         hybridResolver: "0xe5A0277018879679d18cCDb66B52BD06f7fE95FD",
         oldHybridResolver: "0x0dcD506D1Be162E50A2b434028A9a148F2686444",
+        hybridResolverV2: "0x0A67542cbD8d71CB760d1EeB5a4b4a77ea35Ff9b",
         bulkEnsRegistrar: "0x99393f6ceb39a6fdefdfeed1606669b16c49c453",
     },
     [sepoliaId]: {
@@ -44,6 +46,7 @@ const l1Contracts: Record<number, L1ContractAddresses> = {
         nameWrapperProxy: "0x0Ff41b99D7185B01bA47Ca85e9049166Cb3CD6bd",
         hybridResolver: "0xd5568c739f3a615c27e8926f1067b9a791893c3e",
         oldHybridResolver: "0x2F5E9E8B4495e4CDC5bC6C5FCBa93B8AaBDeF595",
+        hybridResolverV2: "0x976a3E43b2a6706F52D9555931c68eb62D134ff7",
         bulkEnsRegistrar: "0x94df1d05e6f1e064c586cee6be8b94eeaacc14aa"
     }
 }
