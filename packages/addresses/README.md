@@ -24,6 +24,8 @@ import {
   getL1NamespaceContracts,
   getL2NamespaceContracts,
   getEnsContracts,
+  getEnsV2Contracts,
+  getNamespaceV2Contracts,
 } from "@thenamespace/addresses";
 
 // Namespace L1 contracts (Ethereum Mainnet / Sepolia)
@@ -37,6 +39,14 @@ console.log(l2.controller);
 // Core ENS contracts
 const ens = getEnsContracts(1); // mainnet
 console.log(ens.ensRegistry);
+
+// ENSv2 contracts (isTestnet: false = mainnet, true = Sepolia)
+const ensV2 = getEnsV2Contracts(false);
+console.log(ensV2.ethRegistrar, ensV2.paymentTokens);
+
+// Namespace's ENSv2 subname contracts, null where not deployed
+const namespaceV2 = getNamespaceV2Contracts(true);
+console.log(namespaceV2?.activationManager);
 ```
 
 ## API
