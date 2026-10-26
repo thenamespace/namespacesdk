@@ -1,7 +1,7 @@
 type Address = `0x${string}`
 
 const mainnetId = 1;
-const sepoliaId = 1115511;
+const sepoliaId = 11155111;
 const baseId = 8453;
 const baseSepoliaId = 84532;
 const opId = 10;
@@ -30,6 +30,45 @@ export interface EnsContracts {
     universalResolver: Address
     unwrappedRegistrarController: Address
     baseRegistrar: Address
+}
+
+export interface PaymentToken {
+    symbol: string
+    address: Address
+    decimals: number
+}
+
+export interface EnsV2Contracts {
+    rootRegistry: Address
+    ethRegistry: Address
+    ethRegistrar: Address
+    // Renews premigrated ENSv1 names still reserved on ENSv2
+    ethRenewerV1: Address
+    verifiableFactory: Address
+    userRegistryImpl: Address
+    permissionedResolverImpl: Address
+    universalResolver: Address
+    // Tokens the ETHRegistrar accepts for registration and renewal
+    paymentTokens: PaymentToken[]
+}
+
+export interface NamespaceV2FeatureModules {
+    labelPrices: Address
+    specialPrices: Address
+    whitelist: Address
+    deadline: Address
+    reservation: Address
+    tokenGate: Address
+}
+
+export interface NamespaceV2Contracts {
+    activationManager: Address
+    subnameIssuer: Address
+    sharedResolver: Address
+    splitPaymentModule: Address
+    features: NamespaceV2FeatureModules
+    // Tokens subnames can be minted with
+    paymentTokens: PaymentToken[]
 }
 
 const l1Contracts: Record<number, L1ContractAddresses> = {
@@ -93,6 +132,59 @@ const ensContracts: Record<number, EnsContracts> = {
     }
 }
 
+const ensV2Contracts: Record<number, EnsV2Contracts> = {
+    [mainnetId]: {
+        rootRegistry: "0x2553c09bE6447BeFfdB86FA622ad41fB8f77A91e",
+        ethRegistry: "0xf60aba43E1f7F3DAB1186Ff03B561401C9Df85E2",
+        ethRegistrar: "0xD6D8369e55c94Ae8AFA714E6cF7AB5bE54D5CC81",
+        ethRenewerV1: "0x56c447F308F463A01121C41E72b0E7e7557fCb68",
+        verifiableFactory: "0x77510ba162dfeA3d8989E3f0928a691B345730D2",
+        userRegistryImpl: "0x75FF9AdBcFcE2469B097AC68f6Ae650EaE1351Bb",
+        permissionedResolverImpl: "0x565b0F456a04Ac9b48758190e90030623Cff57C5",
+        universalResolver: "0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe",
+        paymentTokens: [
+            { symbol: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", decimals: 6 },
+            { symbol: "DAI", address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals: 18 },
+        ],
+    },
+    [sepoliaId]: {
+        rootRegistry: "0xB458D6a3a77919449d03e7A6903C26827c1eC43f",
+        ethRegistry: "0xD4eBcbBdF463C9c45784603Db0dDD499BC44A8B4",
+        ethRegistrar: "0xf633e7FC17e2bbE0D0965D18ec1821dcB754a3d3",
+        ethRenewerV1: "0xf2ece44980778966b8a0FccB3A9E339440f6e045",
+        verifiableFactory: "0xDa70306C98E97eCe36F997a21368e53298572991",
+        userRegistryImpl: "0x9BD8a88719068D09ecee662f36C0E3856708366a",
+        permissionedResolverImpl: "0x115eb53F0c60696633855F90b138178Fb40b2b2C",
+        universalResolver: "0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe",
+        paymentTokens: [
+            { symbol: "USDC", address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", decimals: 6 },
+            { symbol: "DAI", address: "0xF6faC8A58a0BE13b9197f27C41B73162Fe32572b", decimals: 18 },
+        ],
+    }
+}
+
+// Namespace's ENSv2 subname contracts (thenamespace/onchain-subnames). Not on mainnet yet.
+const namespaceV2Contracts: Record<number, NamespaceV2Contracts> = {
+    [sepoliaId]: {
+        activationManager: "0x0bFCcbd5815332F7ea27ba71BD593B0799110bDE",
+        subnameIssuer: "0x5200fd33Cf7952c518f1123797fBA2ce0D77bFC0",
+        sharedResolver: "0x7C48b782cF9c132441844aEBA8b46EC2d80ca067",
+        splitPaymentModule: "0x50EE6887397838d040e4bA35717b049C154A7fAb",
+        features: {
+            labelPrices: "0xb8f15B350469187D26009ef4B967B79702DA7cBB",
+            specialPrices: "0xDE5f1D2F3291CBFd7BA971F8C14958C1253d9eD3",
+            whitelist: "0x48B7c6054836DC0B2291B3b3F2D313e84b4Cc678",
+            deadline: "0x50459C582EB6206A2e561C5aec3810bbc5548726",
+            reservation: "0x5111d49E9B0E02C26F350A585073A36F38758EAf",
+            tokenGate: "0xEbE62D3d5c6A3bEf116cb949c433baF04b6F0D25",
+        },
+        paymentTokens: [
+            { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+            { symbol: "USDC", address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", decimals: 6 },
+        ],
+    }
+}
+
 export const getEnsContracts = (isTestnet: boolean = false): EnsContracts => {
 
     return ensContracts[!isTestnet ? mainnetId : sepoliaId]
@@ -110,4 +202,13 @@ export const getL2NamespaceContracts = (chainId: number): L2ContractAddresses =>
     }
     return contracts;
 
+}
+
+export const getEnsV2Contracts = (isTestnet: boolean = false): EnsV2Contracts => {
+    return ensV2Contracts[!isTestnet ? mainnetId : sepoliaId];
+}
+
+// Null where Namespace's ENSv2 contracts aren't deployed
+export const getNamespaceV2Contracts = (isTestnet: boolean = false): NamespaceV2Contracts | null => {
+    return namespaceV2Contracts[!isTestnet ? mainnetId : sepoliaId] ?? null;
 }
