@@ -69,6 +69,8 @@ export interface NamespaceV2Contracts {
     features: NamespaceV2FeatureModules
     // Tokens subnames can be minted with
     paymentTokens: PaymentToken[]
+    // First block to index from
+    deployBlock: number
 }
 
 const l1Contracts: Record<number, L1ContractAddresses> = {
@@ -139,7 +141,7 @@ const ensV2Contracts: Record<number, EnsV2Contracts> = {
         ethRegistrar: "0xD6D8369e55c94Ae8AFA714E6cF7AB5bE54D5CC81",
         ethRenewerV1: "0x56c447F308F463A01121C41E72b0E7e7557fCb68",
         verifiableFactory: "0x77510ba162dfeA3d8989E3f0928a691B345730D2",
-        userRegistryImpl: "0x75FF9AdBcFcE2469B097AC68f6Ae650EaE1351Bb",
+        userRegistryImpl: "0xfAA23592ACa10A6D8875b18eA86954e8eB6D8d72",
         permissionedResolverImpl: "0x565b0F456a04Ac9b48758190e90030623Cff57C5",
         universalResolver: "0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe",
         paymentTokens: [
@@ -163,8 +165,28 @@ const ensV2Contracts: Record<number, EnsV2Contracts> = {
     }
 }
 
-// Namespace's ENSv2 subname contracts (thenamespace/onchain-subnames). Not on mainnet yet.
+// Namespace's ENSv2 subname contracts (thenamespace/onchain-subnames)
 const namespaceV2Contracts: Record<number, NamespaceV2Contracts> = {
+    [mainnetId]: {
+        activationManager: "0xABd83D025A9d56Be8EDe39a6E14cE9f18d328445",
+        subnameIssuer: "0x742ccCf479271b502FbF99F4199a7B5C7eb17972",
+        sharedResolver: "0x1Ad304327d1477114Abe88820Fa7ddDC9A72f612",
+        splitPaymentModule: "0xAD8dfBB1C10A5f38D1e7FeFa983d8F8ffEb88035",
+        features: {
+            labelPrices: "0x176C38533B61fD4929532B0bd5c3F5a292d9b5Fe",
+            specialPrices: "0x3cad821Df142e4B2eb3e575f852B0233412b26B7",
+            whitelist: "0xE0948e1aeCDB037D90AA1079672c947500E58BFD",
+            deadline: "0xA12e2C77c22F34E146B3bA33792064FD556aB8d2",
+            reservation: "0x7f13C79FB772BA42177f4be6Dc9e692C1f3acD11",
+            tokenGate: "0xda5Cb40315fc64CE6aBcD766A672325f244Bd47D",
+        },
+        paymentTokens: [
+            { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+            { symbol: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", decimals: 6 },
+            { symbol: "DAI", address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals: 18 },
+        ],
+        deployBlock: 26280006,
+    },
     [sepoliaId]: {
         activationManager: "0x0bFCcbd5815332F7ea27ba71BD593B0799110bDE",
         subnameIssuer: "0x5200fd33Cf7952c518f1123797fBA2ce0D77bFC0",
@@ -182,6 +204,7 @@ const namespaceV2Contracts: Record<number, NamespaceV2Contracts> = {
             { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
             { symbol: "USDC", address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", decimals: 6 },
         ],
+        deployBlock: 11950752,
     }
 }
 
