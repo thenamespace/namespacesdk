@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+## [1.2.1] - 2026-10-27
+
+Fix for UserRegistry checksum address
+
 ## [1.2.0] - 2026-10-27
 
 Added new Namespace ensv2 contracts
