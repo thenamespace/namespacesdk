@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+## [1.2.0] - 2026-10-27
+
+Added new Namespace ensv2 contracts
+
 ## [1.1.2] - 2026-10-22
 
 Added HybridResolverV2 address that supports both EnsV1 and EnsV2
