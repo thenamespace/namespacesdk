@@ -141,7 +141,7 @@ const ensV2Contracts: Record<number, EnsV2Contracts> = {
         ethRegistrar: "0xD6D8369e55c94Ae8AFA714E6cF7AB5bE54D5CC81",
         ethRenewerV1: "0x56c447F308F463A01121C41E72b0E7e7557fCb68",
         verifiableFactory: "0x77510ba162dfeA3d8989E3f0928a691B345730D2",
-        userRegistryImpl: "0xfAA23592ACa10A6D8875b18eA86954e8eB6D8d72",
+        userRegistryImpl: "0xFAA23592ACA10A6d8875b18eA86954e8EB6d8d72",
         permissionedResolverImpl: "0x565b0F456a04Ac9b48758190e90030623Cff57C5",
         universalResolver: "0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe",
         paymentTokens: [
