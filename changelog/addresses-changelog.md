@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+## [1.3.0] - 2026-10-28
+
+### Added
+- Added `universalHelper`, `ensV1Resolver`, and `publicResolverV2` to `getEnsV2Contracts()` and the `EnsV2Contracts` type for Ethereum Mainnet and Sepolia.
+- Documented the new contract lookups.
+
 ## [1.2.1] - 2026-10-27
 
 Fix for UserRegistry checksum address
