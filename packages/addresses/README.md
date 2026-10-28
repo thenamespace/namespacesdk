@@ -66,6 +66,19 @@ Returns Namespace L2 contract addresses for the given chain (Base, Optimism and 
 Returns the core ENS contract addresses for the given chain:
 `nameWrapper`, `ensRegistry`, `publicResolver`, `ethRegistrarController`, `universalResolver`, `unwrappedRegistrarController`, `baseRegistrar`.
 
+### `getEnsV2Contracts(isTestnet = false)`
+
+Returns ENSv2 contracts for Ethereum Mainnet, or Sepolia when `isTestnet` is `true`.
+`universalHelper` locates registries and owners in the ENSv2 hierarchy.
+`ensV1Resolver` is the `ENSV1Resolver` mirror used to resolve ENSv1 names through ENSv2.
+`publicResolverV2` is the shared public resolver that checks ENSv2 ownership and operator approvals.
+Addresses follow the [official ENS deployment table](https://docs.ens.domains/learn/deployments/).
+
+```typescript
+const { universalHelper, ensV1Resolver, publicResolverV2 } = getEnsV2Contracts(); // mainnet
+const sepoliaContracts = getEnsV2Contracts(true);
+```
+
 ## License
 
 This project is licensed under the MIT License.

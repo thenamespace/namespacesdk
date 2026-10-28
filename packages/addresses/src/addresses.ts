@@ -48,6 +48,10 @@ export interface EnsV2Contracts {
     userRegistryImpl: Address
     permissionedResolverImpl: Address
     universalResolver: Address
+    universalHelper: Address
+    // ENSV1Resolver mirrors ENSv1 names into ENSv2 resolution
+    ensV1Resolver: Address
+    publicResolverV2: Address
     // Tokens the ETHRegistrar accepts for registration and renewal
     paymentTokens: PaymentToken[]
 }
@@ -144,6 +148,9 @@ const ensV2Contracts: Record<number, EnsV2Contracts> = {
         userRegistryImpl: "0xFAA23592ACA10A6d8875b18eA86954e8EB6d8d72",
         permissionedResolverImpl: "0x565b0F456a04Ac9b48758190e90030623Cff57C5",
         universalResolver: "0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe",
+        universalHelper: "0x46AE127D14683Ac74eF151e46ae2117A1A25C676",
+        ensV1Resolver: "0x394D8EB4a4fDF599384DeAb25F31d111d755c398",
+        publicResolverV2: "0x66f9F566fF2f26309C1Bd9134388478A801dA3e1",
         paymentTokens: [
             { symbol: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", decimals: 6 },
             { symbol: "DAI", address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals: 18 },
@@ -158,6 +165,9 @@ const ensV2Contracts: Record<number, EnsV2Contracts> = {
         userRegistryImpl: "0x9BD8a88719068D09ecee662f36C0E3856708366a",
         permissionedResolverImpl: "0x115eb53F0c60696633855F90b138178Fb40b2b2C",
         universalResolver: "0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe",
+        universalHelper: "0xd453e5Bdb62CC3beA84341B1e306319C8Ffd7DFe",
+        ensV1Resolver: "0x322B7581cA210a69c6D0e0D7c88a7688D2789Cb0",
+        publicResolverV2: "0xdC4a563d00F5c3012b699794eB9e13A561Be386F",
         paymentTokens: [
             { symbol: "USDC", address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", decimals: 6 },
             { symbol: "DAI", address: "0xF6faC8A58a0BE13b9197f27C41B73162Fe32572b", decimals: 18 },
