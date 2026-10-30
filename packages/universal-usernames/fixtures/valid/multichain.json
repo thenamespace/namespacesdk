@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "username": "happy",
+  "texts": {
+    "description": "Multichain profile"
+  },
+  "addresses": {
+    "0": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+    "60": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+    "501": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    "913": "kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW",
+    "2147483648": "0x3333333333333333333333333333333333333333"
+  },
+  "contenthash": "ipns://k51qzi5uqu5dihst24f3rp2ej4co9berxohfkxaenbq1wjty7nrd5e9xp4afx1"
+}
