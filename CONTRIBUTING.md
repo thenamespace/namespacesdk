@@ -16,6 +16,7 @@ Thanks for taking the time to contribute! This repository is a monorepo of TypeS
 | [`@thenamespace/mint-manager`](./packages/mint-manager) | Minting L2 subnames |
 | [`@thenamespace/offchain-manager`](./packages/offchain-manager) | Creating & managing off-chain ENS subnames |
 | [`@thenamespace/avatar`](./packages/avatar) | ENS avatar & header image uploads |
+| [`@thenamespace/universal-usernames`](./packages/universal-usernames) | Universal Usernames profile format, validator and endpoint adapter |
 
 ## Prerequisites
 

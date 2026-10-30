@@ -18,6 +18,7 @@ images.
 | [`@thenamespace/indexer`](./packages/indexer) | Query L2 subnames, registries, and metadata through the Namespace Indexer API. |
 | [`@thenamespace/mint-manager`](./packages/mint-manager) | Check availability and mint ENS subnames on Mainnet and supported L2 networks. |
 | [`@thenamespace/offchain-manager`](./packages/offchain-manager) | Create, update, query, and delete gasless offchain ENS subnames and records. |
+| [`@thenamespace/universal-usernames`](./packages/universal-usernames) | Serve ENS usernames from your own HTTPS endpoint: profile format, validator, endpoint handler and CLI. |
 
 Each package is published independently on npm and has its own installation,
 API, and usage documentation.
@@ -73,7 +74,8 @@ namespacesdk/
 │   ├── avatar/             # ENS avatar and header image management
 │   ├── indexer/            # Namespace Indexer API client
 │   ├── mint-manager/       # ENS subname availability and minting
-│   └── offchain-manager/   # Gasless offchain subname management
+│   ├── offchain-manager/   # Gasless offchain subname management
+│   └── universal-usernames/ # Universal Usernames profile format, validator and adapter
 ├── changelog/              # Package release history and release notes
 ├── lerna.json
 └── package.json
