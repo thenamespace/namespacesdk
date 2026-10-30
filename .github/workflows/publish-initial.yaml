@@ -9,6 +9,7 @@ on:
         description: Package name
         options:
           - avatar
+          - universal-usernames
       version:
         type: string
         description: "Initial version (e.g. 1.0.0)"
