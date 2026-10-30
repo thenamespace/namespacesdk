@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "username": "happy",
+  "texts": {
+    "name": "Happy",
+    "avatar": "https://cdn.brand.example/happy.png",
+    "com.github": "happy",
+    "com.brand.role": "member"
+  },
+  "addresses": {
+    "0": "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
+    "60": "0x1111111111111111111111111111111111111111",
+    "2147492101": "0x2222222222222222222222222222222222222222"
+  },
+  "contenthash": "ipfs://QmYwAPJzv5CZsnAzt8auVZRnGiRAzQmmJYDh4T7SEBuwNA"
+}

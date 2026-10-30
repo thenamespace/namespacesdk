@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "username": "happy",
+  "texts": {
+    "name": "Happy",
+    "age": 42
+  },
+  "addresses": {
+    "0": "not-a-bitcoin-address",
+    "60": "0x1111111111111111111111111111111111111111",
+    "2147492101": "0x2222222222222222222222222222222222222222"
+  },
+  "contenthash": "ar://too-short"
+}

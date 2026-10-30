@@ -13,6 +13,7 @@ on:
           - indexer
           - mint-manager
           - avatar
+          - universal-usernames
       version:
         type: string
         description: "version"

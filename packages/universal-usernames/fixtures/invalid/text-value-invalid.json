@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "username": "happy",
+  "texts": {
+    "name": "Happy",
+    "age": 42,
+    "bio": null,
+    "links": [
+      "a"
+    ]
+  },
+  "addresses": {}
+}

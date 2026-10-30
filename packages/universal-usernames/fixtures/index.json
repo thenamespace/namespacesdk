@@ -1,0 +1,464 @@
+{
+  "description": "Universal Usernames profile v1 fixtures. \"resolved\" lists the expected resolveText/resolveAddress/resolveContenthash values (hex for addresses and contenthash, null for absent). \"issues\" lists the expected validation issues; envelope issues mean the whole profile is rejected.",
+  "valid": [
+    {
+      "file": "valid/basic.json",
+      "expectedUsername": "happy",
+      "description": "The example from the profile v1 spec: standard and custom texts, ETH, Base, Bitcoin and an IPFS contenthash.",
+      "resolved": {
+        "texts": {
+          "name": "Happy",
+          "avatar": "https://cdn.brand.example/happy.png",
+          "com.github": "happy",
+          "com.brand.role": "member",
+          "com.twitter": null
+        },
+        "addresses": {
+          "0": "0x0014e8df018c7e326cc253faac7e46cdc51e68542c42",
+          "60": "0x1111111111111111111111111111111111111111",
+          "501": null,
+          "2147492101": "0x2222222222222222222222222222222222222222"
+        },
+        "contenthash": "0xe301017012209d6c2be50f70695347c6da90ab413d0fdb93e73f0c576e4943910844f3fda983"
+      }
+    },
+    {
+      "file": "valid/empty-records.json",
+      "expectedUsername": "happy",
+      "description": "texts and addresses are required but may be empty; contenthash may be left out.",
+      "resolved": {
+        "texts": {
+          "name": null
+        },
+        "addresses": {
+          "0": null,
+          "60": null,
+          "2147483648": null
+        },
+        "contenthash": null
+      }
+    },
+    {
+      "file": "valid/multichain.json",
+      "expectedUsername": "happy",
+      "description": "Default EVM address plus explicit ETH (checksummed), Bitcoin P2PKH, Solana and Vara records, and an IPNS contenthash.",
+      "resolved": {
+        "texts": {
+          "description": "Multichain profile"
+        },
+        "addresses": {
+          "0": "0x76a91462e907b15cbf27d5425399ebf6f0fb50ebb88f1888ac",
+          "3": null,
+          "60": "0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed",
+          "501": "0x7e8c088760bfde1dddcf32c17f209b8242ee52aaf131facd88d0ea2c6d0b06f2",
+          "913": "0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d",
+          "2147483648": "0x3333333333333333333333333333333333333333",
+          "2147492101": "0x3333333333333333333333333333333333333333"
+        },
+        "contenthash": "0xe50101720024080112205cbd1cc86ac20d6640795809c2a185bb2504538a2de8076da5a6971b8acb4715"
+      }
+    },
+    {
+      "file": "valid/default-evm-only.json",
+      "expectedUsername": "happy",
+      "description": "Only the ENSIP-19 default EVM address: coin type 60 and every EVM chain inherit it, non-EVM coins do not.",
+      "resolved": {
+        "texts": {},
+        "addresses": {
+          "0": null,
+          "60": "0x3333333333333333333333333333333333333333",
+          "501": null,
+          "2147483648": "0x3333333333333333333333333333333333333333",
+          "2147483658": "0x3333333333333333333333333333333333333333",
+          "2147492101": "0x3333333333333333333333333333333333333333"
+        },
+        "contenthash": null
+      }
+    },
+    {
+      "file": "valid/contenthash-swarm.json",
+      "expectedUsername": "happy",
+      "description": "Swarm contenthash (bzz://).",
+      "resolved": {
+        "texts": {},
+        "addresses": {},
+        "contenthash": "0xe40101fa011b20d1de9994b4d039f6548d191eb26786769f580809256b4685ef316805265ea162"
+      }
+    },
+    {
+      "file": "valid/contenthash-arweave.json",
+      "expectedUsername": "happy",
+      "description": "Arweave contenthash (ar://).",
+      "resolved": {
+        "texts": {},
+        "addresses": {},
+        "contenthash": "0x90b2ca05cacd83876b116295296052119b415fab000755fe088b5778cabf4a292ca10437"
+      }
+    },
+    {
+      "file": "valid/unicode-username.json",
+      "expectedUsername": "jöhn",
+      "description": "A normalized non-ASCII username.",
+      "resolved": {
+        "texts": {
+          "name": "Jöhn"
+        },
+        "addresses": {},
+        "contenthash": null
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "file": "invalid/invalid-json.json",
+      "expectedUsername": "happy",
+      "description": "Truncated body.",
+      "issues": [
+        {
+          "code": "INVALID_JSON",
+          "kind": "envelope",
+          "path": ""
+        }
+      ]
+    },
+    {
+      "file": "invalid/duplicate-key.json",
+      "expectedUsername": "happy",
+      "description": "texts.name appears twice; JSON.parse alone would keep the last one.",
+      "issues": [
+        {
+          "code": "DUPLICATE_KEY",
+          "kind": "envelope",
+          "path": "/texts/name"
+        }
+      ]
+    },
+    {
+      "file": "invalid/duplicate-key-escaped.json",
+      "expectedUsername": "happy",
+      "description": "The root has \"username\" twice, once written with a \\u escape.",
+      "issues": [
+        {
+          "code": "DUPLICATE_KEY",
+          "kind": "envelope",
+          "path": "/username"
+        }
+      ]
+    },
+    {
+      "file": "invalid/not-an-object.json",
+      "expectedUsername": "happy",
+      "description": "The body is a JSON array.",
+      "issues": [
+        {
+          "code": "NOT_AN_OBJECT",
+          "kind": "envelope",
+          "path": ""
+        }
+      ]
+    },
+    {
+      "file": "invalid/unsupported-version.json",
+      "expectedUsername": "happy",
+      "description": "version 2 is not supported.",
+      "issues": [
+        {
+          "code": "UNSUPPORTED_VERSION",
+          "kind": "envelope",
+          "path": "/version"
+        }
+      ]
+    },
+    {
+      "file": "invalid/unknown-field.json",
+      "expectedUsername": "happy",
+      "description": "Root has a field outside profile v1.",
+      "issues": [
+        {
+          "code": "UNKNOWN_FIELD",
+          "kind": "envelope",
+          "path": "/avatar"
+        }
+      ]
+    },
+    {
+      "file": "invalid/username-missing.json",
+      "expectedUsername": "happy",
+      "description": "No username.",
+      "issues": [
+        {
+          "code": "USERNAME_MISSING",
+          "kind": "envelope",
+          "path": "/username"
+        }
+      ]
+    },
+    {
+      "file": "invalid/username-mismatch.json",
+      "expectedUsername": "happy",
+      "description": "username is not the requested label.",
+      "issues": [
+        {
+          "code": "USERNAME_MISMATCH",
+          "kind": "envelope",
+          "path": "/username"
+        }
+      ]
+    },
+    {
+      "file": "invalid/texts-not-object.json",
+      "expectedUsername": "happy",
+      "description": "texts is an array.",
+      "issues": [
+        {
+          "code": "TEXTS_NOT_OBJECT",
+          "kind": "envelope",
+          "path": "/texts"
+        }
+      ]
+    },
+    {
+      "file": "invalid/addresses-not-object.json",
+      "expectedUsername": "happy",
+      "description": "addresses is a string.",
+      "issues": [
+        {
+          "code": "ADDRESSES_NOT_OBJECT",
+          "kind": "envelope",
+          "path": "/addresses"
+        }
+      ]
+    },
+    {
+      "file": "invalid/too-many-texts.json",
+      "expectedUsername": "happy",
+      "description": "129 text records; the limit is 128.",
+      "issues": [
+        {
+          "code": "TOO_MANY_TEXTS",
+          "kind": "envelope",
+          "path": "/texts"
+        }
+      ]
+    },
+    {
+      "file": "invalid/too-many-addresses.json",
+      "expectedUsername": "happy",
+      "description": "129 address records; the limit is 128.",
+      "issues": [
+        {
+          "code": "TOO_MANY_ADDRESSES",
+          "kind": "envelope",
+          "path": "/addresses"
+        }
+      ]
+    },
+    {
+      "file": "invalid/several-envelope-errors.json",
+      "expectedUsername": "happy",
+      "description": "Every envelope problem is reported, not just the first.",
+      "issues": [
+        {
+          "code": "UNSUPPORTED_VERSION",
+          "kind": "envelope",
+          "path": "/version"
+        },
+        {
+          "code": "UNKNOWN_FIELD",
+          "kind": "envelope",
+          "path": "/extra"
+        },
+        {
+          "code": "USERNAME_MISMATCH",
+          "kind": "envelope",
+          "path": "/username"
+        },
+        {
+          "code": "TEXTS_NOT_OBJECT",
+          "kind": "envelope",
+          "path": "/texts"
+        },
+        {
+          "code": "ADDRESSES_NOT_OBJECT",
+          "kind": "envelope",
+          "path": "/addresses"
+        }
+      ]
+    },
+    {
+      "file": "invalid/text-key-invalid.json",
+      "expectedUsername": "happy",
+      "description": "An empty text key and one longer than 256 characters.",
+      "issues": [
+        {
+          "code": "TEXT_KEY_INVALID",
+          "kind": "record",
+          "path": "/texts/"
+        },
+        {
+          "code": "TEXT_KEY_INVALID",
+          "kind": "record",
+          "path": "/texts/kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+        }
+      ]
+    },
+    {
+      "file": "invalid/text-value-invalid.json",
+      "expectedUsername": "happy",
+      "description": "Text values must be strings; null is not \"missing\".",
+      "issues": [
+        {
+          "code": "TEXT_VALUE_INVALID",
+          "kind": "record",
+          "path": "/texts/age"
+        },
+        {
+          "code": "TEXT_VALUE_INVALID",
+          "kind": "record",
+          "path": "/texts/bio"
+        },
+        {
+          "code": "TEXT_VALUE_INVALID",
+          "kind": "record",
+          "path": "/texts/links"
+        }
+      ]
+    },
+    {
+      "file": "invalid/text-value-too-long.json",
+      "expectedUsername": "happy",
+      "description": "A 4097-character text value; the limit is 4096.",
+      "issues": [
+        {
+          "code": "TEXT_VALUE_TOO_LONG",
+          "kind": "record",
+          "path": "/texts/description"
+        }
+      ]
+    },
+    {
+      "file": "invalid/coin-type-invalid.json",
+      "expectedUsername": "happy",
+      "description": "Address keys must be canonical decimal coin types from 0 to 4294967295.",
+      "issues": [
+        {
+          "code": "COIN_TYPE_INVALID",
+          "kind": "record",
+          "path": "/addresses/060"
+        },
+        {
+          "code": "COIN_TYPE_INVALID",
+          "kind": "record",
+          "path": "/addresses/eth"
+        },
+        {
+          "code": "COIN_TYPE_INVALID",
+          "kind": "record",
+          "path": "/addresses/-1"
+        },
+        {
+          "code": "COIN_TYPE_INVALID",
+          "kind": "record",
+          "path": "/addresses/4294967296"
+        }
+      ]
+    },
+    {
+      "file": "invalid/coin-type-unsupported.json",
+      "expectedUsername": "happy",
+      "description": "Coin type 999999 has no address encoder.",
+      "issues": [
+        {
+          "code": "COIN_TYPE_UNSUPPORTED",
+          "kind": "record",
+          "path": "/addresses/999999"
+        }
+      ]
+    },
+    {
+      "file": "invalid/address-invalid.json",
+      "expectedUsername": "happy",
+      "description": "Malformed ETH, bad Bitcoin checksum, wrong checksum case, empty value.",
+      "issues": [
+        {
+          "code": "ADDRESS_INVALID",
+          "kind": "record",
+          "path": "/addresses/0"
+        },
+        {
+          "code": "ADDRESS_INVALID",
+          "kind": "record",
+          "path": "/addresses/60"
+        },
+        {
+          "code": "ADDRESS_INVALID",
+          "kind": "record",
+          "path": "/addresses/501"
+        },
+        {
+          "code": "ADDRESS_INVALID",
+          "kind": "record",
+          "path": "/addresses/2147492101"
+        }
+      ]
+    },
+    {
+      "file": "invalid/contenthash-invalid.json",
+      "expectedUsername": "happy",
+      "description": "Supported scheme, malformed content ID.",
+      "issues": [
+        {
+          "code": "CONTENTHASH_INVALID",
+          "kind": "record",
+          "path": "/contenthash"
+        }
+      ]
+    },
+    {
+      "file": "invalid/contenthash-unsupported.json",
+      "expectedUsername": "happy",
+      "description": "https:// is not a contenthash scheme.",
+      "issues": [
+        {
+          "code": "CONTENTHASH_UNSUPPORTED",
+          "kind": "record",
+          "path": "/contenthash"
+        }
+      ]
+    },
+    {
+      "file": "invalid/contenthash-bare-cid.json",
+      "expectedUsername": "happy",
+      "description": "A bare CID without ipfs:// is never guessed as IPFS.",
+      "issues": [
+        {
+          "code": "CONTENTHASH_UNSUPPORTED",
+          "kind": "record",
+          "path": "/contenthash"
+        }
+      ]
+    },
+    {
+      "file": "invalid/record-isolation.json",
+      "expectedUsername": "happy",
+      "description": "One bad text, one bad address and a bad contenthash; every other record still resolves.",
+      "issues": [
+        {
+          "code": "TEXT_VALUE_INVALID",
+          "kind": "record",
+          "path": "/texts/age"
+        },
+        {
+          "code": "ADDRESS_INVALID",
+          "kind": "record",
+          "path": "/addresses/0"
+        },
+        {
+          "code": "CONTENTHASH_INVALID",
+          "kind": "record",
+          "path": "/contenthash"
+        }
+      ]
+    }
+  ]
+}
