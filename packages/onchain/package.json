@@ -1,0 +1,57 @@
+{
+  "name": "@thenamespace/onchain",
+  "version": "0.1.0",
+  "description": "Prepare ENSv2 onchain subname registrations and renewals with Viem.",
+  "license": "MIT",
+  "main": "dist/cjs/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thenamespace/namespacesdk",
+    "directory": "packages/onchain"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "jest --runInBand",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@thenamespace/addresses": "^1.2.1"
+  },
+  "peerDependencies": {
+    "viem": "^2.46.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.7.3",
+    "viem": "2.56.0"
+  },
+  "module": "dist/esm/index.js"
+}
