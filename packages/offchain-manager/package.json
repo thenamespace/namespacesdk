@@ -38,6 +38,8 @@
     "access": "public"
   },
   "dependencies": {
+    "@noble/hashes": "^1.8.0",
+    "@thenamespace/universal-usernames": "^0.1.0",
     "axios": "^1.7.9"
   },
   "scripts": {
@@ -68,6 +70,7 @@
     "rimraf": "^6.0.1",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "viem": "^2.24.3"
   }
 }

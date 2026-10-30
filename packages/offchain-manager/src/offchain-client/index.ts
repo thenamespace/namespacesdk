@@ -30,6 +30,17 @@ import {
 } from "./types";
 import { CreateSubnameRequest } from "../dto/create-subname-request.dto";
 import { ChainName, getCoinType, UpdateSubnameRequest } from "../dto";
+import { UsernameConnectionMethods } from "../universal-usernames/client-methods";
+import {
+  CreateUsernameOwnerSessionOptions,
+  ExpectedRevisionRequest,
+  RotateUsernameCredentialRequest,
+  SaveUsernameConnectionRequest,
+  UsernameOwnerSession,
+  ValidateUsernameEndpointRequest,
+} from "../universal-usernames/types";
+import { UsernameConnectionClient } from "../universal-usernames/username-connection-client";
+import { UsernameOwnerWallet } from "../universal-usernames/wallet-adapters";
 
 /**
  * Main client interface for managing ENS subnames off-chain.
@@ -50,7 +61,7 @@ import { ChainName, getCoinType, UpdateSubnameRequest } from "../dto";
  * });
  * ```
  */
-export interface OffchainClient {
+export interface OffchainClient extends UsernameConnectionMethods {
   /**
    * Set API key for a specific ENS domain.
    * @param ensName - The ENS domain name (e.g., 'example.eth')
@@ -366,6 +377,26 @@ export interface OffchainClientConfig extends AxiosRequestConfig {
    * the API key value used for authentication.
    */
   customHeaders?: Record<string, any>;
+
+  /**
+   * The wallet that owns the parent names you manage with the Universal Usernames methods:
+   * a viem WalletClient, an ethers Wallet/Signer or a `WalletProvider`.
+   * It signs a sign-in session for reads and one message per change. Not used for API key methods.
+   */
+  provider?: UsernameOwnerWallet;
+
+  /**
+   * EIP-4361 `domain` for Universal Usernames signatures. Must be a domain offchain-manager
+   * accepts. Set it only for a custom deployment.
+   * @default the host of the backend URI, e.g. offchain-manager.namespace.ninja
+   */
+  siweDomain?: string;
+
+  /**
+   * EIP-4361 `uri` for Universal Usernames signatures.
+   * @default `https://${siweDomain}`
+   */
+  siweUri?: string;
 }
 
 class HttpOffchainClient implements OffchainClient {
@@ -373,13 +404,23 @@ class HttpOffchainClient implements OffchainClient {
   private apiKeys: Record<string, string> = {};
   private defaultApiKey?: string;
   private customHeaders?: Record<string, any>;
+  private readonly usernames: UsernameConnectionClient;
 
   constructor(private readonly config: OffchainClientConfig = {}) {
     const mode = config.mode || "mainnet";
     const uri = config.backendUri || backendUris[mode];
+    // The wallet stays out of the axios config, which would deep-copy a plain object
+    const { provider, ...httpConfig } = this.config;
     this.HTTP = axios.create({
-      ...this.config,
+      ...httpConfig,
       baseURL: uri,
+    });
+    this.usernames = new UsernameConnectionClient(this.HTTP, {
+      mode,
+      backendUri: uri,
+      provider,
+      siweDomain: config.siweDomain,
+      siweUri: config.siweUri,
     });
 
     // Initialize authentication from config if provided
@@ -570,6 +611,86 @@ class HttpOffchainClient implements OffchainClient {
     query: QuerySubnamesRequest
   ): Promise<PagedResponse<SubnameDTO[]>> {
     return _getFilteredSubnames(this.HTTP, query);
+  }
+
+  public createUsernameOwnerSession(options?: CreateUsernameOwnerSessionOptions) {
+    return this.usernames.createUsernameOwnerSession(options);
+  }
+
+  public getUsernameConnection(parentName: string, session?: UsernameOwnerSession) {
+    return this.usernames.getUsernameConnection(parentName, session);
+  }
+
+  public inspectUsernameParent(parentName: string, session?: UsernameOwnerSession) {
+    return this.usernames.inspectUsernameParent(parentName, session);
+  }
+
+  public validateUsernameEndpoint(
+    parentName: string,
+    request: ValidateUsernameEndpointRequest,
+    session?: UsernameOwnerSession
+  ) {
+    return this.usernames.validateUsernameEndpoint(parentName, request, session);
+  }
+
+  public saveUsernameConnection(
+    parentName: string,
+    request: SaveUsernameConnectionRequest,
+    wallet?: UsernameOwnerWallet
+  ) {
+    return this.usernames.saveUsernameConnection(parentName, request, wallet);
+  }
+
+  public activateUsernameConnection(
+    parentName: string,
+    request: ExpectedRevisionRequest,
+    wallet?: UsernameOwnerWallet
+  ) {
+    return this.usernames.activateUsernameConnection(parentName, request, wallet);
+  }
+
+  public previewUsername(
+    parentName: string,
+    username: string,
+    session?: UsernameOwnerSession
+  ) {
+    return this.usernames.previewUsername(parentName, username, session);
+  }
+
+  public rotateUsernameCredential(
+    parentName: string,
+    request: RotateUsernameCredentialRequest,
+    wallet?: UsernameOwnerWallet
+  ) {
+    return this.usernames.rotateUsernameCredential(parentName, request, wallet);
+  }
+
+  public pauseUsernameConnection(
+    parentName: string,
+    request: ExpectedRevisionRequest,
+    wallet?: UsernameOwnerWallet
+  ) {
+    return this.usernames.pauseUsernameConnection(parentName, request, wallet);
+  }
+
+  public resumeUsernameConnection(
+    parentName: string,
+    request: ExpectedRevisionRequest,
+    wallet?: UsernameOwnerWallet
+  ) {
+    return this.usernames.resumeUsernameConnection(parentName, request, wallet);
+  }
+
+  public disconnectUsernameConnection(
+    parentName: string,
+    request: ExpectedRevisionRequest,
+    wallet?: UsernameOwnerWallet
+  ) {
+    return this.usernames.disconnectUsernameConnection(parentName, request, wallet);
+  }
+
+  public getUsernameConnectionEvents(parentName: string, session?: UsernameOwnerSession) {
+    return this.usernames.getUsernameConnectionEvents(parentName, session);
   }
 
   public setCustomHeaders(headers: Record<string, any>): void {
