@@ -81,3 +81,38 @@ export {
   SubnameAlreadyExistsError,
   RateLimitError,
 } from "./offchain-client/errors";
+
+// Universal Usernames: types, wallet adapter and errors
+export type {
+  CreateUsernameOwnerSessionOptions,
+  EndpointValidationReport,
+  ExpectedRevisionRequest,
+  ParentInspection,
+  ParentOwnerSource,
+  RotateUsernameCredentialRequest,
+  SaveUsernameConnectionRequest,
+  UsernameActivation,
+  UsernameAuthMode,
+  UsernameConnection,
+  UsernameConnectionEvent,
+  UsernameConnectionEventAction,
+  UsernameConnectionRevision,
+  UsernameConnectionStatus,
+  UsernameOperation,
+  UsernameOwnerSession,
+  UsernameRevisionState,
+  UsernameValidationReport,
+  ValidateUsernameEndpointRequest,
+  ValidationIssue,
+  ValidationIssueCode,
+} from "./universal-usernames/types";
+export type {
+  UsernameOwnerWallet,
+  WalletProvider,
+} from "./universal-usernames/wallet-adapters";
+export {
+  ConnectionRevisionConflictError,
+  EndpointValidationError,
+  NotParentOwnerError,
+  UniversalUsernamesError,
+} from "./universal-usernames/errors";

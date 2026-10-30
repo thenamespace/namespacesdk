@@ -220,6 +220,73 @@ const dataRecord = await client.getDataRecord("sub.example.eth", "customData");
 console.log(dataRecord);
 ```
 
+### Universal Usernames
+
+With Universal Usernames, every `username.brand.eth` resolves from your own HTTPS endpoint, so you don't create subnames one by one. Only the wallet that owns the parent name can set this up. These methods don't use API keys: pass the owner's wallet as `provider` (a viem `WalletClient`, an ethers `Signer`, or a `WalletProvider`).
+
+```typescript
+const client = createOffchainClient({
+  mode: "sepolia",
+  provider: walletClient, // the wallet that owns brand.eth
+});
+
+const parentName = "brand.eth";
+const endpoint = {
+  endpointUrl: "https://api.brand.example/ens/users",
+  authMode: "bearer" as const,
+  credential: process.env.ENDPOINT_TOKEN,
+};
+
+// Dry run: nothing is stored
+const report = await client.validateUsernameEndpoint(parentName, {
+  ...endpoint,
+  username: "happy",
+});
+
+// Save, then activate once brand.eth uses HybridResolverV2
+// (inspectUsernameParent lists what still blocks activation)
+const current = await client.getUsernameConnection(parentName);
+const saved = await client.saveUsernameConnection(parentName, {
+  ...endpoint,
+  sampleUsername: "happy",
+  expectedRevision: current?.revision ?? 0,
+});
+const connection = await client.activateUsernameConnection(parentName, {
+  expectedRevision: saved.revision,
+});
+```
+
+Reads (`getUsernameConnection`, `inspectUsernameParent`, `validateUsernameEndpoint`, `previewUsername`, `getUsernameConnectionEvents`) sign in once and reuse that session until it expires. Each change (`saveUsernameConnection`, `activateUsernameConnection`, `rotateUsernameCredential`, `pauseUsernameConnection`, `resumeUsernameConnection`, `disconnectUsernameConnection`) asks the wallet to sign that one change. None of them sends a transaction.
+
+- Every change takes the connection's current `revision` as `expectedRevision`. Use `0` only for a parent that never had a connection; after a disconnect, send the disconnected connection's revision.
+- To replace the endpoint of an active connection, call `saveUsernameConnection` and then `activateUsernameConnection`. The old endpoint keeps serving until the new one is active.
+- `rotateUsernameCredential` on an active connection validates the new token and switches to it right away. Don't call `activateUsernameConnection` after it.
+- Credentials go to Namespace and never come back: responses only say `hasCredential`.
+- To manage the session yourself, call `createUsernameOwnerSession()` and pass the result as the last argument of a read. You can also pass a different wallet as the last argument of a change. Session tokens act like passwords until they expire, so never log or store them.
+- Signed messages use the API host as their domain. Set `siweDomain` (and `siweUri`) only for a custom deployment.
+
+Failed calls throw `UniversalUsernamesError` with the API's `code`, `status`, `details` and a `retryable` flag (true for `UPSTREAM_UNAVAILABLE` and `RATE_LIMITED`). Three codes have their own class:
+
+```typescript
+import {
+  ConnectionRevisionConflictError,
+  EndpointValidationError,
+  NotParentOwnerError,
+} from "@thenamespace/offchain-manager";
+
+try {
+  await client.pauseUsernameConnection("brand.eth", { expectedRevision: 3 });
+} catch (error) {
+  if (error instanceof ConnectionRevisionConflictError) {
+    // Someone changed the connection: reload it and try again
+  } else if (error instanceof NotParentOwnerError) {
+    // The wallet doesn't own brand.eth (or the name expired)
+  } else if (error instanceof EndpointValidationError) {
+    // The request was invalid; error.report holds the validation report when there is one
+  }
+}
+```
+
 ### Error Handling
 
 The SDK provides specific error classes for different scenarios:
