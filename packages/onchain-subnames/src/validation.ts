@@ -8,13 +8,13 @@ import {
 } from "viem";
 import { normalize } from "viem/ens";
 import { OnchainError } from "./errors.js";
-import type { NameInput } from "./types.js";
+import type { SubnameInput } from "./types.js";
 
-export const ONE_YEAR = 31_536_000n;
+export const SECONDS_PER_YEAR = 31_536_000n;
 export const MAX_UINT64 = (1n << 64n) - 1n;
-export const labelId = (label: string) => BigInt(keccak256(toBytes(label)));
+export const getLabelId = (label: string) => BigInt(keccak256(toBytes(label)));
 
-export function parentName(input: string): string {
+export function normalizeParentName(input: string): string {
   try {
     const name = normalize(input);
     const parts = name.split(".");
@@ -30,8 +30,11 @@ export function parentName(input: string): string {
   }
 }
 
-export function nameInput(input: NameInput) {
-  const parent = parentName(input.parentName);
+export function validateSubnameInput(
+  input: SubnameInput,
+  requireDuration = false,
+) {
+  const parent = normalizeParentName(input.parentName);
   let label: string;
   try {
     label = normalize(input.label);
@@ -43,22 +46,34 @@ export function nameInput(input: NameInput) {
       { cause, details: { field: "label" } },
     );
   }
-  const duration = input.duration ?? ONE_YEAR;
-  if (typeof duration !== "bigint" || duration < 0n || duration > MAX_UINT64)
+  if (requireDuration && input.durationSeconds === undefined)
+    throw new OnchainError(
+      "INVALID_INPUT",
+      "Provide durationSeconds for renewal.",
+      {
+        details: { field: "durationSeconds" },
+      },
+    );
+  const durationSeconds = input.durationSeconds ?? SECONDS_PER_YEAR;
+  if (
+    typeof durationSeconds !== "bigint" ||
+    durationSeconds < 0n ||
+    durationSeconds > MAX_UINT64
+  )
     throw new OnchainError(
       "INVALID_INPUT",
       "Duration must be seconds expressed as a uint64 bigint.",
-      { details: { field: "duration" } },
+      { details: { field: "durationSeconds" } },
     );
   return {
     parentName: parent,
     parentLabel: parent.slice(0, -4),
     label,
-    duration,
+    durationSeconds,
   };
 }
 
-export function address(
+export function validateAddress(
   input: Address,
   field: string,
   allowZero = false,

@@ -21,8 +21,8 @@ export function getOnchainDeployment(chainId: number): OnchainDeployment {
     );
   return {
     chainId,
-    manager: namespace.activationManager,
-    issuer: namespace.subnameIssuer,
+    activationManager: namespace.activationManager,
+    subnameIssuer: namespace.subnameIssuer,
     sharedResolver: namespace.sharedResolver,
     ethRegistry: getEnsV2Contracts(testnet).ethRegistry,
     whitelistFeature: namespace.features.whitelist,

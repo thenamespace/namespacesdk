@@ -3,13 +3,13 @@ import { parseAbi, zeroAddress, type Address } from "viem";
 import { OnchainError, toOnchainError } from "./errors.js";
 import type { PaymentToken, TransactionCall } from "./types.js";
 
-export interface TransactionFees {
-  feeWei: bigint | null;
-  shortfallEthWei: bigint;
-  shortfallToken: bigint;
+export interface TransactionCostEstimate {
+  networkFeeWei: bigint | null;
+  nativeBalanceShortfallWei: bigint;
+  tokenBalanceShortfall: bigint;
 }
 
-export interface EstimateFeesInput {
+export interface EstimateTransactionCostInput {
   account: Address;
   calls: readonly TransactionCall[];
   payment: { token: PaymentToken; amount: bigint };
@@ -19,7 +19,7 @@ const balanceAbi = parseAbi([
   "function balanceOf(address owner) view returns (uint256)",
 ]);
 
-async function effectiveGasPrice(client: ContractClient): Promise<bigint> {
+async function estimateGasPrice(client: ContractClient): Promise<bigint> {
   const [history, fees] = await Promise.allSettled([
     client.getFeeHistory({ blockCount: 10, rewardPercentiles: [50] }),
     client.estimateFeesPerGas(),
@@ -51,10 +51,10 @@ async function effectiveGasPrice(client: ContractClient): Promise<bigint> {
 }
 
 /** Simulate ordered calls, including approvals, and report balance shortfalls. Requires eth_simulateV1. */
-export async function estimateFees(
+export async function estimateTransactionCost(
   client: ContractClient,
-  input: EstimateFeesInput,
-): Promise<TransactionFees> {
+  input: EstimateTransactionCostInput,
+): Promise<TransactionCostEstimate> {
   const { account, calls, payment } = input;
   if (calls.length === 0)
     throw new OnchainError(
@@ -74,19 +74,23 @@ export async function estimateFees(
             args: [account],
           }),
     ]);
-    const shortfallToken =
+    const tokenBalanceShortfall =
       native || tokenBalance >= payment.amount
         ? 0n
         : payment.amount - tokenBalance;
-    if (shortfallToken > 0n)
-      return { feeWei: null, shortfallEthWei: 0n, shortfallToken };
+    if (tokenBalanceShortfall > 0n)
+      return {
+        networkFeeWei: null,
+        nativeBalanceShortfallWei: 0n,
+        tokenBalanceShortfall,
+      };
     const [simulation, gasPrice] = await Promise.all([
       client.simulateCalls({
         account,
         calls: [...calls],
         stateOverrides: [{ address: account, balance: 10n ** 30n }],
       }),
-      effectiveGasPrice(client),
+      estimateGasPrice(client),
     ]);
     if (simulation.results.length !== calls.length)
       throw new OnchainError(
@@ -103,15 +107,16 @@ export async function estimateFees(
         "A prepared transaction would fail. Refresh the quote before confirming.",
         { cause: failed },
       );
-    const feeWei =
+    const networkFeeWei =
       simulation.results.reduce((sum, result) => sum + result.gasUsed, 0n) *
       gasPrice;
     const ethNeeded =
-      feeWei + calls.reduce((sum, call) => sum + call.value, 0n);
+      networkFeeWei + calls.reduce((sum, call) => sum + call.value, 0n);
     return {
-      feeWei,
-      shortfallEthWei: ethBalance >= ethNeeded ? 0n : ethNeeded - ethBalance,
-      shortfallToken: 0n,
+      networkFeeWei,
+      nativeBalanceShortfallWei:
+        ethBalance >= ethNeeded ? 0n : ethNeeded - ethBalance,
+      tokenBalanceShortfall: 0n,
     };
   } catch (cause) {
     throw toOnchainError(

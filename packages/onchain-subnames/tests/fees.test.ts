@@ -29,7 +29,7 @@ function feesFixture() {
     account: payer,
     calls: [
       {
-        to: deployment.issuer,
+        to: deployment.subnameIssuer,
         data: "0x" as const,
         value: 10_000n,
         title: "Mint",
@@ -42,10 +42,10 @@ function feesFixture() {
 
 test("includes call value and gas in the ETH shortfall", async () => {
   const f = feesFixture();
-  expect(await f.client.estimateFees(f.input)).toEqual({
-    feeWei: 42_000n,
-    shortfallEthWei: 2_000n,
-    shortfallToken: 0n,
+  expect(await f.client.estimateTransactionCost(f.input)).toEqual({
+    networkFeeWei: 42_000n,
+    nativeBalanceShortfallWei: 2_000n,
+    tokenBalanceShortfall: 0n,
   });
 });
 
@@ -56,11 +56,11 @@ test("reports ERC20 shortfall before attempting a failing simulation", async () 
     (token) => token.address === usdc,
   )!;
   expect(
-    await f.client.estimateFees({
+    await f.client.estimateTransactionCost({
       ...f.input,
       payment: { token, amount: 10n },
     }),
-  ).toMatchObject({ feeWei: null, shortfallToken: 9n });
+  ).toMatchObject({ networkFeeWei: null, tokenBalanceShortfall: 9n });
   expect(f.simulateCalls).not.toHaveBeenCalled();
 });
 
@@ -68,10 +68,12 @@ test("preserves the cause when the RPC cannot simulate calls", async () => {
   const f = feesFixture();
   const cause = new Error("eth_simulateV1 unsupported");
   f.simulateCalls.mockRejectedValue(cause);
-  await expect(f.client.estimateFees(f.input)).rejects.toMatchObject({
-    code: "RPC_ERROR",
-    cause,
-  });
+  await expect(f.client.estimateTransactionCost(f.input)).rejects.toMatchObject(
+    {
+      code: "RPC_ERROR",
+      cause,
+    },
+  );
 });
 
 test("reports a reverted simulation instead of a zero fee", async () => {
@@ -79,15 +81,19 @@ test("reports a reverted simulation instead of a zero fee", async () => {
   f.simulateCalls.mockResolvedValue({
     results: [{ status: "failure", gasUsed: 100n }],
   });
-  await expect(f.client.estimateFees(f.input)).rejects.toMatchObject({
-    code: "CONTRACT_REVERTED",
-  });
+  await expect(f.client.estimateTransactionCost(f.input)).rejects.toMatchObject(
+    {
+      code: "CONTRACT_REVERTED",
+    },
+  );
 });
 
 test("rejects an incomplete simulation instead of reporting zero fees", async () => {
   const f = feesFixture();
   f.simulateCalls.mockResolvedValue({ results: [] });
-  await expect(f.client.estimateFees(f.input)).rejects.toMatchObject({
-    code: "RPC_ERROR",
-  });
+  await expect(f.client.estimateTransactionCost(f.input)).rejects.toMatchObject(
+    {
+      code: "RPC_ERROR",
+    },
+  );
 });

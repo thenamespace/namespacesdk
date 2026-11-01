@@ -1,23 +1,27 @@
 import { encodeFunctionData, zeroAddress, type Address } from "viem";
-import { issuerAbi, managerAbi } from "./abis.js";
-import { readActivation } from "./activation.js";
+import { subnameIssuerAbi, activationManagerAbi } from "./abis.js";
+import { readParentState } from "./activation.js";
 import type { ReadContext, ContractClient } from "./context.js";
 import { getOnchainDeployment } from "./deployment.js";
 import { OnchainError, toOnchainError } from "./errors.js";
-import { estimateFees, type EstimateFeesInput } from "./fees.js";
-import { paymentQuote, preparePayment } from "./payment.js";
-import { mintQuote, renewalQuote } from "./quotes.js";
+import {
+  estimateTransactionCost,
+  type EstimateTransactionCostInput,
+} from "./fees.js";
+import { readPaymentQuote, preparePayment } from "./payment.js";
+import { readRegistrationQuote, readRenewalQuote } from "./quotes.js";
 import type {
-  MintInput,
-  MintQuote,
+  RegistrationInput,
+  PaymentQuoteInput,
+  RegistrationQuote,
   OnchainClientOptions,
-  PrepareMintInput,
-  PreparedTransaction,
+  PrepareRegistrationInput,
+  PreparedOperation,
   PrepareRenewalInput,
   RenewalInput,
   RenewalQuote,
 } from "./types.js";
-import { address } from "./validation.js";
+import { validateAddress } from "./validation.js";
 
 /** A headless client. It reads contracts and prepares calls; it never signs or sends transactions. */
 export function createOnchainClient(options: OnchainClientOptions) {
@@ -54,7 +58,7 @@ export function createOnchainClient(options: OnchainClientOptions) {
       );
     deployment.managerApiUrl = url.href.replace(/\/$/, "");
   }
-  async function run<T>(
+  async function withReadContext<T>(
     operation: (ctx: ReadContext) => Promise<T>,
   ): Promise<T> {
     try {
@@ -89,69 +93,95 @@ export function createOnchainClient(options: OnchainClientOptions) {
   return {
     /** Deployment metadata for token selectors and explorer links. */
     deployment,
-    getActivation: (parentName: string) =>
-      run((ctx) => readActivation(ctx, parentName)),
+    /** Read advanced parent configuration and registry binding state. */
+    getParentState: (parentName: string) =>
+      withReadContext((ctx) => readParentState(ctx, parentName)),
     /** Reads the manager's live resolver precedence, including the platform default. */
-    getResolver: (parentName: string, requested: Address = zeroAddress) =>
-      run(async (ctx) => {
-        const activation = await readActivation(ctx, parentName);
+    getRegistrationResolver: (
+      parentName: string,
+      requested: Address = zeroAddress,
+    ) =>
+      withReadContext(async (ctx) => {
+        const parent = await readParentState(ctx, parentName);
         return ctx.client.readContract({
-          address: deployment.manager,
-          abi: managerAbi,
+          address: deployment.activationManager,
+          abi: activationManagerAbi,
           functionName: "getSubnameResolver",
-          args: [activation.id, address(requested, "resolver", true)],
+          args: [
+            parent.activationId,
+            validateAddress(requested, "resolver", true),
+          ],
           blockNumber: ctx.blockNumber,
         });
       }),
-    estimateFees: (input: EstimateFeesInput) =>
-      run((ctx) =>
-        estimateFees(ctx.client, {
+    /** Simulate prepared calls and report network fees and balance shortfalls. */
+    estimateTransactionCost: (input: EstimateTransactionCostInput) =>
+      withReadContext((ctx) =>
+        estimateTransactionCost(ctx.client, {
           ...input,
-          account: address(input.account, "payer"),
+          account: validateAddress(input.account, "account"),
         }),
       ),
-    quoteMint: (input: MintInput) => run((ctx) => mintQuote(ctx, input)),
-    quoteRenewal: (input: RenewalInput) =>
-      run((ctx) => renewalQuote(ctx, input)),
-    quotePayment: (usdAmount: bigint, token: Address) =>
-      run((ctx) => paymentQuote(ctx, usdAmount, token)),
+    /** Check registration and pricing. Omit account for disconnected browsing. */
+    getRegistrationQuote: (input: RegistrationInput) =>
+      withReadContext(
+        async (ctx) => (await readRegistrationQuote(ctx, input)).quote,
+      ),
+    /** Check renewal and project expiry without assuming the payer owns the name. */
+    getRenewalQuote: (input: RenewalInput) =>
+      withReadContext(
+        async (ctx) => (await readRenewalQuote(ctx, input)).quote,
+      ),
+    /** Convert an exact USD amount into a supported token denomination. */
+    getPaymentQuote: (input: PaymentQuoteInput) =>
+      withReadContext((ctx) => readPaymentQuote(ctx, input)),
     /** Rechecks state and proofs, then returns any approval followed by registration. */
-    prepareMint: (
-      input: PrepareMintInput,
-    ): Promise<PreparedTransaction<MintQuote> & { resolver: Address }> =>
-      run(async (ctx) => {
-        const payer = address(input.minter, "minter");
-        const recipient = address(input.recipient ?? payer, "recipient");
-        const requested = address(
+    prepareRegistration: (
+      input: PrepareRegistrationInput,
+    ): Promise<
+      PreparedOperation<RegistrationQuote & { status: "ready" }> & {
+        resolver: Address;
+      }
+    > =>
+      withReadContext(async (ctx) => {
+        const account = validateAddress(input.account, "account");
+        const recipient = validateAddress(
+          input.recipient ?? account,
+          "recipient",
+        );
+        const requested = validateAddress(
           input.resolver ?? zeroAddress,
           "resolver",
           true,
         );
-        const quote = await mintQuote(ctx, { ...input, minter: payer });
-        if (!quote.canMint || !quote.available)
+        const { quote, parent, encodedClaims } = await readRegistrationQuote(
+          ctx,
+          { ...input, account },
+        );
+        if (quote.status !== "ready")
           throw new OnchainError(
-            "MINT_BLOCKED",
-            quote.reason?.message ?? "This subname can't be minted.",
+            "REGISTRATION_BLOCKED",
+            quote.reason?.message ?? "This subname can't be registered.",
             { details: { reason: quote.reason } },
           );
         const { calls, payment } = await preparePayment(
           ctx,
-          payer,
-          quote.priceUsdRaw,
+          account,
+          quote.price,
           input.paymentToken,
-          input.maxPriceUsdRaw,
+          input.maxPriceUsd,
         );
         const resolver = await ctx.client.readContract({
-          address: deployment.manager,
-          abi: managerAbi,
+          address: deployment.activationManager,
+          abi: activationManagerAbi,
           functionName: "getSubnameResolver",
-          args: [quote.activation.id, requested],
+          args: [parent.activationId, requested],
           blockNumber: ctx.blockNumber,
         });
         calls.push({
-          to: deployment.issuer,
+          to: deployment.subnameIssuer,
           data: encodeFunctionData({
-            abi: issuerAbi,
+            abi: subnameIssuerAbi,
             functionName: "register",
             args: [
               {
@@ -159,19 +189,19 @@ export function createOnchainClient(options: OnchainClientOptions) {
                 label: quote.label,
                 owner: recipient,
                 resolver: requested,
-                duration: quote.duration,
-                extraData: quote.extraData,
+                duration: quote.durationSeconds,
+                extraData: encodedClaims,
               },
               payment.token.address,
             ],
           }),
           value:
             payment.token.address === zeroAddress ? payment.bufferedAmount : 0n,
-          title: `Minting ${quote.label}.${quote.parentName}`,
+          title: `Registering ${quote.label}.${quote.parentName}`,
         });
         return {
           chainId: deployment.chainId,
-          account: payer,
+          account,
           quote,
           payment,
           calls,
@@ -181,11 +211,14 @@ export function createOnchainClient(options: OnchainClientOptions) {
     /** Renewal may be paid by any wallet; it does not transfer ownership. */
     prepareRenewal: (
       input: PrepareRenewalInput,
-    ): Promise<PreparedTransaction<RenewalQuote>> =>
-      run(async (ctx) => {
-        const payer = address(input.renewer, "renewer");
-        const quote = await renewalQuote(ctx, { ...input, renewer: payer });
-        if (!quote.renewable)
+    ): Promise<PreparedOperation<RenewalQuote & { status: "ready" }>> =>
+      withReadContext(async (ctx) => {
+        const account = validateAddress(input.account, "account");
+        const { quote, encodedClaims } = await readRenewalQuote(ctx, {
+          ...input,
+          account,
+        });
+        if (quote.status !== "ready")
           throw new OnchainError(
             "RENEWAL_BLOCKED",
             quote.reason?.message ?? "This subname can't be renewed.",
@@ -193,22 +226,22 @@ export function createOnchainClient(options: OnchainClientOptions) {
           );
         const { calls, payment } = await preparePayment(
           ctx,
-          payer,
-          quote.priceUsdRaw,
+          account,
+          quote.price,
           input.paymentToken,
-          input.maxPriceUsdRaw,
+          input.maxPriceUsd,
         );
         calls.push({
-          to: deployment.issuer,
+          to: deployment.subnameIssuer,
           data: encodeFunctionData({
-            abi: issuerAbi,
+            abi: subnameIssuerAbi,
             functionName: "renew",
             args: [
               {
                 parentLabel: quote.parentName.slice(0, -4),
                 label: quote.label,
-                duration: quote.duration,
-                extraData: quote.extraData,
+                duration: quote.durationSeconds,
+                extraData: encodedClaims,
               },
               payment.token.address,
             ],
@@ -219,7 +252,7 @@ export function createOnchainClient(options: OnchainClientOptions) {
         });
         return {
           chainId: deployment.chainId,
-          account: payer,
+          account,
           quote,
           payment,
           calls,

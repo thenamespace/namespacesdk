@@ -3,14 +3,14 @@ import {
   createOnchainClient,
   getOnchainDeployment,
   OnchainError,
-  ONE_YEAR,
+  SECONDS_PER_YEAR,
   toOnchainError,
 } from "../src";
-import { erc20Abi, issuerAbi } from "../src/abis";
+import { erc20Abi, subnameIssuerAbi } from "../src/abis";
 import {
   deployment,
   fixture,
-  mintInput,
+  registrationInput,
   payer,
   recipient,
   renewalInput,
@@ -29,7 +29,9 @@ describe("deployment and validation", () => {
   it("verifies the RPC chain instead of trusting its configured name", async () => {
     const f = fixture();
     f.getChainId.mockResolvedValue(1);
-    await expect(f.client.quoteMint(mintInput)).rejects.toMatchObject({
+    await expect(
+      f.client.getRegistrationQuote(registrationInput),
+    ).rejects.toMatchObject({
       code: "CHAIN_MISMATCH",
     });
     expect(f.readContract).not.toHaveBeenCalled();
@@ -38,21 +40,24 @@ describe("deployment and validation", () => {
     "rejects unsupported parent %s",
     async (parentName) => {
       await expect(
-        fixture().client.quoteMint({ ...mintInput, parentName }),
+        fixture().client.getRegistrationQuote({
+          ...registrationInput,
+          parentName,
+        }),
       ).rejects.toMatchObject({ code: "INVALID_INPUT" });
     },
   );
   it("normalizes labels before checking and preparing calldata", async () => {
     const f = fixture();
-    const prepared = await f.client.prepareMint({
-      ...mintInput,
+    const prepared = await f.client.prepareRegistration({
+      ...registrationInput,
       parentName: "EXAMPLE.eth",
       label: "ALICE",
       paymentToken: zeroAddress,
     });
     expect(prepared.quote.label).toBe("alice");
     const decoded = decodeFunctionData({
-      abi: issuerAbi,
+      abi: subnameIssuerAbi,
       data: prepared.calls[0].data,
     });
     expect(decoded.args?.[0]).toMatchObject({
@@ -60,15 +65,18 @@ describe("deployment and validation", () => {
       parentLabel: "example",
     });
   });
-  it.each([-1n, 1n << 64n])("rejects duration %s", async (duration) => {
+  it.each([-1n, 1n << 64n])("rejects duration %s", async (durationSeconds) => {
     await expect(
-      fixture().client.quoteMint({ ...mintInput, duration }),
+      fixture().client.getRegistrationQuote({
+        ...registrationInput,
+        durationSeconds,
+      }),
     ).rejects.toMatchObject({ code: "INVALID_INPUT" });
   });
   it("rejects zero recipient", async () => {
     await expect(
-      fixture().client.prepareMint({
-        ...mintInput,
+      fixture().client.prepareRegistration({
+        ...registrationInput,
         recipient: zeroAddress,
         paymentToken: zeroAddress,
       }),
@@ -80,9 +88,12 @@ describe("quotes", () => {
   it("does not mistake an unactivated parent's nonzero ID for an activation", async () => {
     const f = fixture();
     f.state.configured = false;
-    const result = await f.client.quoteMint(mintInput);
-    expect(result.activation.id).not.toBe(zeroHash);
-    expect(result.reason?.code).toBe("NOT_ACTIVATED");
+    const result = await f.client.getRegistrationQuote(registrationInput);
+    expect(
+      (await f.client.getParentState(registrationInput.parentName))
+        .activationId,
+    ).not.toBe(zeroHash);
+    expect(result.reason?.code).toBe("PARENT_NOT_CONFIGURED");
     expect(f.fetch).not.toHaveBeenCalled();
   });
   it.each([1, 2])(
@@ -90,41 +101,45 @@ describe("quotes", () => {
     async (status) => {
       const f = fixture();
       f.state.status = status;
-      const result = await f.client.quoteMint(mintInput);
-      expect(result.available).toBe(false);
-      expect(result.canMint).toBe(false);
+      const result = await f.client.getRegistrationQuote(registrationInput);
+      expect(result.status).toBe("blocked");
+      expect(result.price).toBeNull();
     },
   );
   it("blocks stale parent subregistry bindings", async () => {
     const f = fixture();
     f.state.liveSubregistry = recipient;
     await expect(
-      f.client.prepareMint({ ...mintInput, paymentToken: usdc }),
+      f.client.prepareRegistration({
+        ...registrationInput,
+        paymentToken: usdc,
+      }),
     ).rejects.toMatchObject({
-      code: "MINT_BLOCKED",
+      code: "REGISTRATION_BLOCKED",
       details: { reason: { code: "SUBREGISTRY_CHANGED" } },
     });
   });
   it("checks issuer permission", async () => {
     const f = fixture();
     f.state.permitted = false;
-    expect((await f.client.quoteMint(mintInput)).reason?.code).toBe(
-      "ISSUER_NOT_AUTHORIZED",
-    );
+    expect(
+      (await f.client.getRegistrationQuote(registrationInput)).reason?.code,
+    ).toBe("ISSUER_NOT_AUTHORIZED");
   });
   it("keeps taken names separate from wallet ineligibility", async () => {
     const f = fixture();
     f.state.canMint = false;
     f.state.denied = 7;
-    expect(await f.client.quoteMint(mintInput)).toMatchObject({
-      available: true,
-      canMint: false,
-      reason: { code: "NOT_ELIGIBLE", contractReason: 7 },
+    expect(
+      await f.client.getRegistrationQuote(registrationInput),
+    ).toMatchObject({
+      status: "blocked",
+      reason: { code: "NOT_ELIGIBLE", details: { contractReason: 7 } },
     });
   });
   it("reads one consistent block for each quote", async () => {
     const f = fixture();
-    await f.client.quoteMint(mintInput);
+    await f.client.getRegistrationQuote(registrationInput);
     expect(
       f.readContract.mock.calls.every(
         ([request]) => request.blockNumber === 123n,
@@ -136,52 +151,67 @@ describe("quotes", () => {
 describe("payment preparation", () => {
   it("uses the payer's allowance while registering to a different recipient", async () => {
     const f = fixture();
-    const prepared = await f.client.prepareMint({
-      ...mintInput,
+    const prepared = await f.client.prepareRegistration({
+      ...registrationInput,
       recipient,
       paymentToken: usdc,
     });
     expect(f.readContract).toHaveBeenCalledWith(
       expect.objectContaining({
         functionName: "allowance",
-        args: [payer, deployment.issuer],
+        args: [payer, deployment.subnameIssuer],
       }),
     );
     expect(
-      decodeFunctionData({ abi: issuerAbi, data: prepared.calls[1].data })
-        .args?.[0],
+      decodeFunctionData({
+        abi: subnameIssuerAbi,
+        data: prepared.calls[1].data,
+      }).args?.[0],
     ).toMatchObject({ owner: recipient });
     expect(prepared.calls.every((call) => call.value === 0n)).toBe(true);
   });
   it("approves when allowance covers the raw quote but not its buffer", async () => {
     const f = fixture();
     f.state.allowance = 1_010_000n;
-    const result = await f.client.prepareMint({
-      ...mintInput,
+    const result = await f.client.prepareRegistration({
+      ...registrationInput,
       paymentToken: usdc,
     });
     expect(
       decodeFunctionData({ abi: erc20Abi, data: result.calls[0].data }).args,
-    ).toEqual([deployment.issuer, 1_020_000n]);
+    ).toEqual([deployment.subnameIssuer, 1_020_000n]);
   });
   it("skips approval when allowance covers the buffered amount", async () => {
     const f = fixture();
     f.state.allowance = 1_020_000n;
     expect(
-      (await f.client.prepareMint({ ...mintInput, paymentToken: usdc })).calls,
+      (
+        await f.client.prepareRegistration({
+          ...registrationInput,
+          paymentToken: usdc,
+        })
+      ).calls,
     ).toHaveLength(1);
   });
   it("sends buffered value only for paid native mints", async () => {
     const f = fixture();
     expect(
-      (await f.client.prepareMint({ ...mintInput, paymentToken: zeroAddress }))
-        .calls[0].value,
+      (
+        await f.client.prepareRegistration({
+          ...registrationInput,
+          paymentToken: zeroAddress,
+        })
+      ).calls[0].value,
     ).toBe(1_020_000n);
     f.state.price = 0n;
     f.state.payment = 0n;
     expect(
-      (await f.client.prepareMint({ ...mintInput, paymentToken: zeroAddress }))
-        .calls[0].value,
+      (
+        await f.client.prepareRegistration({
+          ...registrationInput,
+          paymentToken: zeroAddress,
+        })
+      ).calls[0].value,
     ).toBe(0n);
     expect(f.readContract).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -192,27 +222,32 @@ describe("payment preparation", () => {
   });
   it("does not skip token validation for a free quote", async () => {
     const f = fixture();
-    await expect(f.client.quotePayment(0n, recipient)).rejects.toMatchObject({
+    await expect(
+      f.client.getPaymentQuote({
+        price: { currency: "USD", amount: 0n, decimals: 12 },
+        paymentToken: recipient,
+      }),
+    ).rejects.toMatchObject({
       code: "UNSUPPORTED_TOKEN",
     });
   });
   it("rechecks current state and rejects a higher USD price", async () => {
     const f = fixture();
-    const quote = await f.client.quoteMint(mintInput);
+    const quote = await f.client.getRegistrationQuote(registrationInput);
     f.state.price *= 2n;
     await expect(
-      f.client.prepareMint({
-        ...mintInput,
+      f.client.prepareRegistration({
+        ...registrationInput,
         paymentToken: zeroAddress,
-        maxPriceUsdRaw: quote.priceUsdRaw,
+        maxPriceUsd: quote.price!,
       }),
     ).rejects.toMatchObject({ code: "PRICE_CHANGED" });
   });
   it("uses the live manager resolver precedence", async () => {
     const f = fixture();
     f.state.resolver = recipient;
-    const result = await f.client.prepareMint({
-      ...mintInput,
+    const result = await f.client.prepareRegistration({
+      ...registrationInput,
       resolver: payer,
       paymentToken: zeroAddress,
     });
@@ -230,12 +265,12 @@ describe("renewal", () => {
     expect(result.quote.owner).toBe(recipient);
     expect(result.account).toBe(payer);
     expect(
-      decodeFunctionData({ abi: issuerAbi, data: result.calls[0].data })
+      decodeFunctionData({ abi: subnameIssuerAbi, data: result.calls[0].data })
         .functionName,
     ).toBe("renew");
     expect(f.readContract).toHaveBeenCalledWith(
       expect.objectContaining({
-        address: deployment.manager,
+        address: deployment.activationManager,
         functionName: "quoteRenewal",
       }),
     );
@@ -246,7 +281,7 @@ describe("renewal", () => {
     f.readContract.mockImplementation(async (request) =>
       request.functionName === "hasRootRoles" ? false : read(request),
     );
-    expect((await f.client.quoteRenewal(renewalInput)).renewable).toBe(true);
+    expect((await f.client.getRenewalQuote(renewalInput)).status).toBe("ready");
     expect(f.readContract).toHaveBeenCalledWith(
       expect.objectContaining({ functionName: "hasRoles" }),
     );
@@ -258,7 +293,8 @@ describe("renewal", () => {
       if (scenario === "permanent") f.state.expiry = (1n << 64n) - 1n;
       if (scenario === "expired") f.state.owner = zeroAddress;
       if (scenario === "permission") f.state.permitted = false;
-      if (scenario === "overflow") f.state.expiry = (1n << 64n) - ONE_YEAR;
+      if (scenario === "overflow")
+        f.state.expiry = (1n << 64n) - SECONDS_PER_YEAR;
       await expect(
         f.client.prepareRenewal({ ...renewalInput, paymentToken: usdc }),
       ).rejects.toMatchObject({ code: "RENEWAL_BLOCKED" });
@@ -271,7 +307,9 @@ describe("error causes", () => {
     const f = fixture();
     const cause = new Error("transport offline");
     f.readContract.mockRejectedValueOnce(cause);
-    await expect(f.client.quoteMint(mintInput)).rejects.toMatchObject({
+    await expect(
+      f.client.getRegistrationQuote(registrationInput),
+    ).rejects.toMatchObject({
       code: "RPC_ERROR",
       cause,
     });

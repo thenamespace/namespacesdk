@@ -1,6 +1,6 @@
 import { parseAbi } from "viem";
-export { ActivationManagerAbi as managerAbi } from "./abi/ActivationManagerAbi.js";
-export { SubnameIssuerAbi as issuerAbi } from "./abi/SubnameIssuerAbi.js";
+export { ActivationManagerAbi as activationManagerAbi } from "./abi/ActivationManagerAbi.js";
+export { SubnameIssuerAbi as subnameIssuerAbi } from "./abi/SubnameIssuerAbi.js";
 export { WhitelistFeatureAbi as whitelistAbi } from "./abi/WhitelistFeatureAbi.js";
 export { ReservationFeatureAbi as reservationAbi } from "./abi/ReservationFeatureAbi.js";
 

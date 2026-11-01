@@ -5,8 +5,16 @@ import {
   keccak256,
   toBytes,
   zeroHash,
+  zeroAddress,
 } from "viem";
-import { deployment, fixture, mintInput, payer, renewalInput } from "./fixture";
+import { createOnchainClient } from "../src";
+import {
+  deployment,
+  fixture,
+  registrationInput,
+  payer,
+  renewalInput,
+} from "./fixture";
 
 const proofType = [{ type: "bytes32[]" }] as const;
 const whitelistClaim = encodeAbiParameters(proofType, [[]]);
@@ -34,7 +42,7 @@ describe("proof retrieval", () => {
     const f = fixture();
     f.state.whitelistRoot = keccak256(toBytes("old"));
     f.state.reservationRoot = f.state.whitelistRoot;
-    await f.client.quoteMint(mintInput);
+    await f.client.getRegistrationQuote(registrationInput);
     expect(f.fetch).not.toHaveBeenCalled();
     expect(
       f.readContract.mock.calls.some(([r]) =>
@@ -51,10 +59,15 @@ describe("proof retrieval", () => {
         JSON.stringify({ whitelisted: true, claim: whitelistClaim }),
       ),
     );
-    const result = await f.client.quoteMint(mintInput);
-    expect(decodeAbiParameters(claimsType, result.extraData)[0]).toEqual([
-      { feature: deployment.whitelistFeature, data: whitelistClaim },
-    ]);
+    await f.client.getRegistrationQuote(registrationInput);
+    expect(
+      decodeAbiParameters(
+        claimsType,
+        f.readContract.mock.calls.find(
+          ([r]) => r.functionName === "quoteMint",
+        )![0].args![4] as `0x${string}`,
+      )[0],
+    ).toEqual([{ feature: deployment.whitelistFeature, data: whitelistClaim }]);
     expect(f.fetch.mock.calls[0][0]).toContain(`address=${payer}`);
   });
   it("distinguishes a missing proof service from ineligibility", async () => {
@@ -62,7 +75,9 @@ describe("proof retrieval", () => {
     f.state.features = [deployment.whitelistFeature];
     f.state.whitelistRoot = keccak256(toBytes("root"));
     f.fetch.mockResolvedValue(new Response("missing", { status: 404 }));
-    await expect(f.client.quoteMint(mintInput)).rejects.toMatchObject({
+    await expect(
+      f.client.getRegistrationQuote(registrationInput),
+    ).rejects.toMatchObject({
       code: "PROOF_UNAVAILABLE",
       details: { status: 404 },
     });
@@ -73,7 +88,9 @@ describe("proof retrieval", () => {
     f.state.whitelistRoot = keccak256(toBytes("root"));
     const cause = new Error("offline");
     f.fetch.mockRejectedValue(cause);
-    await expect(f.client.quoteMint(mintInput)).rejects.toMatchObject({
+    await expect(
+      f.client.getRegistrationQuote(registrationInput),
+    ).rejects.toMatchObject({
       code: "PROOF_UNAVAILABLE",
       cause,
     });
@@ -87,7 +104,9 @@ describe("proof retrieval", () => {
         JSON.stringify({ whitelisted: true, claim: whitelistClaim }),
       ),
     );
-    await expect(f.client.quoteMint(mintInput)).rejects.toMatchObject({
+    await expect(
+      f.client.getRegistrationQuote(registrationInput),
+    ).rejects.toMatchObject({
       code: "INVALID_PROOF",
     });
   });
@@ -96,7 +115,9 @@ describe("proof retrieval", () => {
     f.state.features = [deployment.whitelistFeature];
     f.state.whitelistRoot = keccak256(toBytes("root"));
     f.fetch.mockResolvedValue(new Response(JSON.stringify({ claim: "0x" })));
-    await expect(f.client.quoteMint(mintInput)).rejects.toMatchObject({
+    await expect(
+      f.client.getRegistrationQuote(registrationInput),
+    ).rejects.toMatchObject({
       code: "INVALID_PROOF",
     });
   });
@@ -114,12 +135,13 @@ describe("proof retrieval", () => {
     );
     const claim = encodeAbiParameters([leafType, ...proofType], [leaf, []]);
     f.fetch.mockResolvedValue(new Response(JSON.stringify({ claim })));
-    expect(
-      decodeAbiParameters(
-        claimsType,
-        (await f.client.quoteMint(mintInput)).extraData,
-      )[0],
-    ).toEqual([{ feature: deployment.reservationFeature, data: claim }]);
+    await f.client.getRegistrationQuote(registrationInput);
+    const encodedClaims = f.readContract.mock.calls.find(
+      ([r]) => r.functionName === "quoteMint",
+    )![0].args![4] as `0x${string}`;
+    expect(decodeAbiParameters(claimsType, encodedClaims)[0]).toEqual([
+      { feature: deployment.reservationFeature, data: claim },
+    ]);
   });
   it("does not fetch gate or reservation proofs during renewal", async () => {
     const f = fixture();
@@ -129,7 +151,7 @@ describe("proof retrieval", () => {
     ];
     f.state.whitelistRoot = keccak256(toBytes("root"));
     f.state.reservationRoot = f.state.whitelistRoot;
-    expect((await f.client.quoteRenewal(renewalInput)).renewable).toBe(true);
+    expect((await f.client.getRenewalQuote(renewalInput)).status).toBe("ready");
     expect(f.fetch).not.toHaveBeenCalled();
   });
   it("does not silently drop a free-renewal discount when its proof is unavailable", async () => {
@@ -138,8 +160,62 @@ describe("proof retrieval", () => {
     f.state.whitelistMode = 1;
     f.state.whitelistRoot = keccak256(toBytes("root"));
     f.fetch.mockRejectedValue(new Error("offline"));
-    await expect(f.client.quoteRenewal(renewalInput)).rejects.toMatchObject({
+    await expect(f.client.getRenewalQuote(renewalInput)).rejects.toMatchObject({
       code: "PROOF_UNAVAILABLE",
     });
+  });
+
+  it("keeps managerApiUrl as the proof-service override", async () => {
+    const f = fixture();
+    f.state.features = [deployment.whitelistFeature];
+    f.state.whitelistRoot = keccak256(encodePacked(["address"], [payer]));
+    f.fetch.mockImplementation(
+      async () =>
+        new Response(
+          JSON.stringify({ whitelisted: true, claim: whitelistClaim }),
+        ),
+    );
+    const client = createOnchainClient({
+      publicClient: f.publicClient,
+      chainId: 11155111,
+      managerApiUrl: "https://proofs.example/api/v1/",
+      fetch: f.fetch,
+    });
+    await client.getRegistrationQuote(registrationInput);
+    await client.prepareRegistration({
+      ...registrationInput,
+      paymentToken: zeroAddress,
+    });
+    expect(client.deployment.managerApiUrl).toBe(
+      "https://proofs.example/api/v1",
+    );
+    expect(f.fetch).toHaveBeenCalledTimes(2);
+    expect(
+      f.fetch.mock.calls.every(([url]) =>
+        String(url).startsWith("https://proofs.example/api/v1/whitelist/"),
+      ),
+    ).toBe(true);
+  });
+
+  it("refreshes proofs instead of accepting stale quote claims", async () => {
+    const f = fixture();
+    f.state.features = [deployment.whitelistFeature];
+    f.state.whitelistRoot = keccak256(encodePacked(["address"], [payer]));
+    f.fetch.mockImplementation(
+      async () =>
+        new Response(
+          JSON.stringify({ whitelisted: true, claim: whitelistClaim }),
+        ),
+    );
+    const quote = await f.client.getRegistrationQuote(registrationInput);
+    expect(quote).not.toHaveProperty("extraData");
+    f.state.whitelistRoot = keccak256(toBytes("new root"));
+    await expect(
+      f.client.prepareRegistration({
+        ...registrationInput,
+        paymentToken: zeroAddress,
+      }),
+    ).rejects.toMatchObject({ code: "INVALID_PROOF" });
+    expect(f.fetch).toHaveBeenCalledTimes(2);
   });
 });

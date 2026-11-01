@@ -13,7 +13,7 @@ import {
 import { whitelistAbi, reservationAbi } from "./abis.js";
 import { OnchainError } from "./errors.js";
 import type { ReadContext } from "./context.js";
-import type { Activation } from "./types.js";
+import type { ParentState } from "./types.js";
 
 const proofType = [{ type: "bytes32[]" }] as const;
 const leafType = {
@@ -26,7 +26,11 @@ const leafType = {
   ],
 } as const;
 
-function verify(root: Hex, leaf: Hex, proof: readonly Hex[]): boolean {
+function verifyMerkleProof(
+  root: Hex,
+  leaf: Hex,
+  proof: readonly Hex[],
+): boolean {
   let hash = leaf;
   for (const sibling of proof) {
     hash = keccak256(
@@ -38,7 +42,7 @@ function verify(root: Hex, leaf: Hex, proof: readonly Hex[]): boolean {
   return hash.toLowerCase() === root.toLowerCase();
 }
 
-async function getProof(
+async function fetchProof(
   ctx: ReadContext,
   path: string,
   feature: string,
@@ -75,32 +79,35 @@ async function getProof(
   }
 }
 
-export async function buildClaims(
+export async function prepareFeatureClaims(
   ctx: ReadContext,
-  activation: Activation,
+  parent: ParentState,
   label: string,
-  payer: Address,
-  renewal: boolean,
+  account: Address,
+  operation: "registration" | "renewal",
 ): Promise<Hex> {
   const { client, deployment, blockNumber } = ctx;
-  const enabled = (module: Address) =>
-    activation.features.some(
+  const isFeatureEnabled = (module: Address) =>
+    parent.featureAddresses.some(
       (feature) => feature.toLowerCase() === module.toLowerCase(),
     );
   const claims: { feature: Address; data: Hex }[] = [];
-  if (enabled(deployment.whitelistFeature) && payer !== zeroAddress) {
+  if (
+    isFeatureEnabled(deployment.whitelistFeature) &&
+    account !== zeroAddress
+  ) {
     const [mode, root] = await client.readContract({
       address: deployment.whitelistFeature,
       abi: whitelistAbi,
       functionName: "configs",
-      args: [activation.id],
+      args: [parent.activationId],
       blockNumber,
     });
     // Gate-mode denials are ignored during renewal; only Free mode can change its price.
-    if (root !== zeroHash && (!renewal || mode === 1)) {
-      const proof = await getProof(
+    if (root !== zeroHash && (operation === "registration" || mode === 1)) {
+      const proof = await fetchProof(
         ctx,
-        `whitelist/${root}/proof?address=${payer}`,
+        `whitelist/${root}/proof?address=${account}`,
         "whitelist",
       );
       try {
@@ -111,37 +118,40 @@ export async function buildClaims(
           const claim = proof.claim as Hex;
           const [siblings] = decodeAbiParameters(proofType, claim);
           if (
-            !verify(
+            !verifyMerkleProof(
               root,
-              keccak256(encodePacked(["address"], [payer])),
+              keccak256(encodePacked(["address"], [account])),
               siblings,
             )
           )
             throw new Error(
-              "Proof does not match the configured root and payer",
+              "Proof does not match the configured root and account",
             );
           claims.push({ feature: deployment.whitelistFeature, data: claim });
         }
       } catch (cause) {
         throw new OnchainError(
           "INVALID_PROOF",
-          "The whitelist proof does not match this wallet and activation.",
+          "The whitelist proof does not match this account and parent.",
           { cause },
         );
       }
     }
   }
   // Reservation claims can add a premium to renewal. Preserve the contract UI's renewal pricing policy.
-  if (!renewal && enabled(deployment.reservationFeature)) {
+  if (
+    operation === "registration" &&
+    isFeatureEnabled(deployment.reservationFeature)
+  ) {
     const root = await client.readContract({
       address: deployment.reservationFeature,
       abi: reservationAbi,
       functionName: "roots",
-      args: [activation.id],
+      args: [parent.activationId],
       blockNumber,
     });
     if (root !== zeroHash) {
-      const proof = await getProof(
+      const proof = await fetchProof(
         ctx,
         `reservation/${root}/proof?label=${encodeURIComponent(label)}`,
         "reservation",
@@ -161,7 +171,7 @@ export async function buildClaims(
         if (
           leaf.kind > 2 ||
           !coversLabel ||
-          !verify(
+          !verifyMerkleProof(
             root,
             keccak256(encodeAbiParameters([leafType], [leaf])),
             siblings,
@@ -172,7 +182,7 @@ export async function buildClaims(
       } catch (cause) {
         throw new OnchainError(
           "INVALID_PROOF",
-          "The reservation proof does not match this label and activation.",
+          "The reservation proof does not match this label and parent.",
           { cause },
         );
       }

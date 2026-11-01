@@ -16,7 +16,7 @@ images.
 | [`@thenamespace/addresses`](./packages/addresses) | Look up Namespace and ENS contract addresses by chain. |
 | [`@thenamespace/avatar`](./packages/avatar) | Upload and delete ENS avatar and header images using SIWE authentication. |
 | [`@thenamespace/indexer`](./packages/indexer) | Query L2 subnames, registries, and metadata through the Namespace Indexer API. |
-| [`@thenamespace/onchain`](./packages/onchain) | Quote and prepare ENSv2 onchain subname registrations and renewals. |
+| [`@thenamespace/onchain-subnames`](./packages/onchain-subnames) | Quote and prepare ENSv2 onchain subname registrations and renewals. |
 | [`@thenamespace/mint-manager`](./packages/mint-manager) | Check availability and mint ENS subnames on Mainnet and supported L2 networks. |
 | [`@thenamespace/offchain-manager`](./packages/offchain-manager) | Create, update, query, and delete gasless offchain ENS subnames and records. |
 

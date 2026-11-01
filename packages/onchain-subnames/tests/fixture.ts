@@ -7,7 +7,11 @@ import {
   type Hex,
   type PublicClient,
 } from "viem";
-import { createOnchainClient, getOnchainDeployment, ONE_YEAR } from "../src";
+import {
+  createOnchainClient,
+  getOnchainDeployment,
+  SECONDS_PER_YEAR,
+} from "../src";
 
 export const payer = "0x1111111111111111111111111111111111111111" as Address;
 export const recipient =
@@ -15,17 +19,17 @@ export const recipient =
 export const registry = "0x3333333333333333333333333333333333333333" as Address;
 export const activationId = keccak256(toBytes("activation"));
 export const deployment = getOnchainDeployment(11155111);
-export const mintInput = {
+export const registrationInput = {
   parentName: "example.eth",
   label: "alice",
-  minter: payer,
-  duration: ONE_YEAR,
+  account: payer,
+  durationSeconds: SECONDS_PER_YEAR,
 };
 export const renewalInput = {
   parentName: "example.eth",
   label: "alice",
-  renewer: payer,
-  duration: ONE_YEAR,
+  account: payer,
+  durationSeconds: SECONDS_PER_YEAR,
 };
 export const usdc = deployment.paymentTokens.find(
   (token) => token.symbol === "USDC",
@@ -46,6 +50,7 @@ export function fixture() {
     reservationRoot: zeroHash as Hex,
     owner: recipient as Address,
     expiry: 2_000_000_000n,
+    parentExpiry: 3_000_000_000n,
     price: 1_000_000_000_000n,
     payment: 1_000_000n,
     allowance: 0n,
@@ -81,7 +86,7 @@ export function fixture() {
           return state.liveSubregistry;
         case "getExpiry":
           return request.address === deployment.ethRegistry
-            ? 3_000_000_000n
+            ? state.parentExpiry
             : state.expiry;
         case "getStatus":
           return state.status;

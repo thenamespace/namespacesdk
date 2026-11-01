@@ -5,7 +5,9 @@ export {
   toOnchainError,
   type OnchainErrorCode,
 } from "./errors.js";
-export { withPaymentBuffer } from "./payment.js";
-export { ONE_YEAR } from "./validation.js";
+export { SECONDS_PER_YEAR } from "./validation.js";
 export type * from "./types.js";
-export type { EstimateFeesInput, TransactionFees } from "./fees.js";
+export type {
+  EstimateTransactionCostInput,
+  TransactionCostEstimate,
+} from "./fees.js";

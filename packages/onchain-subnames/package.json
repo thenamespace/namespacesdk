@@ -1,5 +1,5 @@
 {
-  "name": "@thenamespace/onchain",
+  "name": "@thenamespace/onchain-subnames",
   "version": "0.1.0",
   "description": "Prepare ENSv2 onchain subname registrations and renewals with Viem.",
   "license": "MIT",
@@ -29,7 +29,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/thenamespace/namespacesdk",
-    "directory": "packages/onchain"
+    "directory": "packages/onchain-subnames"
   },
   "publishConfig": {
     "access": "public"
